@@ -1,0 +1,25 @@
+<launch>
+  <!-- First load parameters from a YAML file -->
+  <!-- the "$(find _____)" piece locates the package path (this should be the package that holds the YAML file). -->
+  <!-- See the "roslaunch" page https://wiki.ros.org/roslaunch/XML -->
+
+  
+  
+  <!-- Next launch a motor_node from the python file MotorNode2.py -->  
+
+
+<node name="global_info" pkg="tada_ros" type="constants.py" output="screen"></node>
+  <node name="brain" pkg="tada_ros" type="brain_node.py" output="screen"></node>
+  <node name="sensor" pkg="tada_ros" type="sensor_node.py" output="screen"></node>
+ <node name="controller" pkg="tada_ros" type="controller" output="screen"></node>
+ <node name="user" pkg="tada_ros" type="user_node.py" output="screen"></node>	
+<node name="user_enum" pkg="tada_ros" type="user_choice_enum.py" output="screen"></node>	
+
+
+
+
+  
+  <!-- Add any other nodes you want to launch -->  
+  
+  
+</launch>
