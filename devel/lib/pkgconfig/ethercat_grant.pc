@@ -1,0 +1,8 @@
+prefix=/home/pi/catkin_ws/devel
+
+Name: ethercat_grant
+Description: Description of ethercat_grant
+Version: 0.3.2
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

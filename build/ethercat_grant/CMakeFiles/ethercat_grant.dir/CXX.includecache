@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/pi/catkin_ws/src/ethercat_grant/src/ethercat_grant.cpp
+stdio.h
+-
+unistd.h
+-
+errno.h
+-
+string.h
+-
+sys/capability.h
+-
+string
+-
+cstdlib
+-
+sys/prctl.h
+-
+

@@ -1,0 +1,19 @@
+(cl:defpackage tada_ros-msg
+  (:use )
+  (:export
+   "<CONFIGMSG>"
+   "CONFIGMSG"
+   "<IMUDATAMSG>"
+   "IMUDATAMSG"
+   "<KILLCONFIRMATIONMSG>"
+   "KILLCONFIRMATIONMSG"
+   "<MOTORDATAMSG>"
+   "MOTORDATAMSG"
+   "<MOTORLISTENMSG>"
+   "MOTORLISTENMSG"
+   "<RECONDATAMSG>"
+   "RECONDATAMSG"
+   "<USERCHOICEMSG>"
+   "USERCHOICEMSG"
+  ))
+
