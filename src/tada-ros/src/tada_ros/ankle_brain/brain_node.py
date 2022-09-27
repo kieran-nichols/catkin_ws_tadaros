@@ -42,7 +42,7 @@ class BrainNode():
         prev_var1 = 0; prev_var2 = 0
         var = []
         rate = rospy.Rate(10) # every 0.1 sec
-        # specify home when the motor is turned on
+        # specify home when the motor is turned on to be the motor positions at start
         self.homed1 = self.curr_pos1; self.homed2 = self.curr_pos2
 
         def TADA_angle(self):
