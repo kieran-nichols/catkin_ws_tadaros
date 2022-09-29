@@ -5,6 +5,7 @@ from tada_ros.msg import MotorDataMsg
 from tada_ros.msg import MotorListenMsg
 import numpy as np
 import math
+import os
 
 class BrainNode():
     # motor_command = [0, 0, 180,180, 1500, 1500] # motor mode, time to complete, motor1 position, motor2 position, motor1 torque, motor2 torque
@@ -41,23 +42,25 @@ class BrainNode():
         var1 = 0; var2 = 0
         prev_var1 = 0; prev_var2 = 0
         var = []
-        rate = rospy.Rate(10) # every 0.1 sec
+        rate = rospy.Rate(20) # every 0.1 sec # slowest control loop 
         # specify home when the motor is turned on to be the motor positions at start
         self.homed1 = self.curr_pos1; self.homed2 = self.curr_pos2
 
         def TADA_angle(self):
-            PF = self.PF; inclination_angle = self.inclination_angle; EV = self.EV
+            theta_deg = self.theta_deg; alpha_deg = self.alpha_deg
             homed1 = self.homed1; homed2 = self.homed2
             
-            theta = inclination_angle*math.pi/180
+            theta = theta_deg*math.pi/180
             beta = 5*math.pi/180
             q3 = 2*(np.arccos(np.sin(theta/2)/np.sin(beta))) # arccos in python always returns real values
-            alpha = np.arctan2(PF*math.pi/180, EV*math.pi/180)
+#             alpha = np.arctan2(PF*math.pi/180, EV*math.pi/180)
+            alpha = alpha_deg*math.pi/180
             M1 = 180/math.pi*(alpha - np.arctan2(np.tan(q3/2),np.cos(beta))) 
             M2 = -180/math.pi*(-(alpha + np.arctan2(np.tan(q3/2), np.cos(beta))))
             # print motor angles in non-TADA ref frame
             print("Motor angles from homed", M1, M2)
-            # Need to consider wrapping because it definitely disrupts IV/EV
+            # Wrapping function that ensures that the angle is between 180 and -180;
+            ## need to finish verify
             M1 = np.degrees(np.arctan2(np.sin(np.radians(M1)), np.cos(np.radians(M1))))
             M2 = np.degrees(np.arctan2(np.sin(np.radians(M2)), np.cos(np.radians(M2))))
             print("Wrapped motor angles from homed", M1, M2)
@@ -65,8 +68,8 @@ class BrainNode():
             M1 = M1*self.cnts_per_rev/360 + homed1
             M2 = M2*self.cnts_per_rev/360 + homed2
             print("Global motor angles", M1, M2,"")
-            return [M1, M2]
-        
+            return [M1, M2]         
+            
         # main loop that controls the TADA
         while not rospy.is_shutdown(): #and rospy.on_shutdown(hook):
             # repurpose and shorten the self variables to be local variables
@@ -85,7 +88,23 @@ class BrainNode():
             else:
                 var = [False] 
             
+            # if first command is h then kill motor node; launch file will restart it in 2 seconds
+            ## need smarter way to restart the motor node
+            if var[0]=="kill" and len(var)==2:
+                if var[1]=="m":
+                    os.system("rosnode kill /motor")
+                    print("motor node will restart\n")
+#                     os.system("roslaunch ~/catkin_ws/src/motor_node.launch") # does not work as intended
+                elif var[1]=="a":
+                    os.system("rosnode kill -a")
+                    os.system("killall -9 rosmaster")
+                    print("ROS has been killed")
+                    
+                else:
+                    print("Please enter options 'm' or 'a'\n")
+                
             # if first command is h then assign current position as homed values
+            ## need to fix homing the current position; it seems that the correct value comes in the future iteration
             if var[0]=="h":
                 self.homed1 = curr_pos1
                 self.homed2 = curr_pos2
@@ -115,21 +134,25 @@ class BrainNode():
             elif var[0]=="e":
                 print() 
                   
-            # else; expecting
-            elif len(var)==3:
-                self.PF = int(var[0])
-                self.EV = int(var[1])
-                self.inclination_angle = int(var[2])
+            # if only 2 commands are given then calculate motor angle as a function of the ankle angles which are the inputs
+            elif len(var)==2 and var[0]!="kill":
+                self.theta_deg = int(var[0])
+                self.alpha_deg = int(var[1])
                 # Convert input of PF, EV, inclination angle to motor angles from homed
-                var = TADA_angle(self)
-                var1 = int(var[0]) 
-                var2 = int(var[1])
+                motor = TADA_angle(self)
+                var1 = int(motor[0]) 
+                var2 = int(motor[1])
                 print("Moving to", var1, var2,"\n")
              
-             # else; expecting
-            elif len(var)==2:
-                var1 = int(var[0]) 
-                var2 = int(var[1])
+             # if first command is m, then send global motor commands
+            elif len(var)==3 and var[0]== "m":
+                var1 = int(var[1]) 
+                var2 = int(var[2])
+                
+            elif len(var)==3 and var[0]== "swing":
+                self.initial_tada_angle = int(var[1]) 
+                self.dorsiflexed_tada_angle = int(var[2])
+                move_swing(self)
                                
             # else statement to keep motor position the same; consider also to return to home     
             else:

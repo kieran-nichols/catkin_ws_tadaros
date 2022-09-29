@@ -752,7 +752,7 @@ void extra_function(clock_t start_time) {
     ros::Publisher pub_motor = m.advertise<tada_ros::MotorListenMsg>("motor_listen", 10);
     //~ tada_ros::MotorListenMsg motor_listen;
     ros::spinOnce();
-    ros::Rate rate(10);
+    ros::Rate rate(100);
     dummy = 0; dummy2 = 0; 
     
     while(ros::ok()){

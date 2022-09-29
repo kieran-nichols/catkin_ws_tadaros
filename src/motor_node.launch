@@ -1,0 +1,10 @@
+<launch>
+
+<node pkg="x_soem" type="simple_test" name="motor" args= "0 0 0 0 1000 1000" output="screen" launch-prefix="sudo lxterminal -e taskset -c 1,2"/> 
+
+<!-- <node pkg="soem" type="slaveinfo" name="info" args= "eth0" output="screen" launch-prefix="ethercat_grant" /> -->
+
+<!-- comments: add Europa and IMU nodes as similar to the brain_node-->
+
+</launch>
+
