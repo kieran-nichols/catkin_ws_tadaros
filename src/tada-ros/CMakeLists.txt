@@ -54,6 +54,7 @@ add_message_files(
   UserChoiceMsg.msg
   KillConfirmationMsg.msg
   ConfigMsg.msg
+  EuropaMsg.msg
   IMUDataMsg.msg
   ReconDataMsg.msg
   MotorDataMsg.msg
@@ -137,7 +138,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- add_executable(controller src/tada_ros/sensors/controller.cpp)
+ #add_executable(controller src/tada_ros/sensors/controller.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -147,12 +148,12 @@ include_directories(
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(controller
-   ${catkin_LIBRARIES}
- )
+ #target_link_libraries(controller
+  # ${catkin_LIBRARIES}
+ #)
 
 #############
 ## Install ##
@@ -166,9 +167,10 @@ catkin_package()
 catkin_install_python(PROGRAMS
   src/tada_ros/user_interface/user_node.py
   src/tada_ros/ankle_brain/brain_node.py
-  src/tada_ros/sensors/sensor_node.py
   src/tada_ros/sensors/IMU_controller.py
-  src/tada_ros/sensors/controller.cpp
+  src/tada_ros/sensors/sensor_node.py
+  src/tada_ros/europa/ble_server.py
+  src/tada_ros/europa/EuropaBLE.py
   src/tada_ros/motors/motor_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
