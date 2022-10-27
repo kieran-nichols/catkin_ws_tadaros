@@ -6,17 +6,13 @@ import signal
 from rospy.numpy_msg import numpy_msg
 from tada_ros.msg import MotorDataMsg
 from tada_ros.msg import MotorListenMsg
-<<<<<<< HEAD
 from tada_ros.msg import IMUDataMsg
 from tada_ros.msg import EuropaMsg
 #from tada_ros.europa import EuropaBLE
 from tada_ros.sensors import sensor_node
-import numpy
-=======
 import numpy as np
 import math
 import os
->>>>>>> 82911cf471b2fc7f4dde29f986867b8b3a11db17
 
 class BrainNode():
     # motor_command = [0, 0, 180,180, 1500, 1500] # motor mode, time to complete, motor1 position, motor2 position, motor1 torque, motor2 torque
@@ -43,8 +39,10 @@ class BrainNode():
         #rospy.spin() # keeps python from exiting until this node is stopped
         ## Add rospy.Subscriber with self, its necessary global-like variables, and appropiate listeners (aka callback functions)
     #handling the sensor data
+                # Initialize the global-like variables
+        self.homed1 = 0; self.homed2 = 0
+        self.cnts_per_rev = 567
         
-<<<<<<< HEAD
     def handle_sensor_input(self, msg_data):
         # translates IMUDataMsg ROS message to IMUData class and stores
         #print("handler trg")
@@ -55,14 +53,9 @@ class BrainNode():
         print("in the brain")
         print(msg_data)
         #self.current_europa_data = IMU_controller.ROS_message_to_IMUData(msg_data)
-=======
-        # Initialize the global-like variables
-        self.homed1 = 0; self.homed2 = 0
-        self.cnts_per_rev = 567
                 
         ## Add variables for IMU and Europa here
         
->>>>>>> 82911cf471b2fc7f4dde29f986867b8b3a11db17
     # defining the listener functions for the subscibed nodes
     def listener(self,data):
         self.curr_pos1 = data.curr_pos1
@@ -76,10 +69,7 @@ class BrainNode():
         var1 = 0; var2 = 0
         prev_var1 = 0; prev_var2 = 0
         var = []
-<<<<<<< HEAD
-        rate_motor = rospy.Rate(10) # every 0.1 sec
-        
-=======
+#         rate_motor = rospy.Rate(10) # every 0.1 sec
         rate = rospy.Rate(20) # every 0.1 sec # slowest control loop 
         # specify home when the motor is turned on to be the motor positions at start
         self.homed1 = self.curr_pos1; self.homed2 = self.curr_pos2
@@ -108,7 +98,6 @@ class BrainNode():
             print("Global motor angles", M1, M2,"")
             return [M1, M2]         
             
->>>>>>> 82911cf471b2fc7f4dde29f986867b8b3a11db17
         # main loop that controls the TADA
         while not rospy.is_shutdown(): #and rospy.on_shutdown(hook):
             # repurpose and shorten the self variables to be local variables
@@ -210,14 +199,9 @@ class BrainNode():
             prev_var2 = var2
 #             rospy.loginfo(motor_command) 
             self.pub.publish(motor_command)
-<<<<<<< HEAD
-            rate_motor.sleep()    
-    
-=======
+#             rate_motor.sleep()    
             rate.sleep()
             
-        
->>>>>>> 82911cf471b2fc7f4dde29f986867b8b3a11db17
 if __name__ == '__main__':
     try:
         BrainNode()

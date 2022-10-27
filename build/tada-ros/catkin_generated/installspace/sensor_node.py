@@ -71,7 +71,7 @@ class SensorNode():
         #rospy.Subscriber('kill_all_topic', Bool, handle_kill_command)
         print("initialized IN SENSOR")
         #MPU_Init()
-        pub_sensing = rospy.Publisher('sensing_topic', IMUDataMsg queue_size=10)
+        pub_sensing = rospy.Publisher('sensing_topic', IMUDataMsg, queue_size=10)
         self.imu_msg = IMUDataMsg()
         rospy.init_node('sensor_node', anonymous=True)
         rate = rospy.Rate(100)#100 hz
@@ -88,7 +88,7 @@ class SensorNode():
             #self.imu_msg.swing_time =
             msg_imu = imu_data.to_ROS_message()
             
-            pub_sensing.publish(imu_msg)
+            pub_sensing.publish(msg_imu)
             
             rate.sleep()
         

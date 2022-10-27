@@ -1,6 +1,6 @@
 <launch>
 
-<!-- <node pkg="x_soem" type="simple_test" name="motor" args= "0 0 0 0 1000 1000" output="screen" launch-prefix="sudo lxterminal -e taskset -c 1,2" respawn="true" respawn_delay="1"/> --> 
+<node pkg="x_soem" type="simple_test" name="motor" args= "0 0 0 0 1000 1000" output="screen" launch-prefix="sudo lxterminal -e taskset -c 1,2" respawn="true" respawn_delay="1"/> 
 
 <node pkg="tada_ros" type="brain_node.py" name="brain" args= "" output="screen" launch-prefix="taskset -c 1,2"/> 
 
@@ -13,3 +13,4 @@
 <node name="EuropaBLE_node" pkg="tada_ros" type="EuropaBLE.py" output="screen"></node>
 <node name="EuropaServer_node" pkg="tada_ros" type="ble_server.py" output="screen"></node>
 </launch>
+
