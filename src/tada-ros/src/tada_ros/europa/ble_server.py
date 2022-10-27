@@ -27,7 +27,7 @@ class BleServer():
     def __init__(self):
         
         #rospy.Subscriber('kill_all_topic', Bool, handle_kill_command)
-        print("initialized IN EUROPA")
+        #print("initialized IN EUROPA")
         #MPU_Init()
         dev = EuropaBLE.EuropaBLE()   
         dev.set_device_addr(EUROPA_ADDR)
@@ -45,9 +45,9 @@ class BleServer():
             dev.connect() #create new file for each connection
             dev.start_stream()
             dev.thread_process_data()
-            #print(EuropaBLE.get_fz_data())
-            #print(get_mz_data())
-            #print("Reconnect")
+            ##print(EuropaBLE.get_fz_data())
+            ##print(get_mz_data())
+            ##print("Reconnect")
             time.sleep(6)
             
             
