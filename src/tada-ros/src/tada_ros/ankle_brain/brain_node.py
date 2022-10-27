@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 import rospy
+import os
+import sys
+import signal
 from rospy.numpy_msg import numpy_msg
 from tada_ros.msg import MotorDataMsg
 from tada_ros.msg import MotorListenMsg
+from tada_ros.msg import IMUDataMsg
+from tada_ros.msg import EuropaMsg
+#from tada_ros.europa import EuropaBLE
+from tada_ros.sensors import sensor_node
 import numpy as np
 import math
 import os
@@ -14,18 +21,38 @@ class BrainNode():
    
     # Initialization and declaration of global-like (self) variables
     def __init__(self):
+        #rospy.init_node('sensor_node', anonymous=True)
+        #rospy.init_node('IMU_controller', anonymous=True)
         rospy.init_node('brain', anonymous=True)
+        #Subscribbing to some topics
+        print("init brain")
+        rospy.Subscriber('europa_topic', EuropaMsg, self.handle_europa_input)
+        rospy.Subscriber('sensing_topic', IMUDataMsg, self.handle_sensor_input)
+        #imu_sensor = sensor_node.SensorNode()
+        #self.sensor_info = Sensor()
         # Publisher: motor
         self.pub = rospy.Publisher('motor_command', MotorDataMsg, queue_size=10) 
         self.motor_command = MotorDataMsg()
         # Subscribers: motors, IMU, Europa; subscribe command with it necessary variables that will be attached to self
         self.sub = rospy.Subscriber('motor_listen', MotorListenMsg, self.listener)
         self.curr_pos1 = 0; self.curr_pos2 = 0
+        #rospy.spin() # keeps python from exiting until this node is stopped
         ## Add rospy.Subscriber with self, its necessary global-like variables, and appropiate listeners (aka callback functions)
-        
-        # Initialize the global-like variables
+    #handling the sensor data
+                # Initialize the global-like variables
         self.homed1 = 0; self.homed2 = 0
         self.cnts_per_rev = 567
+        
+    def handle_sensor_input(self, msg_data):
+        # translates IMUDataMsg ROS message to IMUData class and stores
+        #print("handler trg")
+        self.current_IMU_data = IMU_controller.ROS_message_to_IMUData(msg_data)
+        
+    def handle_europa_input(self, msg_data):
+        # translates IMUDataMsg ROS message to IMUData class and stores
+        print("in the brain")
+        print(msg_data)
+        #self.current_europa_data = IMU_controller.ROS_message_to_IMUData(msg_data)
                 
         ## Add variables for IMU and Europa here
         
@@ -42,6 +69,7 @@ class BrainNode():
         var1 = 0; var2 = 0
         prev_var1 = 0; prev_var2 = 0
         var = []
+#         rate_motor = rospy.Rate(10) # every 0.1 sec
         rate = rospy.Rate(20) # every 0.1 sec # slowest control loop 
         # specify home when the motor is turned on to be the motor positions at start
         self.homed1 = self.curr_pos1; self.homed2 = self.curr_pos2
@@ -171,11 +199,12 @@ class BrainNode():
             prev_var2 = var2
 #             rospy.loginfo(motor_command) 
             self.pub.publish(motor_command)
+#             rate_motor.sleep()    
             rate.sleep()
             
-        
 if __name__ == '__main__':
     try:
-        BrainNode().action()
+        BrainNode()
+        pass
     except rospy.ROSInterruptException: # ensures stopping if node is shut down
         pass

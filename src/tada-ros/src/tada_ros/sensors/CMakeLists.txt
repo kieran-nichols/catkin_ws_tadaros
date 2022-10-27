@@ -54,6 +54,7 @@ add_message_files(
   UserChoiceMsg.msg
   KillConfirmationMsg.msg
   ConfigMsg.msg
+  EuropaMsg.msg
   IMUDataMsg.msg
   ReconDataMsg.msg
 )
@@ -146,12 +147,12 @@ include_directories(
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-add_dependencies(controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+#add_dependencies(controller ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(controller
-   ${catkin_LIBRARIES}
- )
+ #target_link_libraries(controller
+  # ${catkin_LIBRARIES}
+ #)
 
 #############
 ## Install ##
@@ -166,8 +167,9 @@ catkin_install_python(PROGRAMS
   src/tada_ros/user_interface/user_node.py
   src/tada_ros/ankle_brain/brain_node.py
   src/tada_ros/sensors/sensor_node.py
+  src/tada_ros/sensors/ble_server.py
+  src/tada_ros/sensors/EuropaBLE.py
   src/tada_ros/sensors/IMU_controller.py
-  src/tada_ros/sensors/controller.cpp
   src/tada_ros/motors/motor_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

@@ -12,7 +12,7 @@ class MotorNode():
     def __init__(self):
         # anonymous=True ensures that the name is unique by adding random numbers
         rospy.init_node('motor_node', anonymous=True)
-
+        print("initialized IN MOTOR")
         rospy.Subscriber('movement_topic', String, self.handle_movement_command)
         # killing the program is its own topic so that there's minimal delay
         rospy.Subscriber('kill_all_topic', Bool, self.handle_kill_command)
