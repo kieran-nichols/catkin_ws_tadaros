@@ -2,4 +2,4 @@
 source_root_dir = '/home/pi/catkin_ws/src'
 whitelisted_packages = ''.split(';') if '' != '' else []
 blacklisted_packages = ''.split(';') if '' != '' else []
-underlay_workspaces = '/home/pi/ros_catkin_ws/install_isolated'.split(';') if '/home/pi/ros_catkin_ws/install_isolated' != '' else []
+underlay_workspaces = '/home/pi/catkin_ws/devel;/home/pi/ros_catkin_ws/install_isolated'.split(';') if '/home/pi/catkin_ws/devel;/home/pi/ros_catkin_ws/install_isolated' != '' else []

@@ -642,11 +642,11 @@ tada-ros/CMakeFiles/std_msgs_generate_messages_cpp.dir/clean:
 # Target rules for target tada-ros/CMakeFiles/tada_ros_generate_messages.dir
 
 # All Build rule for target.
+tada-ros/CMakeFiles/tada_ros_generate_messages.dir/all: tada-ros/CMakeFiles/tada_ros_generate_messages_nodejs.dir/all
 tada-ros/CMakeFiles/tada_ros_generate_messages.dir/all: tada-ros/CMakeFiles/tada_ros_generate_messages_cpp.dir/all
 tada-ros/CMakeFiles/tada_ros_generate_messages.dir/all: tada-ros/CMakeFiles/tada_ros_generate_messages_eus.dir/all
 tada-ros/CMakeFiles/tada_ros_generate_messages.dir/all: tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/all
 tada-ros/CMakeFiles/tada_ros_generate_messages.dir/all: tada-ros/CMakeFiles/tada_ros_generate_messages_lisp.dir/all
-tada-ros/CMakeFiles/tada_ros_generate_messages.dir/all: tada-ros/CMakeFiles/tada_ros_generate_messages_nodejs.dir/all
 	$(MAKE) -f tada-ros/CMakeFiles/tada_ros_generate_messages.dir/build.make tada-ros/CMakeFiles/tada_ros_generate_messages.dir/depend
 	$(MAKE) -f tada-ros/CMakeFiles/tada_ros_generate_messages.dir/build.make tada-ros/CMakeFiles/tada_ros_generate_messages.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/pi/catkin_ws/build/CMakeFiles --progress-num= "Built target tada_ros_generate_messages"
@@ -1345,7 +1345,6 @@ tada-ros/CMakeFiles/tada_ros_generate_messages_eus.dir/clean:
 # Target rules for target tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir
 
 # All Build rule for target.
-tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/all: tada-ros/CMakeFiles/std_msgs_generate_messages_py.dir/all
 tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/all: tada-ros/CMakeFiles/_tada_ros_generate_messages_check_deps_KillConfirmationMsg.dir/all
 tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/all: tada-ros/CMakeFiles/_tada_ros_generate_messages_check_deps_ConfigMsg.dir/all
 tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/all: tada-ros/CMakeFiles/_tada_ros_generate_messages_check_deps_EuropaMsg.dir/all
@@ -1354,6 +1353,7 @@ tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/all: tada-ros/CMakeFiles/_
 tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/all: tada-ros/CMakeFiles/_tada_ros_generate_messages_check_deps_UserChoiceMsg.dir/all
 tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/all: tada-ros/CMakeFiles/_tada_ros_generate_messages_check_deps_MotorDataMsg.dir/all
 tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/all: tada-ros/CMakeFiles/_tada_ros_generate_messages_check_deps_MotorListenMsg.dir/all
+tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/all: tada-ros/CMakeFiles/std_msgs_generate_messages_py.dir/all
 	$(MAKE) -f tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/build.make tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/depend
 	$(MAKE) -f tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/build.make tada-ros/CMakeFiles/tada_ros_generate_messages_py.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/pi/catkin_ws/build/CMakeFiles --progress-num=62,63,64,65,66,67,68,69,70 "Built target tada_ros_generate_messages_py"

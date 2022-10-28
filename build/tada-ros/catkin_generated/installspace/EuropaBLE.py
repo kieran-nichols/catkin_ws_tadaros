@@ -105,7 +105,7 @@ class EuropaBLE(object):
         device_list=[]
         if time.time()-self.ble_scan_time>1200:             #scan interval 60
             scanner = Scanner(self.iface)                  # use hci1, external dongle
-            print("Scanning")
+            ##print("Scanning")
             self.scan_results = scanner.scan(10.0)
             self.ble_scan_time=time.time()
         device_list=[]
@@ -123,7 +123,7 @@ class EuropaBLE(object):
                         break
             if flag_add==True:           
                 device_list.append([dev.addr,dev.addrType,dev.rssi])
-                print("scan results "+str(name)+" "+str(dev.addr)+" "+str(dev.rssi))
+                ##print("scan results "+str(name)+" "+str(dev.addr)+" "+str(dev.rssi))
         if device_list==[]:
             return [0,0]                     # no match device
         flag_find=False
@@ -146,12 +146,12 @@ class EuropaBLE(object):
         if not res1[0] == 0:
             self.device_addr=res1[0]
             self.device_type=res1[1]
-            print("found europa "+str(self.device_addr)+" "+str(self.device_type))
+            ##print("found europa "+str(self.device_addr)+" "+str(self.device_type))
             return 0
         else:
             self.device_addr=None
             self.device_type=None
-            print("No europa found")
+            ##print("No europa found")
             return 1        
 
     def findSerialPortSrv(self):
@@ -162,10 +162,10 @@ class EuropaBLE(object):
             for ch in chr_list:
                 if FIFO_CHAR_UUID==ch.uuid:     #Found FIFO characteristics"
                     self.FIFOCh=ch
-                    #print("FIFO charcteristics Handle {} UUID {}".format(str(self.FIFOCh.getHandle()), str(self.FIFOCh.uuid)))
+                    ##print("FIFO charcteristics Handle {} UUID {}".format(str(self.FIFOCh.getHandle()), str(self.FIFOCh.uuid)))
                 if CREDITS_CHAR_UUID==ch.uuid:  #Found Credits characteristics
                     self.CreditsCh=ch
-                    #print("Credits charcteristics Handle {} UUID {}".format(str(self.CreditsCh.getHandle()), str(self.CreditsCh.uuid)))
+                    ##print("Credits charcteristics Handle {} UUID {}".format(str(self.CreditsCh.getHandle()), str(self.CreditsCh.uuid)))
         except Exception as e:
             raise(ConfigError("Can't find Serial Port Service: "+str(e)))
 	
@@ -184,16 +184,16 @@ class EuropaBLE(object):
                     self.device_handle.buffer.append(x)
                 if len(self.device_handle.buffer)>3000:
                     self.device_handle.buffer=self.device_handle.buffer[1100:]
-                    print("drop")
+                    ##print("drop")
                 self.msg_count=self.msg_count+1
                 #if self.msg_count % 50 ==0:
-                #    print(self.msg_count)
+                #    #print(self.msg_count)
         
         try:
             self.dev=Peripheral(self.device_addr.decode('utf-8'),iface=self.iface).withDelegate(NotifyDelegate(self))   # hci1, external dongle
-            print("[EuropaBLE/connectDevice]"+str(time.time())+" Europa Connected")
+            ##print("[EuropaBLE/connectDevice]"+str(time.time())+" Europa Connected")
         except Exception as e:
-            print("[EuropaBLE/connectDevice]Can't connect to device: "+str(e))
+            ##print("[EuropaBLE/connectDevice]Can't connect to device: "+str(e))
             raise(ConnectError(str(e)))
 
 
@@ -219,27 +219,27 @@ class EuropaBLE(object):
         #if self.device_addr==None:
         #   raise ConnectError("No device address")
         self.isConnect=False
-        print("[EuropaBLE/connect] Connecting")
+        ##print("[EuropaBLE/connect] Connecting")
 
         count=3
         while (count>0):
             try:
                 self.connectDevice()
-                print("got stuck 1 in open")
+                ##print("got stuck 1 in open")
                 self.findSerialPortSrv()
-                print("got stuck 2 in open")
-                #print('Turn on first notification')
+                ##print("got stuck 2 in open")
+                ##print('Turn on first notification')
                 self.turnOnNotify(self.FIFOCh.getHandle()+1)
-                print("got stuck 3 in open")
-                #print('Turn on second notification')
+                ##print("got stuck 3 in open")
+                ##print('Turn on second notification')
                 self.turnOnNotify(self.CreditsCh.getHandle()+1)
                 self.isConnect=True
                 count=0
-                print("[EuropaBLE/connect] Europa configure finished")
-                print('---------------------Europa Ready------------------------\n')
+                ##print("[EuropaBLE/connect] Europa configure finished")
+                ##print('---------------------Europa Ready------------------------\n')
             except Exception as e:
-                print("[EuropaBLE/connect]Connect failed: "+str(e))
-                print("Try times left "+str(count))
+                #print("[EuropaBLE/connect]Connect failed: "+str(e))
+                #print("Try times left "+str(count))
                 try:
                     self.dev.disconnect()
                 except:
@@ -249,17 +249,18 @@ class EuropaBLE(object):
             
     def disconnect(self):
         try:
-            print('[EuropaBLE/disconnect]Europa disconnected')
+            ##printt('[EuropaBLE/disconnect]Europa disconnected')
             self.dev.disconnect()
             self.isConnect=False
         except Exception as e:
-            print("[EuropaBLE/disconnect]Error in disconnect Europa:",e)
+            pass
+            ##print("[EuropaBLE/disconnect]Error in disconnect Europa:",e)
         finally:
             pass
 
     def check_connect(self):  #Not working due to bluepy bug
         res=self.dev.getState()
-        print("checkConnect--------------------------------------------",res)
+        ##print("checkConnect--------------------------------------------",res)
         if res=='conn':
             self.isConnect=True
         elif res=='disc':
@@ -282,14 +283,16 @@ class EuropaBLE(object):
         try:
             os.system("sudo hciconfig hci"+str(iface)+" down")
         except:
-            print("Fail to turn off hci0")
+            pass
+            ##print("Fail to turn off hci0")
   
         time.sleep(1)
     def turn_on_hci(self,iface):
         try:
             os.system("sudo hciconfig hci"+str(iface)+" up")
         except:
-            print("Fail to turn off hci0")
+            pass
+            ##print("Fail to turn off hci0")
   
         time.sleep(1)
 
@@ -299,7 +302,7 @@ class EuropaBLE(object):
             while self.isStream==True:
                 self.dev.waitForNotifications(0.2)
         except Exception as e:
-            print("[EuropaBLE/stream]Error in streaming thread: ",str(e))
+            #print("[EuropaBLE/stream]Error in streaming thread: ",str(e))
             time.sleep(2)
             #raise(LoggingError(str(e),time.time()))
             self.isStream=False
@@ -317,11 +320,12 @@ class EuropaBLE(object):
                 self.thread=threading.Thread(target=self.stream)
                 self.thread.name="stream handler"
                 self.thread.setDaemon(True)
-                print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_start,withResponse=True))
-                print("[EuropaBLE/start_stream]",str(time.time())," Europa start streaming...")
+                #print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_start,withResponse=True))
+                #print("[EuropaBLE/start_stream]",str(time.time())," Europa start streaming...")
                 self.thread.start()
             except Exception as e:
-                print("[EuropaBLE/start_stream]Fail to write start command: "+ str(e))
+                pass
+                #print("[EuropaBLE/start_stream]Fail to write start command: "+ str(e))
  
     def thread_process_data(self):
         try:
@@ -341,7 +345,8 @@ class EuropaBLE(object):
 
                         self.last_msg=self.convert_data(msg)
                         if self.last_msg==None:
-                            print("None!!")
+                            pass
+                            #print("None!!")
                         self.msg_count=self.msg_count+1
                         self.mx_buffer.append(float(self.last_msg[0]))
                         self.my_buffer.append(float(self.last_msg[1]))
@@ -358,27 +363,28 @@ class EuropaBLE(object):
                         
                         t=self.last_msg[2]
                         #if (t>500 or t<-500):
-                        #    print(msg)
+                        #    #print(msg)
                         if self.msg_count>PLOT_BUFFER_MAX:
                             self.mx_buffer=self.mx_buffer[1:]
                             self.my_buffer=self.my_buffer[1:]
                             self.fz_buffer=self.fz_buffer[1:]
-                        #print("self.fz_buffer: ")
-                        #print(type(self.fz_buffer))
-                        #print(self.fz_buffer)
+                        ##print("self.fz_buffer: ")
+                        ##print(type(self.fz_buffer))
+                        ##print(self.fz_buffer)
                             
                         if not self.data_logger==None:
                             self.data_logger.write(str(time.time())+str(self.last_msg)+"\n")
                         #if self.msg_count % 100 ==0 and DBG_FLAG:
                         #    if len(self.last_msg)==6:
-                        #        print("F",msg)
-                        #         print("Mx: %3d, My: %3d, Fz: %3d, Ax: %4d, Ay: %4d, Az: %4d" %  (self.last_msg[0],self.last_msg[1],self.last_msg[2],self.last_msg[3],self.last_msg[4],self.last_msg[5] ) )
+                        #        #print("F",msg)
+                        #         #print("Mx: %3d, My: %3d, Fz: %3d, Ax: %4d, Ay: %4d, Az: %4d" %  (self.last_msg[0],self.last_msg[1],self.last_msg[2],self.last_msg[3],self.last_msg[4],self.last_msg[5] ) )
                         #    else:
-                        #        print("None")
+                        #        #print("None")
                        
         except Exception as e:
-                print("[EuropaBLE/thread_process_data]",e)
-        print("[EuropaBLE/thread_process_data] thread quit")
+            pass
+                #print("[EuropaBLE/thread_process_data]",e)
+        #print("[EuropaBLE/thread_process_data] thread quit")
 
     def process_data(self):
         self.process_thread=threading.Thread(target=self.thread_process_data)
@@ -396,25 +402,26 @@ class EuropaBLE(object):
     def stop_stream(self):
         if self.isStream==True:
             try:
-                print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_end,withResponse=True))
+                #print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_end,withResponse=True))
                 self.isStream=False
                 #self.file.write('Stop streaming\n')
                 while self.dev.waitForNotifications(1):
                     pass
-                #print(self.thread.isAlive())
+                ##print(self.thread.isAlive())
                 if self.thread.isAlive():
                     self.thread.join()
-                print('[EuropaBLE/stop_stream]Streaming thread quit, Stop stream')
+                #print('[EuropaBLE/stop_stream]Streaming thread quit, Stop stream')
             except Exception as e:
-                print("[EuropaBLE/stop_stream]stop stream failed:",str(e))
+                pass
+                #print("[EuropaBLE/stop_stream]stop stream failed:",str(e))
                 
     def check_stream(self):
         pass
 
 
     def check_battery(self):      #Not working
-        print("----------------check battery---------------------")
-        print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_battery,withResponse=True))
+        #print("----------------check battery---------------------")
+        #print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_battery,withResponse=True))
         self.dev.waitForNotifications(3)  
         self.dev.waitForNotifications(3) 
         self.dev.waitForNotifications(3) 
@@ -452,7 +459,7 @@ class EuropaBLE(object):
         current_time=0
         stream=[]
         converted_data=[]
-        print("\n\nConvert")
+        #print("\n\nConvert")
         for data_timestamp,data in self.raw_data:
             for x in map(ord,data):
                 stream.append(x)
@@ -463,7 +470,7 @@ class EuropaBLE(object):
                     current_time=data_timestamp
                     flag_time=True
                 if self.check_opener(stream) and len(stream)>10:
-                    #print(stream[0:11])
+                    ##print(stream[0:11])
                     converted_data.append(self.convert_data(stream[0:11]) )
                     stream=stream[11:]
                     flag_time=False

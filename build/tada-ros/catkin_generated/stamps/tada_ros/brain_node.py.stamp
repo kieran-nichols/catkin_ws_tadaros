@@ -38,8 +38,8 @@ class BrainNode():
         self.curr_pos1 = 0; self.curr_pos2 = 0
         #rospy.spin() # keeps python from exiting until this node is stopped
         ## Add rospy.Subscriber with self, its necessary global-like variables, and appropiate listeners (aka callback functions)
-    #handling the sensor data
-                # Initialize the global-like variables
+        #handling the sensor data
+        # Initialize the global-like variables
         self.homed1 = 0; self.homed2 = 0
         self.cnts_per_rev = 567
         
@@ -118,69 +118,76 @@ class BrainNode():
             
             # if first command is h then kill motor node; launch file will restart it in 2 seconds
             ## need smarter way to restart the motor node
-            if var[0]=="kill" and len(var)==2:
-                if var[1]=="m":
-                    os.system("rosnode kill /motor")
-                    print("motor node will restart\n")
-#                     os.system("roslaunch ~/catkin_ws/src/motor_node.launch") # does not work as intended
-                elif var[1]=="a":
-                    os.system("rosnode kill -a")
-                    os.system("killall -9 rosmaster")
-                    print("ROS has been killed")
-                    
+            if len(var)== 2:
+                if var[0]=="kill"
+                    if var[1]=="m":
+                        os.system("rosnode kill /motor")
+                        print("motor node will restart\n")
+    #                     os.system("roslaunch ~/catkin_ws/src/motor_node.launch") # does not work as intended
+                    elif var[1]=="a":
+                        os.system("rosnode kill -a")
+                        os.system("killall -9 rosmaster")
+                        print("ROS has been killed")
+                        
+                    else:
+                        print("Please enter options 'm' or 'a'\n")
+                 
+                 # if only 2 commands are given then calculate motor angle as a function of the ankle angles which are the inputs
                 else:
-                    print("Please enter options 'm' or 'a'\n")
+                    self.theta_deg = int(var[0])
+                    self.alpha_deg = int(var[1])
+                    # Convert input of PF, EV, inclination angle to motor angles from homed
+                    motor = TADA_angle(self)
+                    var1 = int(motor[0]) 
+                    var2 = int(motor[1])
+                    print("Moving to", var1, var2,"\n")
                 
-            # if first command is h then assign current position as homed values
-            ## need to fix homing the current position; it seems that the correct value comes in the future iteration
-            if var[0]=="h":
-                self.homed1 = curr_pos1
-                self.homed2 = curr_pos2
-                print(curr_pos1, curr_pos2)
-                print("created new homed positions:", self.homed1, self.homed2,"\n")     
-            
-            # if first command is r then return the motors back to home
-            elif var[0]=="r":
-            # create new homed value and specify the movement toward the new home which should be the same position as the old home
-#                 var1 = cnts_per_rev*round(homed1*cnts_per_rev)
-#                 var2 = cnts_per_rev*round(homed2*cnts_per_rev)
-                var1 = homed1
-                var2 = homed2
-                print("returned to home\n")  
-            
-            # if first command is c then print the current motor positions
-            elif var[0]=="c":
-                print("Current motor positions:", curr_pos1, curr_pos2,"\n")
-                var1 = curr_pos1 # 180
-                var2 = curr_pos2 # 567
-            
-            ## if first command is i then read the IMU's state
-            elif var[0]=="i":
-                print() 
-            
-            ## if first command is i then read the Eropa's sagittal and frontal moments
-            elif var[0]=="e":
-                print() 
-                  
-            # if only 2 commands are given then calculate motor angle as a function of the ankle angles which are the inputs
-            elif len(var)==2 and var[0]!="kill":
-                self.theta_deg = int(var[0])
-                self.alpha_deg = int(var[1])
-                # Convert input of PF, EV, inclination angle to motor angles from homed
-                motor = TADA_angle(self)
-                var1 = int(motor[0]) 
-                var2 = int(motor[1])
-                print("Moving to", var1, var2,"\n")
-             
-             # if first command is m, then send global motor commands
-            elif len(var)==3 and var[0]== "m":
-                var1 = int(var[1]) 
-                var2 = int(var[2])
+            elif len(var)== 1:
+                # if first command is h then assign current position as homed values
+                ## need to fix homing the current position; it seems that the correct value comes in the future iteration
+                if var[0]=="h":
+                    self.homed1 = curr_pos1
+                    self.homed2 = curr_pos2
+                    print(curr_pos1, curr_pos2)
+                    print("created new homed positions:", self.homed1, self.homed2,"\n")     
                 
-            elif len(var)==3 and var[0]== "swing":
-                self.initial_tada_angle = int(var[1]) 
-                self.dorsiflexed_tada_angle = int(var[2])
-                move_swing(self)
+                # if first command is r then return the motors back to home
+                elif var[0]=="r":
+                # create new homed value and specify the movement toward the new home which should be the same position as the old home
+    #                 var1 = cnts_per_rev*round(homed1*cnts_per_rev)
+    #                 var2 = cnts_per_rev*round(homed2*cnts_per_rev)
+                    var1 = homed1
+                    var2 = homed2
+                    print("returned to home\n")  
+                
+                # if first command is c then print the current motor positions
+                elif var[0]=="c":
+                    print("Current motor positions:", curr_pos1, curr_pos2,"\n")
+                    var1 = curr_pos1 # 180
+                    var2 = curr_pos2 # 567
+                
+                ## if first command is i then read the IMU's state
+                elif var[0]=="i":
+                    print() 
+                
+                ## if first command is i then read the Eropa's sagittal and frontal moments
+                elif var[0]=="e":
+                    print()
+                
+                # do nothing
+                else:
+                    print("Did nothing")
+                    
+            elif len(var)== 3:             
+                # if first command is m, then send global motor commands
+                elif var[0]== "m":
+                    var1 = int(var[1]) 
+                    var2 = int(var[2])
+                    
+                elif var[0]== "swing":
+                    self.initial_tada_angle = int(var[1]) 
+                    self.dorsiflexed_tada_angle = int(var[2])
+                    move_swing(self)
                                
             # else statement to keep motor position the same; consider also to return to home     
             else:
@@ -204,7 +211,8 @@ class BrainNode():
             
 if __name__ == '__main__':
     try:
-        BrainNode()
+
+        BrainNode().action()
         pass
     except rospy.ROSInterruptException: # ensures stopping if node is shut down
         pass
