@@ -21,7 +21,7 @@ import os
 import threading
 
 #EUROPA_ADDR=u"06:11"
-EUROPA_ADDR=u"ef:1b"
+EUROPA_ADDR=u"06:53"
 #europa_file_path="/home/pi/Desktop/europa/data/"
 class BleServer():
     def __init__(self):

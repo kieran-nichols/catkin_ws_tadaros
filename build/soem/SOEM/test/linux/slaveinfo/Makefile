@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/pi/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/pi/catkin_ws/catkin_ws_tadaros/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/pi/catkin_ws/build
+CMAKE_BINARY_DIR = /home/pi/catkin_ws/catkin_ws_tadaros/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -137,14 +137,14 @@ install/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/pi/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/pi/catkin_ws/build/CMakeFiles /home/pi/catkin_ws/build/soem/SOEM/test/linux/slaveinfo/CMakeFiles/progress.marks
-	cd /home/pi/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 soem/SOEM/test/linux/slaveinfo/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/catkin_ws/build/CMakeFiles 0
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/pi/catkin_ws/catkin_ws_tadaros/build/CMakeFiles /home/pi/catkin_ws/catkin_ws_tadaros/build/soem/SOEM/test/linux/slaveinfo/CMakeFiles/progress.marks
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f CMakeFiles/Makefile2 soem/SOEM/test/linux/slaveinfo/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/catkin_ws/catkin_ws_tadaros/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/pi/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 soem/SOEM/test/linux/slaveinfo/clean
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f CMakeFiles/Makefile2 soem/SOEM/test/linux/slaveinfo/clean
 .PHONY : clean
 
 # The main clean target
@@ -154,22 +154,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/pi/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 soem/SOEM/test/linux/slaveinfo/preinstall
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f CMakeFiles/Makefile2 soem/SOEM/test/linux/slaveinfo/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/pi/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 soem/SOEM/test/linux/slaveinfo/preinstall
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f CMakeFiles/Makefile2 soem/SOEM/test/linux/slaveinfo/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/pi/catkin_ws/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/rule:
-	cd /home/pi/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/rule
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f CMakeFiles/Makefile2 soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/rule
 .PHONY : soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/rule
 
 # Convenience name for target.
@@ -179,7 +179,7 @@ slaveinfo: soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/rule
 
 # fast build rule for target.
 slaveinfo/fast:
-	cd /home/pi/catkin_ws/build && $(MAKE) -f soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build.make soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build.make soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build
 .PHONY : slaveinfo/fast
 
 slaveinfo.o: slaveinfo.c.o
@@ -188,7 +188,7 @@ slaveinfo.o: slaveinfo.c.o
 
 # target to build an object file
 slaveinfo.c.o:
-	cd /home/pi/catkin_ws/build && $(MAKE) -f soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build.make soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.o
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build.make soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.o
 .PHONY : slaveinfo.c.o
 
 slaveinfo.i: slaveinfo.c.i
@@ -197,7 +197,7 @@ slaveinfo.i: slaveinfo.c.i
 
 # target to preprocess a source file
 slaveinfo.c.i:
-	cd /home/pi/catkin_ws/build && $(MAKE) -f soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build.make soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.i
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build.make soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.i
 .PHONY : slaveinfo.c.i
 
 slaveinfo.s: slaveinfo.c.s
@@ -206,7 +206,7 @@ slaveinfo.s: slaveinfo.c.s
 
 # target to generate assembly for a file
 slaveinfo.c.s:
-	cd /home/pi/catkin_ws/build && $(MAKE) -f soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build.make soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.s
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build.make soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.s
 .PHONY : slaveinfo.c.s
 
 # Help Target
@@ -237,6 +237,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/pi/catkin_ws/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

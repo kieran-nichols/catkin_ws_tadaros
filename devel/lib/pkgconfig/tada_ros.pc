@@ -1,8 +1,8 @@
-prefix=/home/pi/catkin_ws/devel
+prefix=/home/pi/catkin_ws/catkin_ws_tadaros/devel
 
 Name: tada_ros
 Description: Description of tada_ros
 Version: 0.0.0
-Cflags: -I/home/pi/catkin_ws/devel/include
+Cflags: -I/home/pi/catkin_ws/catkin_ws_tadaros/devel/include
 Libs: -L${prefix}/lib 
 Requires: 

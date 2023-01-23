@@ -1,3 +1,3 @@
 file(REMOVE_RECURSE
-  "/home/pi/catkin_ws/devel/lib/libsoem.a"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/libsoem.a"
 )

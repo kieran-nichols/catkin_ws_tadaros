@@ -7,4 +7,9 @@
 # new environment variables
 
 # modified environment variables
-export PWD='/home/pi/catkin_ws/build'
+export CMAKE_PREFIX_PATH="/home/pi/catkin_ws/catkin_ws_tadaros/devel:$CMAKE_PREFIX_PATH"
+export LD_LIBRARY_PATH="/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib:$LD_LIBRARY_PATH"
+export PWD='/home/pi/catkin_ws/catkin_ws_tadaros/build'
+export PYTHONPATH="/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/python3/dist-packages:$PYTHONPATH"
+export ROSLISP_PACKAGE_DIRECTORIES='/home/pi/catkin_ws/catkin_ws_tadaros/devel/share/common-lisp'
+export ROS_PACKAGE_PATH="/home/pi/catkin_ws/catkin_ws_tadaros/src:$ROS_PACKAGE_PATH"

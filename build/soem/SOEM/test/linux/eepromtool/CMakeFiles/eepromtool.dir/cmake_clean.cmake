@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/pi/catkin_ws/devel/lib/x_soem/eepromtool"
-  "/home/pi/catkin_ws/devel/lib/x_soem/eepromtool.pdb"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/eepromtool"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/eepromtool.pdb"
   "CMakeFiles/eepromtool.dir/eepromtool.c.o"
 )
 

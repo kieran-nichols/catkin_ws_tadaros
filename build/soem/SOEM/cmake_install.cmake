@@ -1,8 +1,8 @@
-# Install script for directory: /home/pi/catkin_ws/src/soem/SOEM
+# Install script for directory: /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/pi/catkin_ws/install")
+  set(CMAKE_INSTALL_PREFIX "/home/pi/catkin_ws/catkin_ws_tadaros/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,35 +38,35 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "/home/pi/catkin_ws/devel/lib/libsoem.a")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/libsoem.a")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/soem" TYPE FILE FILES
-    "/home/pi/catkin_ws/src/soem/SOEM/soem/ethercat.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/soem/ethercatbase.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/soem/ethercatcoe.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/soem/ethercatconfig.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/soem/ethercatconfiglist.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/soem/ethercatdc.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/soem/ethercateoe.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/soem/ethercatfoe.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/soem/ethercatmain.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/soem/ethercatprint.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/soem/ethercatsoe.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/soem/ethercattype.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/osal/linux/osal_defs.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/osal/osal.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/oshw/linux/nicdrv.h"
-    "/home/pi/catkin_ws/src/soem/SOEM/oshw/linux/oshw.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercat.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatbase.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatcoe.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatconfig.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatconfiglist.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatdc.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercateoe.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatfoe.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatmain.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatprint.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatsoe.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercattype.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/osal/linux/osal_defs.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/osal/osal.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/oshw/linux/nicdrv.h"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/oshw/linux/oshw.h"
     )
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/pi/catkin_ws/build/soem/SOEM/test/linux/slaveinfo/cmake_install.cmake")
-  include("/home/pi/catkin_ws/build/soem/SOEM/test/linux/eepromtool/cmake_install.cmake")
-  include("/home/pi/catkin_ws/build/soem/SOEM/test/linux/simple_test/cmake_install.cmake")
+  include("/home/pi/catkin_ws/catkin_ws_tadaros/build/soem/SOEM/test/linux/slaveinfo/cmake_install.cmake")
+  include("/home/pi/catkin_ws/catkin_ws_tadaros/build/soem/SOEM/test/linux/eepromtool/cmake_install.cmake")
+  include("/home/pi/catkin_ws/catkin_ws_tadaros/build/soem/SOEM/test/linux/simple_test/cmake_install.cmake")
 
 endif()
 

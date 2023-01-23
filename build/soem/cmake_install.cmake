@@ -1,8 +1,8 @@
-# Install script for directory: /home/pi/catkin_ws/src/soem
+# Install script for directory: /home/pi/catkin_ws/catkin_ws_tadaros/src/soem
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/pi/catkin_ws/install")
+  set(CMAKE_INSTALL_PREFIX "/home/pi/catkin_ws/catkin_ws_tadaros/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -38,27 +38,27 @@ if(NOT DEFINED CMAKE_CROSSCOMPILING)
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/pi/catkin_ws/build/soem/catkin_generated/installspace/x_soem.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/pi/catkin_ws/catkin_ws_tadaros/build/soem/catkin_generated/installspace/x_soem.pc")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/x_soem/cmake" TYPE FILE FILES "/home/pi/catkin_ws/build/soem/catkin_generated/installspace/soem-ros-extras.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/x_soem/cmake" TYPE FILE FILES "/home/pi/catkin_ws/catkin_ws_tadaros/build/soem/catkin_generated/installspace/soem-ros-extras.cmake")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/x_soem/cmake" TYPE FILE FILES
-    "/home/pi/catkin_ws/build/soem/catkin_generated/installspace/x_soemConfig.cmake"
-    "/home/pi/catkin_ws/build/soem/catkin_generated/installspace/x_soemConfig-version.cmake"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/build/soem/catkin_generated/installspace/x_soemConfig.cmake"
+    "/home/pi/catkin_ws/catkin_ws_tadaros/build/soem/catkin_generated/installspace/x_soemConfig-version.cmake"
     )
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/x_soem" TYPE FILE FILES "/home/pi/catkin_ws/src/soem/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/x_soem" TYPE FILE FILES "/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/package.xml")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/pi/catkin_ws/build/soem/SOEM/cmake_install.cmake")
+  include("/home/pi/catkin_ws/catkin_ws_tadaros/build/soem/SOEM/cmake_install.cmake")
 
 endif()
 

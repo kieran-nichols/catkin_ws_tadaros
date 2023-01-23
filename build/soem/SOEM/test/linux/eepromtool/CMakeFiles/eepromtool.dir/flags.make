@@ -6,5 +6,5 @@ C_FLAGS =  -Wall -Wextra   -fPIC
 
 C_DEFINES = -DROSCONSOLE_BACKEND_LOG4CXX -DROS_BUILD_SHARED_LIBS=1 -DROS_PACKAGE_NAME=\"x_soem\"
 
-C_INCLUDES = -I/home/pi/catkin_ws/devel/include -I/home/pi/ros_catkin_ws/install_isolated/include -I/home/pi/ros_catkin_ws/install_isolated/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/home/pi/catkin_ws/src/soem/SOEM/soem -I/home/pi/catkin_ws/src/soem/SOEM/osal -I/home/pi/catkin_ws/src/soem/SOEM/osal/linux -I/home/pi/catkin_ws/src/soem/SOEM/oshw/linux 
+C_INCLUDES = -I/home/pi/catkin_ws/catkin_ws_tadaros/devel/include -I/home/pi/ros_catkin_ws/install_isolated/include -I/home/pi/ros_catkin_ws/install_isolated/share/xmlrpcpp/cmake/../../../include/xmlrpcpp -I/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem -I/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/osal -I/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/osal/linux -I/home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/oshw/linux 
 

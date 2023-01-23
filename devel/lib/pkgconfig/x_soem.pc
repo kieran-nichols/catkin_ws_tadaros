@@ -1,4 +1,4 @@
-prefix=/home/pi/catkin_ws/devel
+prefix=/home/pi/catkin_ws/catkin_ws_tadaros/devel
 
 Name: x_soem
 Description: Description of x_soem

@@ -67,14 +67,14 @@ set(x_soem_CONFIG_INCLUDED TRUE)
 
 # set variables for source/devel/install prefixes
 if("FALSE" STREQUAL "TRUE")
-  set(x_soem_SOURCE_PREFIX /home/pi/catkin_ws/src/soem)
-  set(x_soem_DEVEL_PREFIX /home/pi/catkin_ws/devel)
+  set(x_soem_SOURCE_PREFIX /home/pi/catkin_ws/catkin_ws_tadaros/src/soem)
+  set(x_soem_DEVEL_PREFIX /home/pi/catkin_ws/catkin_ws_tadaros/devel)
   set(x_soem_INSTALL_PREFIX "")
   set(x_soem_PREFIX ${x_soem_DEVEL_PREFIX})
 else()
   set(x_soem_SOURCE_PREFIX "")
   set(x_soem_DEVEL_PREFIX "")
-  set(x_soem_INSTALL_PREFIX /home/pi/catkin_ws/install)
+  set(x_soem_INSTALL_PREFIX /home/pi/catkin_ws/catkin_ws_tadaros/install)
   set(x_soem_PREFIX ${x_soem_INSTALL_PREFIX})
 endif()
 
@@ -154,7 +154,7 @@ foreach(library ${libraries})
     set(lib_path "")
     set(lib "${library}-NOTFOUND")
     # since the path where the library is found is returned we have to iterate over the paths manually
-    foreach(path /home/pi/catkin_ws/install/lib;/home/pi/catkin_ws/devel/lib;/home/pi/ros_catkin_ws/install_isolated/lib)
+    foreach(path /home/pi/catkin_ws/catkin_ws_tadaros/install/lib;/home/pi/ros_catkin_ws/install_isolated/lib)
       find_library(lib ${library}
         PATHS ${path}
         NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)

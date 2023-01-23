@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/pi/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/pi/catkin_ws/catkin_ws_tadaros/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/pi/catkin_ws/build
+CMAKE_BINARY_DIR = /home/pi/catkin_ws/catkin_ws_tadaros/build
 
 # Utility rule file for CopyHeaders.
 
@@ -54,11 +54,11 @@ CMAKE_BINARY_DIR = /home/pi/catkin_ws/build
 include soem/CMakeFiles/CopyHeaders.dir/progress.make
 
 soem/CMakeFiles/CopyHeaders:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Copying SOEM headers to ROS-standard in devel space location."
-	cd /home/pi/catkin_ws/build/soem && /usr/bin/cmake -E copy_if_different /home/pi/catkin_ws/src/soem/SOEM/soem/ethercat.h /home/pi/catkin_ws/src/soem/SOEM/soem/ethercatbase.h /home/pi/catkin_ws/src/soem/SOEM/soem/ethercatcoe.h /home/pi/catkin_ws/src/soem/SOEM/soem/ethercatconfig.h /home/pi/catkin_ws/src/soem/SOEM/soem/ethercatconfiglist.h /home/pi/catkin_ws/src/soem/SOEM/soem/ethercatdc.h /home/pi/catkin_ws/src/soem/SOEM/soem/ethercateoe.h /home/pi/catkin_ws/src/soem/SOEM/soem/ethercatfoe.h /home/pi/catkin_ws/src/soem/SOEM/soem/ethercatmain.h /home/pi/catkin_ws/src/soem/SOEM/soem/ethercatprint.h /home/pi/catkin_ws/src/soem/SOEM/soem/ethercatsoe.h /home/pi/catkin_ws/src/soem/SOEM/soem/ethercattype.h /home/pi/catkin_ws/devel/include/x_soem
-	cd /home/pi/catkin_ws/build/soem && /usr/bin/cmake -E copy_if_different /home/pi/catkin_ws/src/soem/SOEM/osal/osal.h /home/pi/catkin_ws/devel/include/x_soem
-	cd /home/pi/catkin_ws/build/soem && /usr/bin/cmake -E copy_if_different /home/pi/catkin_ws/src/soem/SOEM/osal/linux/osal_defs.h /home/pi/catkin_ws/devel/include/x_soem
-	cd /home/pi/catkin_ws/build/soem && /usr/bin/cmake -E copy_if_different /home/pi/catkin_ws/src/soem/SOEM/oshw/linux/nicdrv.h /home/pi/catkin_ws/src/soem/SOEM/oshw/linux/oshw.h /home/pi/catkin_ws/devel/include/x_soem
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/pi/catkin_ws/catkin_ws_tadaros/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Copying SOEM headers to ROS-standard in devel space location."
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build/soem && /usr/bin/cmake -E copy_if_different /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercat.h /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatbase.h /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatcoe.h /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatconfig.h /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatconfiglist.h /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatdc.h /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercateoe.h /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatfoe.h /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatmain.h /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatprint.h /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercatsoe.h /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/soem/ethercattype.h /home/pi/catkin_ws/catkin_ws_tadaros/devel/include/x_soem
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build/soem && /usr/bin/cmake -E copy_if_different /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/osal/osal.h /home/pi/catkin_ws/catkin_ws_tadaros/devel/include/x_soem
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build/soem && /usr/bin/cmake -E copy_if_different /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/osal/linux/osal_defs.h /home/pi/catkin_ws/catkin_ws_tadaros/devel/include/x_soem
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build/soem && /usr/bin/cmake -E copy_if_different /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/oshw/linux/nicdrv.h /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/oshw/linux/oshw.h /home/pi/catkin_ws/catkin_ws_tadaros/devel/include/x_soem
 
 CopyHeaders: soem/CMakeFiles/CopyHeaders
 CopyHeaders: soem/CMakeFiles/CopyHeaders.dir/build.make
@@ -71,10 +71,10 @@ soem/CMakeFiles/CopyHeaders.dir/build: CopyHeaders
 .PHONY : soem/CMakeFiles/CopyHeaders.dir/build
 
 soem/CMakeFiles/CopyHeaders.dir/clean:
-	cd /home/pi/catkin_ws/build/soem && $(CMAKE_COMMAND) -P CMakeFiles/CopyHeaders.dir/cmake_clean.cmake
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build/soem && $(CMAKE_COMMAND) -P CMakeFiles/CopyHeaders.dir/cmake_clean.cmake
 .PHONY : soem/CMakeFiles/CopyHeaders.dir/clean
 
 soem/CMakeFiles/CopyHeaders.dir/depend:
-	cd /home/pi/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/pi/catkin_ws/src /home/pi/catkin_ws/src/soem /home/pi/catkin_ws/build /home/pi/catkin_ws/build/soem /home/pi/catkin_ws/build/soem/CMakeFiles/CopyHeaders.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/pi/catkin_ws/catkin_ws_tadaros/src /home/pi/catkin_ws/catkin_ws_tadaros/src/soem /home/pi/catkin_ws/catkin_ws_tadaros/build /home/pi/catkin_ws/catkin_ws_tadaros/build/soem /home/pi/catkin_ws/catkin_ws_tadaros/build/soem/CMakeFiles/CopyHeaders.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : soem/CMakeFiles/CopyHeaders.dir/depend
 

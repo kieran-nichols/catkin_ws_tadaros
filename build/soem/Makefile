@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/pi/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/pi/catkin_ws/catkin_ws_tadaros/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/pi/catkin_ws/build
+CMAKE_BINARY_DIR = /home/pi/catkin_ws/catkin_ws_tadaros/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -137,14 +137,14 @@ install/fast: preinstall/fast
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/pi/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/pi/catkin_ws/build/CMakeFiles /home/pi/catkin_ws/build/soem/CMakeFiles/progress.marks
-	cd /home/pi/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 soem/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/catkin_ws/build/CMakeFiles 0
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(CMAKE_COMMAND) -E cmake_progress_start /home/pi/catkin_ws/catkin_ws_tadaros/build/CMakeFiles /home/pi/catkin_ws/catkin_ws_tadaros/build/soem/CMakeFiles/progress.marks
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f CMakeFiles/Makefile2 soem/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/pi/catkin_ws/catkin_ws_tadaros/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/pi/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 soem/clean
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f CMakeFiles/Makefile2 soem/clean
 .PHONY : clean
 
 # The main clean target
@@ -154,22 +154,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/pi/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 soem/preinstall
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f CMakeFiles/Makefile2 soem/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/pi/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 soem/preinstall
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f CMakeFiles/Makefile2 soem/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/pi/catkin_ws/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 soem/CMakeFiles/CopyHeaders.dir/rule:
-	cd /home/pi/catkin_ws/build && $(MAKE) -f CMakeFiles/Makefile2 soem/CMakeFiles/CopyHeaders.dir/rule
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f CMakeFiles/Makefile2 soem/CMakeFiles/CopyHeaders.dir/rule
 .PHONY : soem/CMakeFiles/CopyHeaders.dir/rule
 
 # Convenience name for target.
@@ -179,7 +179,7 @@ CopyHeaders: soem/CMakeFiles/CopyHeaders.dir/rule
 
 # fast build rule for target.
 CopyHeaders/fast:
-	cd /home/pi/catkin_ws/build && $(MAKE) -f soem/CMakeFiles/CopyHeaders.dir/build.make soem/CMakeFiles/CopyHeaders.dir/build
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(MAKE) -f soem/CMakeFiles/CopyHeaders.dir/build.make soem/CMakeFiles/CopyHeaders.dir/build
 .PHONY : CopyHeaders/fast
 
 # Help Target
@@ -207,6 +207,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/pi/catkin_ws/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

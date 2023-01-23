@@ -6,7 +6,7 @@ from os import path as os_path
 from pkgutil import extend_path
 from sys import path as sys_path
 
-__extended_path = '/home/pi/catkin_ws/src/tada-ros/src'.split(';')
+__extended_path = '/home/pi/catkin_ws/catkin_ws_tadaros/src/tada-ros/src'.split(';')
 for p in reversed(__extended_path):
     sys_path.insert(0, p)
     del p

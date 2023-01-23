@@ -1,12 +1,12 @@
 file(REMOVE_RECURSE
-  "/home/pi/catkin_ws/devel/include/tada_ros/ConfigMsg.h"
-  "/home/pi/catkin_ws/devel/include/tada_ros/EuropaMsg.h"
-  "/home/pi/catkin_ws/devel/include/tada_ros/IMUDataMsg.h"
-  "/home/pi/catkin_ws/devel/include/tada_ros/KillConfirmationMsg.h"
-  "/home/pi/catkin_ws/devel/include/tada_ros/MotorDataMsg.h"
-  "/home/pi/catkin_ws/devel/include/tada_ros/MotorListenMsg.h"
-  "/home/pi/catkin_ws/devel/include/tada_ros/ReconDataMsg.h"
-  "/home/pi/catkin_ws/devel/include/tada_ros/UserChoiceMsg.h"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/include/tada_ros/ConfigMsg.h"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/include/tada_ros/EuropaMsg.h"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/include/tada_ros/IMUDataMsg.h"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/include/tada_ros/KillConfirmationMsg.h"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/include/tada_ros/MotorDataMsg.h"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/include/tada_ros/MotorListenMsg.h"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/include/tada_ros/ReconDataMsg.h"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/include/tada_ros/UserChoiceMsg.h"
   "CMakeFiles/tada_ros_generate_messages_cpp"
 )
 

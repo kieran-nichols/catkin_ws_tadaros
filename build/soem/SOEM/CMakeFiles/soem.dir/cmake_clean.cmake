@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/pi/catkin_ws/devel/lib/libsoem.a"
-  "/home/pi/catkin_ws/devel/lib/libsoem.pdb"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/libsoem.a"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/libsoem.pdb"
   "CMakeFiles/soem.dir/osal/linux/osal.c.o"
   "CMakeFiles/soem.dir/oshw/linux/nicdrv.c.o"
   "CMakeFiles/soem.dir/oshw/linux/oshw.c.o"

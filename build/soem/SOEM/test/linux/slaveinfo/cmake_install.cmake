@@ -1,8 +1,8 @@
-# Install script for directory: /home/pi/catkin_ws/src/soem/SOEM/test/linux/slaveinfo
+# Install script for directory: /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/test/linux/slaveinfo
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/pi/catkin_ws/install")
+  set(CMAKE_INSTALL_PREFIX "/home/pi/catkin_ws/catkin_ws_tadaros/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -44,7 +44,7 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
          FILE "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/slaveinfo"
          RPATH "")
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "/home/pi/catkin_ws/devel/lib/x_soem/slaveinfo")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/slaveinfo")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/slaveinfo" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/slaveinfo")
     if(CMAKE_INSTALL_DO_STRIP)

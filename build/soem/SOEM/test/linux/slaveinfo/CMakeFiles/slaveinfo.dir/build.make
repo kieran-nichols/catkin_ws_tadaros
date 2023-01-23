@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/pi/catkin_ws/src
+CMAKE_SOURCE_DIR = /home/pi/catkin_ws/catkin_ws_tadaros/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/pi/catkin_ws/build
+CMAKE_BINARY_DIR = /home/pi/catkin_ws/catkin_ws_tadaros/build
 
 # Include any dependencies generated for this target.
 include soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/depend.make
@@ -58,17 +58,17 @@ include soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/progress.make
 include soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/flags.make
 
 soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.o: soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/flags.make
-soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.o: /home/pi/catkin_ws/src/soem/SOEM/test/linux/slaveinfo/slaveinfo.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/pi/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.o"
-	cd /home/pi/catkin_ws/build/soem/SOEM/test/linux/slaveinfo && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/slaveinfo.dir/slaveinfo.c.o   -c /home/pi/catkin_ws/src/soem/SOEM/test/linux/slaveinfo/slaveinfo.c
+soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.o: /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/test/linux/slaveinfo/slaveinfo.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/pi/catkin_ws/catkin_ws_tadaros/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.o"
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build/soem/SOEM/test/linux/slaveinfo && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/slaveinfo.dir/slaveinfo.c.o   -c /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/test/linux/slaveinfo/slaveinfo.c
 
 soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/slaveinfo.dir/slaveinfo.c.i"
-	cd /home/pi/catkin_ws/build/soem/SOEM/test/linux/slaveinfo && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/pi/catkin_ws/src/soem/SOEM/test/linux/slaveinfo/slaveinfo.c > CMakeFiles/slaveinfo.dir/slaveinfo.c.i
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build/soem/SOEM/test/linux/slaveinfo && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/test/linux/slaveinfo/slaveinfo.c > CMakeFiles/slaveinfo.dir/slaveinfo.c.i
 
 soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/slaveinfo.dir/slaveinfo.c.s"
-	cd /home/pi/catkin_ws/build/soem/SOEM/test/linux/slaveinfo && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/pi/catkin_ws/src/soem/SOEM/test/linux/slaveinfo/slaveinfo.c -o CMakeFiles/slaveinfo.dir/slaveinfo.c.s
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build/soem/SOEM/test/linux/slaveinfo && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/test/linux/slaveinfo/slaveinfo.c -o CMakeFiles/slaveinfo.dir/slaveinfo.c.s
 
 # Object files for target slaveinfo
 slaveinfo_OBJECTS = \
@@ -77,23 +77,23 @@ slaveinfo_OBJECTS = \
 # External object files for target slaveinfo
 slaveinfo_EXTERNAL_OBJECTS =
 
-/home/pi/catkin_ws/devel/lib/x_soem/slaveinfo: soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.o
-/home/pi/catkin_ws/devel/lib/x_soem/slaveinfo: soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build.make
-/home/pi/catkin_ws/devel/lib/x_soem/slaveinfo: /home/pi/catkin_ws/devel/lib/libsoem.a
-/home/pi/catkin_ws/devel/lib/x_soem/slaveinfo: soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/pi/catkin_ws/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable /home/pi/catkin_ws/devel/lib/x_soem/slaveinfo"
-	cd /home/pi/catkin_ws/build/soem/SOEM/test/linux/slaveinfo && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/slaveinfo.dir/link.txt --verbose=$(VERBOSE)
+/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/slaveinfo: soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/slaveinfo.c.o
+/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/slaveinfo: soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build.make
+/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/slaveinfo: /home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/libsoem.a
+/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/slaveinfo: soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/pi/catkin_ws/catkin_ws_tadaros/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable /home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/slaveinfo"
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build/soem/SOEM/test/linux/slaveinfo && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/slaveinfo.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build: /home/pi/catkin_ws/devel/lib/x_soem/slaveinfo
+soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build: /home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/slaveinfo
 
 .PHONY : soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/build
 
 soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/clean:
-	cd /home/pi/catkin_ws/build/soem/SOEM/test/linux/slaveinfo && $(CMAKE_COMMAND) -P CMakeFiles/slaveinfo.dir/cmake_clean.cmake
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build/soem/SOEM/test/linux/slaveinfo && $(CMAKE_COMMAND) -P CMakeFiles/slaveinfo.dir/cmake_clean.cmake
 .PHONY : soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/clean
 
 soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/depend:
-	cd /home/pi/catkin_ws/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/pi/catkin_ws/src /home/pi/catkin_ws/src/soem/SOEM/test/linux/slaveinfo /home/pi/catkin_ws/build /home/pi/catkin_ws/build/soem/SOEM/test/linux/slaveinfo /home/pi/catkin_ws/build/soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/pi/catkin_ws/catkin_ws_tadaros/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/pi/catkin_ws/catkin_ws_tadaros/src /home/pi/catkin_ws/catkin_ws_tadaros/src/soem/SOEM/test/linux/slaveinfo /home/pi/catkin_ws/catkin_ws_tadaros/build /home/pi/catkin_ws/catkin_ws_tadaros/build/soem/SOEM/test/linux/slaveinfo /home/pi/catkin_ws/catkin_ws_tadaros/build/soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : soem/SOEM/test/linux/slaveinfo/CMakeFiles/slaveinfo.dir/depend
 

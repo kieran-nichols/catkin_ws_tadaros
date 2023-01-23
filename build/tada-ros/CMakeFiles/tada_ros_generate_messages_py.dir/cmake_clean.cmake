@@ -1,13 +1,13 @@
 file(REMOVE_RECURSE
-  "/home/pi/catkin_ws/devel/lib/python3/dist-packages/tada_ros/msg/_ConfigMsg.py"
-  "/home/pi/catkin_ws/devel/lib/python3/dist-packages/tada_ros/msg/_EuropaMsg.py"
-  "/home/pi/catkin_ws/devel/lib/python3/dist-packages/tada_ros/msg/_IMUDataMsg.py"
-  "/home/pi/catkin_ws/devel/lib/python3/dist-packages/tada_ros/msg/_KillConfirmationMsg.py"
-  "/home/pi/catkin_ws/devel/lib/python3/dist-packages/tada_ros/msg/_MotorDataMsg.py"
-  "/home/pi/catkin_ws/devel/lib/python3/dist-packages/tada_ros/msg/_MotorListenMsg.py"
-  "/home/pi/catkin_ws/devel/lib/python3/dist-packages/tada_ros/msg/_ReconDataMsg.py"
-  "/home/pi/catkin_ws/devel/lib/python3/dist-packages/tada_ros/msg/_UserChoiceMsg.py"
-  "/home/pi/catkin_ws/devel/lib/python3/dist-packages/tada_ros/msg/__init__.py"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/python3/dist-packages/tada_ros/msg/_ConfigMsg.py"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/python3/dist-packages/tada_ros/msg/_EuropaMsg.py"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/python3/dist-packages/tada_ros/msg/_IMUDataMsg.py"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/python3/dist-packages/tada_ros/msg/_KillConfirmationMsg.py"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/python3/dist-packages/tada_ros/msg/_MotorDataMsg.py"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/python3/dist-packages/tada_ros/msg/_MotorListenMsg.py"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/python3/dist-packages/tada_ros/msg/_ReconDataMsg.py"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/python3/dist-packages/tada_ros/msg/_UserChoiceMsg.py"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/python3/dist-packages/tada_ros/msg/__init__.py"
   "CMakeFiles/tada_ros_generate_messages_py"
 )
 

@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "/home/pi/catkin_ws/devel/lib/x_soem/slaveinfo"
-  "/home/pi/catkin_ws/devel/lib/x_soem/slaveinfo.pdb"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/slaveinfo"
+  "/home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/slaveinfo.pdb"
   "CMakeFiles/slaveinfo.dir/slaveinfo.c.o"
 )
 

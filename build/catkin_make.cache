@@ -1,2 +1,2 @@
 soem:tada-ros
--DCATKIN_DEVEL_PREFIX=/home/pi/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/pi/catkin_ws/install -G Unix Makefiles
+-DCATKIN_DEVEL_PREFIX=/home/pi/catkin_ws/catkin_ws_tadaros/devel -DCMAKE_INSTALL_PREFIX=/home/pi/catkin_ws/catkin_ws_tadaros/install -G Unix Makefiles
