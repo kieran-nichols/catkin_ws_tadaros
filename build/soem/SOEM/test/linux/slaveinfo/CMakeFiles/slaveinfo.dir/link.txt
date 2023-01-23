@@ -1,1 +1,0 @@
-/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/slaveinfo.dir/slaveinfo.c.o  -o /home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/slaveinfo  /home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/libsoem.a -lpthread -lrt 

@@ -1,1 +1,0 @@
-/usr/bin/cc  -Wall -Wextra  -rdynamic CMakeFiles/eepromtool.dir/eepromtool.c.o  -o /home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/x_soem/eepromtool  /home/pi/catkin_ws/catkin_ws_tadaros/devel/lib/libsoem.a -lpthread -lrt 
