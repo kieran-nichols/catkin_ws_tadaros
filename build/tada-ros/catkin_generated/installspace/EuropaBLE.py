@@ -178,8 +178,8 @@ class EuropaBLE(object):
                 self.last_msg=[]
                 self.buffer=[]
             def handleNotification(self,cHandle,data):
-                #list_data=map(ord,data)
-                list_data=data
+                list_data=map(ord,data)
+                #list_data=data
                 for x in list_data:
                     self.device_handle.buffer.append(x)
                 if len(self.device_handle.buffer)>3000:
@@ -190,7 +190,7 @@ class EuropaBLE(object):
                 #    #print(self.msg_count)
         
         try:
-            self.dev=Peripheral(self.device_addr.decode('utf-8'),iface=self.iface).withDelegate(NotifyDelegate(self))   # hci1, external dongle
+            self.dev=Peripheral(self.device_addr,iface=self.iface).withDelegate(NotifyDelegate(self))   # hci1, external dongle
             ##print("[EuropaBLE/connectDevice]"+str(time.time())+" Europa Connected")
         except Exception as e:
             ##print("[EuropaBLE/connectDevice]Can't connect to device: "+str(e))

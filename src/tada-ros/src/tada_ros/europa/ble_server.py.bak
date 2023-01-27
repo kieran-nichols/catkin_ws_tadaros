@@ -21,13 +21,13 @@ import os
 import threading
 
 #EUROPA_ADDR=u"06:11"
-EUROPA_ADDR=u"06:53" # 06:53 02:8D
+EUROPA_ADDR=u"02:8d" # 06:53 02:8d convert the europa last 4 values to hexadecimal
 #europa_file_path="/home/pi/Desktop/europa/data/"
 class BleServer():
     def __init__(self):
         
         #rospy.Subscriber('kill_all_topic', Bool, handle_kill_command)
-        #print("initialized IN EUROPA")
+        print("initialized IN EUROPA")
         #MPU_Init()
         dev = EuropaBLE.EuropaBLE()   
         dev.set_device_addr(EUROPA_ADDR)
@@ -47,12 +47,13 @@ class BleServer():
             dev.thread_process_data()
             ##print(EuropaBLE.get_fz_data())
             ##print(get_mz_data())
-            ##print("Reconnect")
+            print("Reconnect")
             time.sleep(6)
             
             
         #if os.path.isdir(europa_file_path)==False:
         #os.makedirs(europa_file_path)
+        print("quit")
  
 if __name__ == '__main__':
     try:

@@ -74,7 +74,7 @@ class EuropaBLE(object):
         self.raw_data=[]
         self.target_address=None
         self.key=EUROPA_KEY
-        self.iface=0
+        self.iface=1
         self.data_logger=None
         self.buffer=[]
         self.msg_count=0
@@ -93,6 +93,7 @@ class EuropaBLE(object):
         
     def set_device_addr(self,device_addr):    #set device address
         self.target_address=device_addr
+        print("taget_addr = "+str(device_addr))
     def set_iface(self,iface):
         if iface==0:
             self.turn_on_hci(0)
@@ -105,8 +106,9 @@ class EuropaBLE(object):
         device_list=[]
         if time.time()-self.ble_scan_time>1200:             #scan interval 60
             scanner = Scanner(self.iface)                  # use hci1, external dongle
-            ##print("Scanning")
+            print("Scanning")
             self.scan_results = scanner.scan(10.0)
+            #print(self.scan_results)
             self.ble_scan_time=time.time()
         device_list=[]
         for dev in self.scan_results:
@@ -123,7 +125,7 @@ class EuropaBLE(object):
                         break
             if flag_add==True:           
                 device_list.append([dev.addr,dev.addrType,dev.rssi])
-                ##print("scan results "+str(name)+" "+str(dev.addr)+" "+str(dev.rssi))
+                print("scan results "+str(name)+" "+str(dev.addr)+" "+str(dev.rssi))
         if device_list==[]:
             return [0,0]                     # no match device
         flag_find=False
@@ -151,7 +153,7 @@ class EuropaBLE(object):
         else:
             self.device_addr=None
             self.device_type=None
-            ##print("No europa found")
+            print("No europa found")
             return 1        
 
     def findSerialPortSrv(self):
@@ -191,9 +193,9 @@ class EuropaBLE(object):
         
         try:
             self.dev=Peripheral(self.device_addr,iface=self.iface).withDelegate(NotifyDelegate(self))   # hci1, external dongle
-            ##print("[EuropaBLE/connectDevice]"+str(time.time())+" Europa Connected")
+            print("[EuropaBLE/connectDevice]"+str(time.time())+" Europa Connected")
         except Exception as e:
-            ##print("[EuropaBLE/connectDevice]Can't connect to device: "+str(e))
+            print("[EuropaBLE/connectDevice]Can't connect to device: "+str(e))
             raise(ConnectError(str(e)))
 
 
@@ -216,10 +218,10 @@ class EuropaBLE(object):
             self.data_logger.close()
 
     def connect(self):
-        #if self.device_addr==None:
-        #   raise ConnectError("No device address")
+        if self.device_addr==None:
+           raise ConnectError("No device address")
         self.isConnect=False
-        ##print("[EuropaBLE/connect] Connecting")
+        print("[EuropaBLE/connect] Connecting")
 
         count=3
         while (count>0):
@@ -292,7 +294,7 @@ class EuropaBLE(object):
             os.system("sudo hciconfig hci"+str(iface)+" up")
         except:
             pass
-            ##print("Fail to turn off hci0")
+            #print("Fail to turn off hci0")
   
         time.sleep(1)
 
