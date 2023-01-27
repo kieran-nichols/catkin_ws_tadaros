@@ -320,19 +320,20 @@ class EuropaBLE(object):
                 self.thread=threading.Thread(target=self.stream)
                 self.thread.name="stream handler"
                 self.thread.setDaemon(True)
+                # need the below print statement
                 print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_start,withResponse=True))
-                print("[EuropaBLE/start_stream]",str(time.time())," Europa start streaming...")
+                #print("[EuropaBLE/start_stream]",str(time.time())," Europa start streaming...")
                 self.thread.start()
             except Exception as e:
-                #pass
-                print("[EuropaBLE/start_stream]Fail to write start command: "+ str(e))
+                pass
+                #print("[EuropaBLE/start_stream]Fail to write start command: "+ str(e))
  
     def thread_process_data(self):
         try:
             self.msg_count=0
             while self.isConnect==True and self.isStream==True:
                 time.sleep(0.1)   
-                print(self.buffer)             
+                # ~ print(self.buffer)             
                 while len(self.buffer)>13: 
                     while not self.check_opener(self.buffer) and len(self.buffer)>1:
                         self.buffer=self.buffer[1:]
