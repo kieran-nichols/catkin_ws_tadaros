@@ -107,6 +107,7 @@ class EuropaBLE(object):
             scanner = Scanner(self.iface)                  # use hci1, external dongle
             print("Scanning")
             self.scan_results = scanner.scan(10.0)
+            # ~ print(self.scan_results)
             self.ble_scan_time=time.time()
         device_list=[]
         for dev in self.scan_results:
@@ -116,6 +117,7 @@ class EuropaBLE(object):
             for (adtype, desc, value) in dev.getScanData():
                 if "Name" in desc:
                     if flag_add==True: #find name of device with target address
+                        print(value)
                         name=value         
                     if not self.key==None and self.key in value: # find device with target name
                         flag_add=True
@@ -332,7 +334,8 @@ class EuropaBLE(object):
         try:
             self.msg_count=0
             while self.isConnect==True and self.isStream==True:
-                time.sleep(0.1)   
+                time.sleep(0.01)   
+                # ~ print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_start,withResponse=True))
                 # ~ print(self.buffer)             
                 while len(self.buffer)>13: 
                     while not self.check_opener(self.buffer) and len(self.buffer)>1:
@@ -360,6 +363,7 @@ class EuropaBLE(object):
                         self.europa_command.mx = float(self.last_msg[0])
                         self.europa_command.my = float(self.last_msg[1])
                         self.europa_command.fz = float(self.last_msg[2])*CAL_FZ
+                        #print(self.europa_command)
                         self.europa_sensing.publish(self.europa_command)
                         
                         t=self.last_msg[2]
@@ -383,9 +387,9 @@ class EuropaBLE(object):
                                 # ~ print("None")
                        
         except Exception as e:
-            pass
+            #pass
                 #print("[EuropaBLE/thread_process_data]",e)
-        #print("[EuropaBLE/thread_process_data] thread quit")
+            print("[EuropaBLE/thread_process_data] thread quit")
 
     def process_data(self):
         self.process_thread=threading.Thread(target=self.thread_process_data)

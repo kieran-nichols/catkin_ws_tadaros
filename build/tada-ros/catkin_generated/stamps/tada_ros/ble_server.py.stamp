@@ -21,7 +21,7 @@ import os
 import threading
 
 #EUROPA_ADDR=u"06:11"
-EUROPA_ADDR=u"02:8d" # convert the europa last 4 values to hexadecimal
+EUROPA_ADDR=u"06:53" # 06:53 02:8D
 #europa_file_path="/home/pi/Desktop/europa/data/"
 class BleServer():
     def __init__(self):
@@ -31,7 +31,7 @@ class BleServer():
         #MPU_Init()
         dev = EuropaBLE.EuropaBLE()   
         dev.set_device_addr(EUROPA_ADDR)
-        dev.set_iface(0)
+        dev.set_iface(1)
         #rospy.init_node('EuropaServer_node', anonymous=True)
         #dev.create_log_file(file_path=europa_file_path)
         #plot_thread=threading.Thread(target=plot_data,args=(dev,))

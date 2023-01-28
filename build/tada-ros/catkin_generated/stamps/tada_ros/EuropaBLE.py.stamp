@@ -74,7 +74,7 @@ class EuropaBLE(object):
         self.raw_data=[]
         self.target_address=None
         self.key=EUROPA_KEY
-        self.iface=0
+        self.iface=1
         self.data_logger=None
         self.buffer=[]
         self.msg_count=0
@@ -105,7 +105,7 @@ class EuropaBLE(object):
         device_list=[]
         if time.time()-self.ble_scan_time>1200:             #scan interval 60
             scanner = Scanner(self.iface)                  # use hci1, external dongle
-            ##print("Scanning")
+            print("Scanning")
             self.scan_results = scanner.scan(10.0)
             self.ble_scan_time=time.time()
         device_list=[]
@@ -123,7 +123,7 @@ class EuropaBLE(object):
                         break
             if flag_add==True:           
                 device_list.append([dev.addr,dev.addrType,dev.rssi])
-                ##print("scan results "+str(name)+" "+str(dev.addr)+" "+str(dev.rssi))
+                print("scan results "+str(name)+" "+str(dev.addr)+" "+str(dev.rssi))
         if device_list==[]:
             return [0,0]                     # no match device
         flag_find=False
@@ -146,12 +146,12 @@ class EuropaBLE(object):
         if not res1[0] == 0:
             self.device_addr=res1[0]
             self.device_type=res1[1]
-            ##print("found europa "+str(self.device_addr)+" "+str(self.device_type))
+            print("found europa "+str(self.device_addr)+" "+str(self.device_type))
             return 0
         else:
             self.device_addr=None
             self.device_type=None
-            ##print("No europa found")
+            print("No europa found")
             return 1        
 
     def findSerialPortSrv(self):
@@ -178,8 +178,8 @@ class EuropaBLE(object):
                 self.last_msg=[]
                 self.buffer=[]
             def handleNotification(self,cHandle,data):
-                list_data=map(ord,data)
-                #list_data=data
+                #list_data=map(ord,data)
+                list_data=data
                 for x in list_data:
                     self.device_handle.buffer.append(x)
                 if len(self.device_handle.buffer)>3000:
@@ -190,10 +190,10 @@ class EuropaBLE(object):
                 #    #print(self.msg_count)
         
         try:
-            self.dev=Peripheral(self.device_addr,iface=self.iface).withDelegate(NotifyDelegate(self))   # hci1, external dongle
-            ##print("[EuropaBLE/connectDevice]"+str(time.time())+" Europa Connected")
+            self.dev=Peripheral(self.device_addr.decode('utf-8'),iface=self.iface).withDelegate(NotifyDelegate(self))   # hci1, external dongle
+            print("[EuropaBLE/connectDevice]"+str(time.time())+" Europa Connected")
         except Exception as e:
-            ##print("[EuropaBLE/connectDevice]Can't connect to device: "+str(e))
+            print("[EuropaBLE/connectDevice]Can't connect to device: "+str(e))
             raise(ConnectError(str(e)))
 
 
@@ -320,7 +320,8 @@ class EuropaBLE(object):
                 self.thread=threading.Thread(target=self.stream)
                 self.thread.name="stream handler"
                 self.thread.setDaemon(True)
-                #print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_start,withResponse=True))
+                # need the below print statement
+                print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_start,withResponse=True))
                 #print("[EuropaBLE/start_stream]",str(time.time())," Europa start streaming...")
                 self.thread.start()
             except Exception as e:
@@ -331,8 +332,9 @@ class EuropaBLE(object):
         try:
             self.msg_count=0
             while self.isConnect==True and self.isStream==True:
-                time.sleep(0.1)
-                while len(self.buffer)>13:
+                time.sleep(0.1)   
+                # ~ print(self.buffer)             
+                while len(self.buffer)>13: 
                     while not self.check_opener(self.buffer) and len(self.buffer)>1:
                         self.buffer=self.buffer[1:]
                     if self.check_opener(self.buffer) and len(self.buffer)>13:
@@ -359,7 +361,6 @@ class EuropaBLE(object):
                         self.europa_command.my = float(self.last_msg[1])
                         self.europa_command.fz = float(self.last_msg[2])*CAL_FZ
                         self.europa_sensing.publish(self.europa_command)
-
                         
                         t=self.last_msg[2]
                         #if (t>500 or t<-500):
@@ -375,11 +376,11 @@ class EuropaBLE(object):
                         if not self.data_logger==None:
                             self.data_logger.write(str(time.time())+str(self.last_msg)+"\n")
                         #if self.msg_count % 100 ==0 and DBG_FLAG:
-                        #    if len(self.last_msg)==6:
-                        #        #print("F",msg)
-                        #         #print("Mx: %3d, My: %3d, Fz: %3d, Ax: %4d, Ay: %4d, Az: %4d" %  (self.last_msg[0],self.last_msg[1],self.last_msg[2],self.last_msg[3],self.last_msg[4],self.last_msg[5] ) )
-                        #    else:
-                        #        #print("None")
+                            # ~ if len(self.last_msg)==6:
+                                # ~ print("F",msg)
+                        # ~ #         #print("Mx: %3d, My: %3d, Fz: %3d, Ax: %4d, Ay: %4d, Az: %4d" %  (self.last_msg[0],self.last_msg[1],self.last_msg[2],self.last_msg[3],self.last_msg[4],self.last_msg[5] ) )
+                            # ~ else:
+                                # ~ print("None")
                        
         except Exception as e:
             pass

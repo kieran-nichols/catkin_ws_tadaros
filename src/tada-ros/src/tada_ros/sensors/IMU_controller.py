@@ -74,7 +74,7 @@ class IMUData():
             % (self.swing.x, self.swing.y))
 
 def ROS_message_to_IMUData(msg_data):
-    print("IMU message function")
+    #print("IMU message function")
     return IMUData(msg_data.accel_x, msg_data.accel_y, msg_data.accel_z, \
                     msg_data.gyro_x, msg_data.gyro_y, msg_data.gyro_z, msg_data.state, msg_data.swing_time)
 

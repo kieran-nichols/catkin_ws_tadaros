@@ -71,8 +71,9 @@ class BrainNode():
         
     def handle_europa_input(self, msg_data):
         # translates IMUDataMsg ROS message to IMUData class and stores
-        print("in the brain")
-        print(msg_data)
+        # ~ print("in the brain")
+        # ~ print(msg_data)
+        pass # temporary
         #self.current_europa_data = IMU_controller.ROS_message_to_IMUData(msg_data)
     
     def GUI_input(self, msg_data):

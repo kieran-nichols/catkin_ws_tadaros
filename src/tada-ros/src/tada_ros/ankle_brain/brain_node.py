@@ -12,6 +12,7 @@ from tada_ros.msg import MotorListenMsg
 from tada_ros.msg import IMUDataMsg
 from tada_ros.msg import EuropaMsg
 #from tada_ros.europa import EuropaBLE
+from tada_ros.sensors import IMU_controller
 from tada_ros.sensors import sensor_node
 import numpy as np
 import math
