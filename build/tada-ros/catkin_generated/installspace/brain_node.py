@@ -12,6 +12,7 @@ from tada_ros.msg import MotorListenMsg
 from tada_ros.msg import IMUDataMsg
 from tada_ros.msg import EuropaMsg
 #from tada_ros.europa import EuropaBLE
+from tada_ros.sensors import IMU_controller
 from tada_ros.sensors import sensor_node
 import numpy as np
 import math
@@ -108,7 +109,7 @@ class BrainNode():
             
             theta = theta_deg*math.pi/180
             beta = 5*math.pi/180
-            q3 = 2*(np.arccos(np.sin(theta/2)/np.sin(beta))) # arccos in python always returns real values
+            q3 = 2*np.real((np.arccos(np.sin(theta/2)/np.sin(beta)))) # arccos in python always returns real values
 #             alpha = np.arctan2(PF*math.pi/180, EV*math.pi/180)
             alpha = alpha_deg*math.pi/180
             M1 = 180/math.pi*(alpha - np.arctan2(np.tan(q3/2),np.cos(beta))) 

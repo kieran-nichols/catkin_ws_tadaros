@@ -365,6 +365,7 @@ class EuropaBLE(object):
                         self.europa_command.fz = float(self.last_msg[2])*CAL_FZ
                         #print(self.europa_command)
                         self.europa_sensing.publish(self.europa_command)
+                        # ~ rate.sleep() makes the thread quit
                         
                         t=self.last_msg[2]
                         #if (t>500 or t<-500):

@@ -71,7 +71,7 @@ class SensorNode():
         #rospy.Subscriber('kill_all_topic', Bool, handle_kill_command)
         print("initialized IN SENSOR")
         #MPU_Init()
-        pub_sensing = rospy.Publisher('sensing_topic', IMUDataMsg, queue_size=10)
+        pub_sensing = rospy.Publisher('sensing_topic', IMUDataMsg, queue_size=100)
         self.imu_msg = IMUDataMsg()
         rospy.init_node('sensor_node', anonymous=True)
         rate = rospy.Rate(100)#100 hz
@@ -87,13 +87,10 @@ class SensorNode():
             #self.imu_msg.state =
             #self.imu_msg.swing_time =
             msg_imu = imu_data.to_ROS_message()
-            
+            # ~ std_msgs.msg.Header().stamp = rospy.Time.now()
             pub_sensing.publish(msg_imu)
-            
             rate.sleep()
-        
-        
-        
+     
         # queue_size argument limits the number of queued messages if any
         # subscriber is not receiving them fast enough.
         
