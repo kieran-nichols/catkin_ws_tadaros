@@ -21,7 +21,7 @@ import os
 import threading
 
 #EUROPA_ADDR=u"06:11"
-EUROPA_ADDR=u"06:53"
+EUROPA_ADDR=u"c4:be" #06:53
 #europa_file_path="/home/pi/Desktop/europa/data/"
 class BleServer():
     def __init__(self):
@@ -42,6 +42,7 @@ class BleServer():
         #rospy.init_node('europa_topic', anonymous=True)
         #rate = rospy.Rate(100)#100 hz
         while dev.search_europa()==0:
+            
             dev.connect() #create new file for each connection
             dev.start_stream()
             dev.thread_process_data()

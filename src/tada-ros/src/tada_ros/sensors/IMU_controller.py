@@ -14,6 +14,7 @@ from enum import Enum
 from tada_ros.msg import IMUDataMsg, ReconDataMsg
 from tada_ros.global_info import constants
 
+
 DEBUG_FLAG = 0
 linear_correction = 1
 
@@ -61,7 +62,7 @@ class IMUData():
             % (self.accel.x, self.accel.y, self.accel.z)
         str += "gyro_x: %.6f; gyro_y: %.6f; gyro_z: %.6f;\n" \
             % (self.gyro.x, self.gyro.y, self.gyro.z)
-        str += "swing state: %.6f; swing time: %.6f; " \
+        str += "swing state: %.6f; time: %.6f; " \
             % (self.swing.x, self.swing.y)
         return str
 
@@ -70,11 +71,11 @@ class IMUData():
             % (self.accel.x, self.accel.y, self.accel.z))
         print("gyro_x: %.6f; gyro_y: %.6f; gyro_z: %.6f; " \
             % (self.gyro.x, self.gyro.y, self.gyro.z))
-        print ("swing state: %.6f; swing time: %.6f; " \
+        print ("swing state: %.6f; time: %.6f; " \
             % (self.swing.x, self.swing.y))
 
 def ROS_message_to_IMUData(msg_data):
-    print("IMU message function")
+    #print("IMU message function")
     return IMUData(msg_data.accel_x, msg_data.accel_y, msg_data.accel_z, \
                     msg_data.gyro_x, msg_data.gyro_y, msg_data.gyro_z, msg_data.state, msg_data.swing_time)
 
@@ -170,8 +171,9 @@ class IMUController():
             else:
                 state = 1
                 swing_time = time.time() - start_time
+        
         #SWING
-                
-        imu_data = IMUData(accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, state, swing_time)
+
+        imu_data = IMUData(accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, state, time.time())
     
         return imu_data

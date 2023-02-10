@@ -87,7 +87,7 @@ class SensorNode():
             #self.imu_msg.state =
             #self.imu_msg.swing_time =
             msg_imu = imu_data.to_ROS_message()
-            
+            #print("imu publishing")
             pub_sensing.publish(msg_imu)
             
             rate.sleep()

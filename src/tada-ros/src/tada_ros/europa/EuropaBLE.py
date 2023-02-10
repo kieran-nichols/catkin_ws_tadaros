@@ -84,6 +84,7 @@ class EuropaBLE(object):
         self.fz_buffer=[]
 
         #start ros shananigans
+        print("publisher trigger")
         self.europa_sensing = rospy.Publisher('europa_topic', EuropaMsg, queue_size=10)
         rospy.init_node('EuropaBLE_node', anonymous=True)
         self.europa_command = EuropaMsg()
@@ -146,12 +147,12 @@ class EuropaBLE(object):
         if not res1[0] == 0:
             self.device_addr=res1[0]
             self.device_type=res1[1]
-            ##print("found europa "+str(self.device_addr)+" "+str(self.device_type))
+            print("found europa "+str(self.device_addr)+" "+str(self.device_type))
             return 0
         else:
             self.device_addr=None
             self.device_type=None
-            ##print("No europa found")
+            print("No europa found")
             return 1        
 
     def findSerialPortSrv(self):
@@ -167,7 +168,8 @@ class EuropaBLE(object):
                     self.CreditsCh=ch
                     ##print("Credits charcteristics Handle {} UUID {}".format(str(self.CreditsCh.getHandle()), str(self.CreditsCh.uuid)))
         except Exception as e:
-            raise(ConfigError("Can't find Serial Port Service: "+str(e)))
+            #raise(ConfigError("Can't find Serial Port Service: "+str(e)))
+            print("Can't find Serial Port Service")
 	
     def connectDevice(self):
         class NotifyDelegate(DefaultDelegate):             # callback function for handling notification
@@ -177,12 +179,15 @@ class EuropaBLE(object):
                 self.msg_count=0
                 self.last_msg=[]
                 self.buffer=[]
+                print("NotifyDelegate init")
             def handleNotification(self,cHandle,data):
                 #list_data=map(ord,data)
                 list_data=data
+                print("handleNotification")
                 for x in list_data:
                     self.device_handle.buffer.append(x)
                 if len(self.device_handle.buffer)>3000:
+                    print("in if")
                     self.device_handle.buffer=self.device_handle.buffer[1100:]
                     ##print("drop")
                 self.msg_count=self.msg_count+1
@@ -193,8 +198,8 @@ class EuropaBLE(object):
             self.dev=Peripheral(self.device_addr.decode('utf-8'),iface=self.iface).withDelegate(NotifyDelegate(self))   # hci1, external dongle
             ##print("[EuropaBLE/connectDevice]"+str(time.time())+" Europa Connected")
         except Exception as e:
-            ##print("[EuropaBLE/connectDevice]Can't connect to device: "+str(e))
-            raise(ConnectError(str(e)))
+            print("[EuropaBLE/connectDevice]Can't connect to device: "+str(e))
+            #raise(ConnectError(str(e)))
 
 
     def turnOnNotify(self,cHandle):
@@ -331,11 +336,15 @@ class EuropaBLE(object):
         try:
             self.msg_count=0
             while self.isConnect==True and self.isStream==True:
+
                 time.sleep(0.1)
                 while len(self.buffer)>13:
+
                     while not self.check_opener(self.buffer) and len(self.buffer)>1:
+
                         self.buffer=self.buffer[1:]
                     if self.check_opener(self.buffer) and len(self.buffer)>13:
+
                         msg=self.buffer[0:11]
                         if self.buffer[11]==254 and self.buffer[12]==254:
                             self.buffer=self.buffer[11:]
@@ -358,6 +367,11 @@ class EuropaBLE(object):
                         self.europa_command.mx = float(self.last_msg[0])
                         self.europa_command.my = float(self.last_msg[1])
                         self.europa_command.fz = float(self.last_msg[2])*CAL_FZ
+                        self.europa_command.t = time.time()
+
+                        #print(europa_command.mx)
+                        #print(europa_command.my)
+                        #print(europa_command.fz)
                         self.europa_sensing.publish(self.europa_command)
 
                         
