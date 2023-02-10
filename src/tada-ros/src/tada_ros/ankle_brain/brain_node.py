@@ -113,13 +113,15 @@ class BrainNode():
 #             alpha = np.arctan2(PF*math.pi/180, EV*math.pi/180)
             alpha = alpha_deg*math.pi/180
             M1 = 180/math.pi*(alpha - np.arctan2(np.tan(q3/2),np.cos(beta))) 
-            M2 = -180/math.pi*(-(alpha + np.arctan2(np.tan(q3/2), np.cos(beta))))
+            M2 = 180/math.pi*(-(alpha + np.arctan2(np.tan(q3/2), np.cos(beta))))
             # print motor angles in non-TADA ref frame
             print("Motor angles from homed", M1, M2)
             # Wrapping function that ensures that the angle is between 180 and -180;
             ## need to finish verify
-            M1 = np.degrees(np.arctan2(np.sin(np.radians(M1)), np.cos(np.radians(M1))))
-            M2 = np.degrees(np.arctan2(np.sin(np.radians(M2)), np.cos(np.radians(M2))))
+            # ~ M1 = np.degrees(np.arctan2(np.sin(np.radians(M1)), np.cos(np.radians(M1))))
+            # ~ M2 = np.degrees(np.arctan2(np.sin(np.radians(M2)), np.cos(np.radians(M2))))
+            M1 = (M1 + 180)%360 - 180
+            M2 = (M2 + 180)%360 - 180
             print("Wrapped motor angles from homed", M1, M2)
             # Convert to counts for motor movement
             M1 = M1*self.cnts_per_rev/360 + homed1
