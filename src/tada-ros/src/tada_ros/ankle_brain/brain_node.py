@@ -12,8 +12,12 @@ from tada_ros.msg import MotorListenMsg
 from tada_ros.msg import IMUDataMsg
 from tada_ros.msg import EuropaMsg
 #from tada_ros.europa import EuropaBLE
+<<<<<<< HEAD
 from tada_ros.sensors import IMU_controller
 from tada_ros.sensors import sensor_node
+=======
+from tada_ros.sensors import sensor_node, IMU_controller
+>>>>>>> bc276f3573bcce8677fe4473a741087f89a4ded3
 import numpy as np
 import math
 import os
@@ -68,8 +72,9 @@ class BrainNode():
     def handle_sensor_input(self, msg_data):
         # translates IMUDataMsg ROS message to IMUData class and stores
         #print("handler trg")
-        self.current_IMU_data = IMU_controller.ROS_message_to_IMUData(msg_data)
-        
+        #self.current_IMU_data = IMU_controller.ROS_message_to_IMUData(msg_data)
+        pass
+
     def handle_europa_input(self, msg_data):
         # translates IMUDataMsg ROS message to IMUData class and stores
         # ~ print("in the brain")
@@ -175,6 +180,7 @@ class BrainNode():
                  
                  # if only 2 commands are given then calculate motor angle as a function of the ankle angles which are the inputs
                 else:
+                
                     self.theta_deg = float(var[0])
                     self.alpha_deg = float(var[1])
                     # Convert input of PF, EV, inclination angle to motor angles from homed
@@ -233,6 +239,14 @@ class BrainNode():
                 if var[0] == "m":
                     var1 = int(var[1]) 
                     var2 = int(var[2])
+                    if (int(var[1])>=0 and int(var[1])<=10 and int(var[2])>=-180 and int(var[2])<=180):
+                        var1 = int(var[1]) 
+                        var2 = int(var[2])
+                        
+                    else:
+                        print("You have put in wrong numbers")
+                        print("\nTo command motor movement: 'm num num' (num is motor ticks where 567 for full rev)")
+                        print("To command ankle angles: 'theta(0 to 10 deg) alpha(-180 to 180 deg)'")
                     
                 elif var[0]== "swing":
                     # Test for sagittal only ankle movement from neutral to dorsiflexed and back to neutral
