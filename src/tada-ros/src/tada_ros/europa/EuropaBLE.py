@@ -185,7 +185,7 @@ class EuropaBLE(object):
             def handleNotification(self,cHandle,data):
                 #list_data=map(ord,data)
                 list_data=data
-                print("handleNotification")
+                #print("handleNotification")
                 for x in list_data:
                     self.device_handle.buffer.append(x)
                 if len(self.device_handle.buffer)>3000:
@@ -201,11 +201,7 @@ class EuropaBLE(object):
             print("[EuropaBLE/connectDevice]"+str(time.time())+" Europa Connected")
         except Exception as e:
             print("[EuropaBLE/connectDevice]Can't connect to device: "+str(e))
-<<<<<<< HEAD
             raise(ConnectError(str(e)))
-=======
-            #raise(ConnectError(str(e)))
->>>>>>> bc276f3573bcce8677fe4473a741087f89a4ded3
 
 
     def turnOnNotify(self,cHandle):
@@ -343,17 +339,10 @@ class EuropaBLE(object):
         try:
             self.msg_count=0
             while self.isConnect==True and self.isStream==True:
-<<<<<<< HEAD
-                time.sleep(0.01)   
+                # ~ time.sleep(0.01)   
                 # ~ print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_start,withResponse=True))
                 # ~ print(self.buffer)             
                 while len(self.buffer)>13: 
-=======
-
-                time.sleep(0.1)
-                while len(self.buffer)>13:
-
->>>>>>> bc276f3573bcce8677fe4473a741087f89a4ded3
                     while not self.check_opener(self.buffer) and len(self.buffer)>1:
 
                         self.buffer=self.buffer[1:]
@@ -381,17 +370,10 @@ class EuropaBLE(object):
                         self.europa_command.mx = float(self.last_msg[0])
                         self.europa_command.my = float(self.last_msg[1])
                         self.europa_command.fz = float(self.last_msg[2])*CAL_FZ
-<<<<<<< HEAD
-                        #print(self.europa_command)
-=======
-                        self.europa_command.t = time.time()
-
-                        #print(europa_command.mx)
-                        #print(europa_command.my)
-                        #print(europa_command.fz)
->>>>>>> bc276f3573bcce8677fe4473a741087f89a4ded3
+                        self.europa_command.t = float(time.time())
+                        # ~ print(self.europa_command.t)
                         self.europa_sensing.publish(self.europa_command)
-                        # ~ rate.sleep() makes the thread quit
+                        
                         
                         t=self.last_msg[2]
                         #if (t>500 or t<-500):
@@ -412,6 +394,7 @@ class EuropaBLE(object):
                         # ~ #         #print("Mx: %3d, My: %3d, Fz: %3d, Ax: %4d, Ay: %4d, Az: %4d" %  (self.last_msg[0],self.last_msg[1],self.last_msg[2],self.last_msg[3],self.last_msg[4],self.last_msg[5] ) )
                             # ~ else:
                                 # ~ print("None")
+                        # ~ rate.sleep() #makes the thread quit
                        
         except Exception as e:
             #pass
