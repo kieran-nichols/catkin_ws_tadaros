@@ -100,7 +100,7 @@ class BrainNode():
         prev_var1 = 0; prev_var2 = 0
         var = []
 #         rate_motor = rospy.Rate(10) # every 0.1 sec
-        rate = rospy.Rate(10) # every 0.1 sec # slowest control loop 
+        rate = rospy.Rate(100) # every 0.1 sec # slowest control loop 
         # specify home when the motor is turned on to be the motor positions at start
         self.homed1 = self.curr_pos1; self.homed2 = self.curr_pos2
             

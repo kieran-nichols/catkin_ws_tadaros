@@ -32,26 +32,26 @@ class BleServer():
         dev = EuropaBLE.EuropaBLE()   
         dev.set_device_addr(EUROPA_ADDR)
         dev.set_iface(1)
-        #rospy.init_node('EuropaServer_node', anonymous=True)
-        #dev.create_log_file(file_path=europa_file_path)
-        #plot_thread=threading.Thread(target=plot_data,args=(dev,))
-        #plot_thread.name="plot_thread handler"
-        #plot_thread.setDaemon(True)
-        #plot_thread.start()
-        #europa_sensing = rospy.Publisher('europa_topic', String, queue_size=10)
-        #rospy.init_node('europa_topic', anonymous=True)
-        #rate = rospy.Rate(100)#100 hz
-        while dev.search_europa()==0:
+        
+        # ~ self.europa_sensing = rospy.Publisher('europa_topic', EuropaMsg, queue_size=10)
+        # ~ rospy.init_node('EuropaBLE_node', anonymous=True)
+        # ~ self.europa_command = EuropaMsg()        
+        # ~ rate = rospy.Rate(100)#100 hz
+        
+        while dev.search_europa()==0 and not rospy.is_shutdown():
             
             dev.connect() #create new file for each connection
             dev.start_stream()
             dev.thread_process_data()
+            # ~ dev.rospub()
             ##print(EuropaBLE.get_fz_data())
             ##print(get_mz_data())
             ##print("Reconnect")
-            time.sleep(6)
-            
-            
+            # ~ time.sleep(6)
+        # two seperate threads for ros pub and bluetooth functions
+        # ~ while not rospy.is_shutdown(): 
+            # ~ dev.rospub()
+            # ~ rate.sleep()       
         #if os.path.isdir(europa_file_path)==False:
         #os.makedirs(europa_file_path)
  

@@ -87,8 +87,7 @@ class EuropaBLE(object):
         print("publisher trigger")
         self.europa_sensing = rospy.Publisher('europa_topic', EuropaMsg, queue_size=10)
         rospy.init_node('EuropaBLE_node', anonymous=True)
-        self.europa_command = EuropaMsg()
-        
+        self.europa_command = EuropaMsg()        
         rate = rospy.Rate(100)#100 hz
 
         
@@ -245,14 +244,14 @@ class EuropaBLE(object):
                 ##print("[EuropaBLE/connect] Europa configure finished")
                 ##print('---------------------Europa Ready------------------------\n')
             except Exception as e:
-                #print("[EuropaBLE/connect]Connect failed: "+str(e))
+                print("[EuropaBLE/connect]Connect failed: "+str(e))
                 #print("Try times left "+str(count))
                 try:
                     self.dev.disconnect()
                 except:
                     pass
                 count=count-1
-            time.sleep(1)
+            time.sleep(0.1)
             
     def disconnect(self):
         try:
@@ -276,14 +275,14 @@ class EuropaBLE(object):
     def resetBluetooth(self):
         try:
             os.system("rfkill block bluetooth")
-            time.sleep(5)
+            # ~ time.sleep(0.1)
         except:
             pass
         try:
             os.system("rfkill unblock bluetooth")        
         except:
             pass
-        time.sleep(2)
+        time.sleep(0.1)
         
         
     def turn_off_hci(self,iface):
@@ -293,7 +292,7 @@ class EuropaBLE(object):
             pass
             ##print("Fail to turn off hci0")
   
-        time.sleep(1)
+        time.sleep(0.1)
     def turn_on_hci(self,iface):
         try:
             os.system("sudo hciconfig hci"+str(iface)+" up")
@@ -301,7 +300,7 @@ class EuropaBLE(object):
             pass
             ##print("Fail to turn off hci0")
   
-        time.sleep(1)
+        time.sleep(0.1)
 
 
     def stream(self):
@@ -310,7 +309,7 @@ class EuropaBLE(object):
                 self.dev.waitForNotifications(0.2)
         except Exception as e:
             #print("[EuropaBLE/stream]Error in streaming thread: ",str(e))
-            time.sleep(2)
+            # ~ time.sleep(1)
             #raise(LoggingError(str(e),time.time()))
             self.isStream=False
             self.isConnect=False
@@ -329,6 +328,7 @@ class EuropaBLE(object):
                 self.thread.setDaemon(True)
                 # need the below print statement
                 print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_start,withResponse=True))
+                print("Europa connected and publishing")
                 #print("[EuropaBLE/start_stream]",str(time.time())," Europa start streaming...")
                 self.thread.start()
             except Exception as e:
@@ -338,14 +338,18 @@ class EuropaBLE(object):
     def thread_process_data(self):
         try:
             self.msg_count=0
+            freq = 100
+            cycle_time = 1/freq
+            t0 = time.perf_counter()
+            time_counter = t0
+            
             while self.isConnect==True and self.isStream==True:
-                # ~ time.sleep(0.01)   
                 # ~ print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_start,withResponse=True))
                 # ~ print(self.buffer)             
                 while len(self.buffer)>13: 
                     while not self.check_opener(self.buffer) and len(self.buffer)>1:
-
                         self.buffer=self.buffer[1:]
+                        
                     if self.check_opener(self.buffer) and len(self.buffer)>13:
 
                         msg=self.buffer[0:11]
@@ -357,31 +361,33 @@ class EuropaBLE(object):
 
                         self.last_msg=self.convert_data(msg)
                         if self.last_msg==None:
-                            pass
-                            #print("None!!")
+                            # ~ pass
+                            print("None!!")
+                            
                         self.msg_count=self.msg_count+1
-                        self.mx_buffer.append(float(self.last_msg[0]))
-                        self.my_buffer.append(float(self.last_msg[1]))
-                        self.fz_buffer.append(float(self.last_msg[2])*CAL_FZ)
+                        # ~ self.mx_buffer.append(float(self.last_msg[0]))
+                        # ~ self.my_buffer.append(float(self.last_msg[1]))
+                        # ~ self.fz_buffer.append(float(self.last_msg[2])*CAL_FZ)
                         
-                        #publishing
-                        #I think r is the pressure
-                        #r is fz_buffer
+                        # ~ #publishing
+                        # ~ #I think r is the pressure
+                        # ~ #r is fz_buffer
+                        
+                                            
                         self.europa_command.mx = float(self.last_msg[0])
                         self.europa_command.my = float(self.last_msg[1])
                         self.europa_command.fz = float(self.last_msg[2])*CAL_FZ
                         self.europa_command.t = float(time.time())
-                        # ~ print(self.europa_command.t)
+                        # ~ # print(self.europa_command.t)
                         self.europa_sensing.publish(self.europa_command)
-                        
-                        
-                        t=self.last_msg[2]
+                                               
+                        # ~ t=self.last_msg[2]
                         #if (t>500 or t<-500):
                         #    #print(msg)
-                        if self.msg_count>PLOT_BUFFER_MAX:
-                            self.mx_buffer=self.mx_buffer[1:]
-                            self.my_buffer=self.my_buffer[1:]
-                            self.fz_buffer=self.fz_buffer[1:]
+                        # ~ if self.msg_count>PLOT_BUFFER_MAX:
+                            # ~ self.mx_buffer=self.mx_buffer[1:]
+                            # ~ self.my_buffer=self.my_buffer[1:]
+                            # ~ self.fz_buffer=self.fz_buffer[1:]
                         ##print("self.fz_buffer: ")
                         ##print(type(self.fz_buffer))
                         ##print(self.fz_buffer)
@@ -394,25 +400,47 @@ class EuropaBLE(object):
                         # ~ #         #print("Mx: %3d, My: %3d, Fz: %3d, Ax: %4d, Ay: %4d, Az: %4d" %  (self.last_msg[0],self.last_msg[1],self.last_msg[2],self.last_msg[3],self.last_msg[4],self.last_msg[5] ) )
                             # ~ else:
                                 # ~ print("None")
+                        
+                        # ~ now = time.perf_counter()
+                        # ~ elapsed_time = now - time_counter
+                        # ~ target_time = cycle_time - time_counter
+                        # ~ if elapsed_time < target_time:
+                            # ~ time.sleep(target_time)
+                        # ~ time_counter += cycle_time
+                        time.sleep(0.009) 
                         # ~ rate.sleep() #makes the thread quit
+                        
+                        # ~ print(self.europa_command.t)
                        
         except Exception as e:
             #pass
                 #print("[EuropaBLE/thread_process_data]",e)
             print("[EuropaBLE/thread_process_data] thread quit")
-
+    
+    # ~ def rospub(self):
+        # ~ #publishing
+        # ~ #I think r is the pressure
+        # ~ #r is fz_buffer
+        # ~ self.europa_command.mx = float(self.last_msg[0])
+        # ~ self.europa_command.my = float(self.last_msg[1])
+        # ~ self.europa_command.fz = float(self.last_msg[2])*CAL_FZ
+        # ~ self.europa_command.t = float(time.time())
+        # ~ self.europa_sensing.publish(self.europa_command)
+        # ~ print("europa publishing")
+        # ~ rate.sleep()
+                        
     def process_data(self):
         self.process_thread=threading.Thread(target=self.thread_process_data)
         self.process_thread.name="thread_process_data handler"
         self.process_thread.setDaemon(True)
         self.process_thread.start()
         
-    def get_fz_data(self):
-        return self.fz_buffer
-    def get_mx_data(self):
-        return self.mx_buffer
-    def get_my_data(self):
-        return self.my_buffer
+    # ~ def get_fz_data(self):
+        # ~ return self.fz_buffer
+    # ~ def get_mx_data(self):
+        # ~ return self.mx_buffer
+    # ~ def get_my_data(self):
+        # ~ return self.my_buffer
         
     def stop_stream(self):
         if self.isStream==True:
@@ -420,8 +448,8 @@ class EuropaBLE(object):
                 #print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_end,withResponse=True))
                 self.isStream=False
                 #self.file.write('Stop streaming\n')
-                while self.dev.waitForNotifications(1):
-                    pass
+                # ~ while self.dev.waitForNotifications(1):
+                    # ~ pass
                 ##print(self.thread.isAlive())
                 if self.thread.isAlive():
                     self.thread.join()
@@ -438,8 +466,8 @@ class EuropaBLE(object):
         #print("----------------check battery---------------------")
         #print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_battery,withResponse=True))
         self.dev.waitForNotifications(3)  
-        self.dev.waitForNotifications(3) 
-        self.dev.waitForNotifications(3) 
+        # ~ self.dev.waitForNotifications(3) 
+        # ~ self.dev.waitForNotifications(3) 
         
     def check_opener(self,data):
         if len(data)>1:
