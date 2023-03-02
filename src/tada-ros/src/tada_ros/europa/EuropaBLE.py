@@ -407,7 +407,7 @@ class EuropaBLE(object):
                         # ~ if elapsed_time < target_time:
                             # ~ time.sleep(target_time)
                         # ~ time_counter += cycle_time
-                        time.sleep(0.009) 
+                        time.sleep(0.01) 
                         # ~ rate.sleep() #makes the thread quit
                         
                         # ~ print(self.europa_command.t)
