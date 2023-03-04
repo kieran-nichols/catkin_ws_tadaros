@@ -3,9 +3,9 @@
 <node pkg="tada_ros" type="brain_node.py" name="brain" args= "" output="screen" launch-prefix="taskset -c 1,2"/> 
 <!--
 <node name="global_info" pkg="tada_ros" type="constants.py" output="screen"></node>
--->
-<node name="sensor_node" pkg="tada_ros" type="sensor_node.py" output="screen"></node>
 
+<node name="sensor_node" pkg="tada_ros" type="sensor_node.py" output="screen"></node>
+-->
 <node name="EuropaServer_node" pkg="tada_ros" type="ble_server.py" output="screen"></node> 
 
 </launch>

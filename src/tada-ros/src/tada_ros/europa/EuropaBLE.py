@@ -338,10 +338,10 @@ class EuropaBLE(object):
     def thread_process_data(self):
         try:
             self.msg_count=0
-            freq = 100
-            cycle_time = 1/freq
-            t0 = time.perf_counter()
-            time_counter = t0
+            # ~ freq = 100
+            # ~ cycle_time = 1/freq
+            # ~ t0 = time.perf_counter()
+            # ~ time_counter = t0
             
             while self.isConnect==True and self.isStream==True:
                 # ~ print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_start,withResponse=True))
@@ -409,8 +409,6 @@ class EuropaBLE(object):
                         # ~ time_counter += cycle_time
                         time.sleep(0.01) 
                         # ~ rate.sleep() #makes the thread quit
-                        
-                        # ~ print(self.europa_command.t)
                        
         except Exception as e:
             #pass
