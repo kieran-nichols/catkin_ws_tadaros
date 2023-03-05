@@ -106,6 +106,7 @@ class BrainNode():
         self.swing_test = []
         self.stance_tracker = 0
         self.prev_stance_tracker = 0
+        self.initial_itr = 0
         self.prev_stance_theta, self.prev_stance_alpha = 0,0
 #         rate_motor = rospy.Rate(10) # every 0.1 sec
         rate = rospy.Rate(100) # every 0.1 sec # slowest control loop 
@@ -147,8 +148,9 @@ class BrainNode():
         # All alphas will be 0 or 180 to keep sagittal only movements (0 for plantarflexion and 180 for dorsiflexion)
         def move_swing(self):
             var1,var2 = 0,0
+            # ~ self.initial_itr = 0
             # swing state
-            if self.fz < 50.0 and self.steps > self.prev_steps and self.stance_tracker == self.prev_stance_tracker:
+            if self.fz < 200.0: # and self.steps > self.prev_steps: # and self.stance_tracker == self.prev_stance_tracker:
                 # ~ print("start of swing")
                 now = time.perf_counter()
                 elapsed_time = now - self.start_time
@@ -158,23 +160,31 @@ class BrainNode():
                 # move back to original position
                 elif 2*self.swing_test[2]/3 <= elapsed_time < self.swing_test[2]:
                     self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
+                    self.initial_itr = 0
                 # end of time
                 else:
-                    print(elapsed_time)
-                    # ~ self.start_time = time.perf_counter()
-                    self.prev_steps = self.steps 
-                    self.steps += 1
-                    self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
-            elif self.fz < 50.0 and self.stance_tracker != self.prev_stance_tracker:
-                self.steps += 1
-                self.prev_stance_tracker = self.stance_tracker
-                self.start_time = time.perf_counter()
-                self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
+                    if self.initial_itr == 0:
+                        print(elapsed_time)
+                        print("end of motor movement")
+                        # ~ self.start_time = time.perf_counter()
+                        self.prev_steps = self.steps 
+                        self.steps += 1
+                        self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
+                        self.initial_itr = 1       
+                    else: 
+                        self.steps += 1
+                        self.prev_stance_tracker = self.stance_tracker
+                        self.start_time = time.perf_counter()
+                        self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
             # stance state and everything else
             else: 
-                self.prev_stance_tracker = self.stance_tracker
-                self.stance_tracker += 1
+                # ~ if self.initial_itr != 0:
+                # ~ print("stance")
+                # ~ self.prev_stance_tracker = self.stance_tracker
+                # ~ self.stance_tracker += 1
                 self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
+                self.start_time = time.perf_counter()
+            
             motor = TADA_angle(self)
             # ~ print(motor)
             var1 = int(motor[0]) 
