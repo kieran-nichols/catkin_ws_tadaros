@@ -592,6 +592,7 @@ void motor_commandCallback(const tada_ros::MotorDataMsg::ConstPtr& motor_command
     motor_command_received[3] = motor_command->motor2_move;
     motor_command_received[4] = motor_command->motor1_torque;
     motor_command_received[5] = motor_command->motor2_torque;
+    // currently not collecting data for PF, EV, and timestamp
 //~ void motor_commandCallback(const std_msgs::Int32MultiArray::ConstPtr& motor_command){
     // Code for MultiArray processing
     //~ int i = 0;

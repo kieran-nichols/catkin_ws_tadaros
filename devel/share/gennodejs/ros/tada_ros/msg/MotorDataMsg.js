@@ -24,6 +24,9 @@ class MotorDataMsg {
       this.motor2_move = null;
       this.motor1_torque = null;
       this.motor2_torque = null;
+      this.PF = null;
+      this.EV = null;
+      this.t = null;
     }
     else {
       if (initObj.hasOwnProperty('mode')) {
@@ -62,6 +65,24 @@ class MotorDataMsg {
       else {
         this.motor2_torque = 0;
       }
+      if (initObj.hasOwnProperty('PF')) {
+        this.PF = initObj.PF
+      }
+      else {
+        this.PF = 0.0;
+      }
+      if (initObj.hasOwnProperty('EV')) {
+        this.EV = initObj.EV
+      }
+      else {
+        this.EV = 0.0;
+      }
+      if (initObj.hasOwnProperty('t')) {
+        this.t = initObj.t
+      }
+      else {
+        this.t = 0.0;
+      }
     }
   }
 
@@ -79,6 +100,12 @@ class MotorDataMsg {
     bufferOffset = _serializer.int32(obj.motor1_torque, buffer, bufferOffset);
     // Serialize message field [motor2_torque]
     bufferOffset = _serializer.int32(obj.motor2_torque, buffer, bufferOffset);
+    // Serialize message field [PF]
+    bufferOffset = _serializer.float32(obj.PF, buffer, bufferOffset);
+    // Serialize message field [EV]
+    bufferOffset = _serializer.float32(obj.EV, buffer, bufferOffset);
+    // Serialize message field [t]
+    bufferOffset = _serializer.float32(obj.t, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -98,11 +125,17 @@ class MotorDataMsg {
     data.motor1_torque = _deserializer.int32(buffer, bufferOffset);
     // Deserialize message field [motor2_torque]
     data.motor2_torque = _deserializer.int32(buffer, bufferOffset);
+    // Deserialize message field [PF]
+    data.PF = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [EV]
+    data.EV = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [t]
+    data.t = _deserializer.float32(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
-    return 24;
+    return 36;
   }
 
   static datatype() {
@@ -112,7 +145,7 @@ class MotorDataMsg {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '40e9fd659c4732cd7ff0cddac935981b';
+    return '0122060c184091d374c522c731386ece';
   }
 
   static messageDefinition() {
@@ -124,6 +157,9 @@ class MotorDataMsg {
     int32 motor2_move
     int32 motor1_torque
     int32 motor2_torque
+    float32 PF
+    float32 EV
+    float32 t
     
     `;
   }
@@ -174,6 +210,27 @@ class MotorDataMsg {
     }
     else {
       resolved.motor2_torque = 0
+    }
+
+    if (msg.PF !== undefined) {
+      resolved.PF = msg.PF;
+    }
+    else {
+      resolved.PF = 0.0
+    }
+
+    if (msg.EV !== undefined) {
+      resolved.EV = msg.EV;
+    }
+    else {
+      resolved.EV = 0.0
+    }
+
+    if (msg.t !== undefined) {
+      resolved.t = msg.t;
+    }
+    else {
+      resolved.t = 0.0
     }
 
     return resolved;

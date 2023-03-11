@@ -42,7 +42,6 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/home/pi/catkin_ws/src/tada-ros/src/tada_ros/motors/motor_node.py"
   "/home/pi/catkin_ws/src/tada-ros/src/tada_ros/sensors/IMU_controller.py"
   "/home/pi/catkin_ws/src/tada-ros/src/tada_ros/sensors/sensor_node.py"
-  "/home/pi/catkin_ws/src/tada-ros/src/tada_ros/user_interface/user_node.py"
   "/home/pi/ros_catkin_ws/install_isolated/share/catkin/cmake/all.cmake"
   "/home/pi/ros_catkin_ws/install_isolated/share/catkin/cmake/assert.cmake"
   "/home/pi/ros_catkin_ws/install_isolated/share/catkin/cmake/atomic_configure_file.cmake"

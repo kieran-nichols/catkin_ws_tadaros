@@ -4,3 +4,6 @@ int32 motor1_move
 int32 motor2_move
 int32 motor1_torque
 int32 motor2_torque
+float32 PF
+float32 EV
+float32 t
