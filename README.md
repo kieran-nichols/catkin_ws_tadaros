@@ -17,8 +17,8 @@
 * Load cell: Europa+, Three Axis (Frontal and Sagittal moments, and axial force)
 
 ## Installation
-* .img location link # TODO: Kieran do you have this?
-* Install ROS: # TODO: does the .img link to the Raspberry Pi already have this?
+* .img location link
+* Install ROS 
   * http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment
 * "source /home/pi/[CATKIN WORKSPACE FOLDER]/devel/setup.bash" # put this into
   the bashrc file (don't forget to open a new terminal to load the bashrc file)
@@ -32,7 +32,7 @@ used to direct the motors without user input.
 
 ## How to use
 * "roscore" # run the ROS master node from a terminal
-* To run the TADA system, use "roslaunch launch_file.launch" from the catkin_ws_tadaros/src" folder
+* To run the TADA system, use "roslaunch catkin_ws_tadaros/src/launch_file.launch"
 * To run individual nodes, use "rosrun tada_ros [NAME_NODE].py" ex: "rosrun tada_ros sensor_node.py" # run
    each node in a new terminal
 * If you want to plot the data being sent across topics on a graph, you can use
@@ -41,13 +41,6 @@ used to direct the motors without user input.
   
 ## Issues and Error Handling
 If you have any issues, please refer to the issue folder first as someone in our group could have dealt with it already. Also, please post your solutions to your general issues in there.
-
-* When trying to run the nodes, I got an error on "import rospy".
-I fixed it by editing line 160 of
-/opt/ros/noetic/lib/python3/dist-packages/rospy/impl/tcpros_base.py
-from (e_errno, msg, *_) = e.args to (e_errno, msg) = e.args
-(note: you will probably need to use sudo to get edit access, something like:
-"sudo nano /opt/ros/noetic/lib/python3/dist-packages/rospy/impl/tcpros_base.py"
 
 ## Authors
 Kieran Nichols, Sofya Akhetova, Becca Roembke, Peter Adamczyk

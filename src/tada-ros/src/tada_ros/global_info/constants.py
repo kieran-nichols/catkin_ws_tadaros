@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 
-import math
-
-MIN_ANGLE_CHOICE = 0
-MAX_ANGLE_CHOICE = 10
-NO_ANGLE = -1
-
+## IMU
 # IMU reconstruction
 STANCE_THRESHOLD = 50 # 50 [deg/s] angular velocity threshold for stance
 GRAVITY = 9.81 #9.080297286843 # [m/s^2]
@@ -29,3 +24,13 @@ DIFF_TIME_THRESHOLD = 0.001 # [seconds]
 
 LOW_MOTION_THRESHOLD_SECONDS = LOW_MOTION_COUNT_THRESHOLD * DT
 NONLOW_MOTION_THRESHOLD_SECONDS = NONLOW_MOTION_COUNT_THRESHOLD * DT
+
+## MOTOR
+
+# EUROPA
+
+## OTHER
+import math
+MIN_ANGLE_CHOICE = 0
+MAX_ANGLE_CHOICE = 10
+NO_ANGLE = -1

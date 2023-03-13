@@ -134,7 +134,7 @@ class BrainNode():
         # Inpput array: [initial0 (deg), final1 (deg)   , time (ms), increments (unitless), return (0,1), initial2 (deg)]
         # Sample array: [theta0, alpha0, theta1, alpha1 , 200      , 5                    , 1           , theta2, alpha2]
         # Sample array: [theta0, 0     , theta1, 0      , 300      , 3                    , 0           , 0     , 0     ]
-        # All alphas will be 0 or 180 to keep sagittal only movements (0 for plantarflexion and 180 for dors
+        # All alphas will be 0 or 180 to keep sagittal only movements (0 for plantarflexion and 180 for dorsiflexion)
         def move_swing(self):
             print("need to complete")
             
@@ -144,13 +144,9 @@ class BrainNode():
             motor_command = self.motor_command
             curr_pos1 = self.curr_pos1; curr_pos2 = self.curr_pos2
             homed1 = self.homed1; homed2 = self.homed2
-            ## add IMU and Europa variables here that need to be read
             ## variables that are called here are updated to be used in this while loop
                        
             # read input from the terminal; expecting between 1 and 3 inputs
-#             print("type 'help' for description of full instructions")
-#             raw_var = list(input("Enter command(s): ").split())
-#             self.raw_var = self.input_thread
             
             # assigns the raw input data to var and ignores error if no input was given
             if self.raw_var: 
@@ -176,15 +172,20 @@ class BrainNode():
                  
                  # if only 2 commands are given then calculate motor angle as a function of the ankle angles which are the inputs
                 else:
-                
-                    self.theta_deg = float(var[0])
-                    self.alpha_deg = float(var[1])
-                    # Convert input of PF, EV, inclination angle to motor angles from homed
-                    motor = TADA_angle(self)
-                    var1 = int(motor[0]) 
-                    var2 = int(motor[1])
-                    print("Moving to", var1, var2,"\n")
-                
+                    if (int(var[1])>=0 and int(var[1])<=10 and int(var[2])>=-180 and int(var[2])<=180):
+                        self.theta_deg = float(var[0])
+                        self.alpha_deg = float(var[1])
+                        # Convert input of PF, EV, inclination angle to motor angles from homed
+                        motor = TADA_angle(self)
+                        var1 = int(motor[0]) 
+                        var2 = int(motor[1])
+                        print("Moving to", var1, var2,"\n")
+                        
+                    else:
+                        print("You have put in wrong numbers")
+                        print("\nTo command motor movement: 'm num num' (num is motor ticks where 567 for full rev)")
+                        print("To command ankle angles: 'theta(0 to 10 deg) alpha(-180 to 180 deg)'")
+                                        
             elif len(var)== 1:
                 # print statement to describe instructions
                 if var[0]=="help":                
@@ -235,14 +236,6 @@ class BrainNode():
                 if var[0] == "m":
                     var1 = int(var[1]) 
                     var2 = int(var[2])
-                    if (int(var[1])>=0 and int(var[1])<=10 and int(var[2])>=-180 and int(var[2])<=180):
-                        var1 = int(var[1]) 
-                        var2 = int(var[2])
-                        
-                    else:
-                        print("You have put in wrong numbers")
-                        print("\nTo command motor movement: 'm num num' (num is motor ticks where 567 for full rev)")
-                        print("To command ankle angles: 'theta(0 to 10 deg) alpha(-180 to 180 deg)'")
                     
                 elif var[0]== "swing":
                     # Test for sagittal only ankle movement from neutral to dorsiflexed and back to neutral
@@ -260,8 +253,8 @@ class BrainNode():
                                
             # else statement to keep motor position the same; consider also to return to home     
             else:
-                var1 = curr_pos1 # 180
-                var2 = curr_pos2 # 567
+                var1 = prev_var1 # 180
+                var2 = prev_var2 # 567
                 print("Kept current position", var1, var2,"\n")
             
             # cmd to refresh terminal entry variable
@@ -278,7 +271,6 @@ class BrainNode():
             prev_var2 = var2
 #             rospy.loginfo(motor_command) 
             self.pub.publish(motor_command)
-#             rate_motor.sleep()
             rate.sleep()
             
 if __name__ == '__main__':
