@@ -106,7 +106,7 @@ class EuropaBLE(object):
         if time.time()-self.ble_scan_time>1200:             #scan interval 60
             scanner = Scanner(self.iface)                  # use hci1, external dongle
             print("Scanning")
-            self.scan_results = scanner.scan(10.0)
+            self.scan_results = scanner.scan(3.0)
             # ~ print(self.scan_results)
             self.ble_scan_time=time.time()
         device_list=[]
@@ -225,7 +225,7 @@ class EuropaBLE(object):
         #if self.device_addr==None:
         #   raise ConnectError("No device address")
         self.isConnect=False
-        ##print("[EuropaBLE/connect] Connecting")
+        print("[EuropaBLE/connect] Connecting")
 
         count=3
         while (count>0):
@@ -251,7 +251,7 @@ class EuropaBLE(object):
                 except:
                     pass
                 count=count-1
-            time.sleep(0.1)
+            time.sleep(0.01)
             
     def disconnect(self):
         try:
@@ -282,7 +282,7 @@ class EuropaBLE(object):
             os.system("rfkill unblock bluetooth")        
         except:
             pass
-        time.sleep(0.1)
+        time.sleep(0.01)
         
         
     def turn_off_hci(self,iface):
@@ -292,7 +292,7 @@ class EuropaBLE(object):
             pass
             ##print("Fail to turn off hci0")
   
-        time.sleep(0.1)
+        time.sleep(0.01)
     def turn_on_hci(self,iface):
         try:
             os.system("sudo hciconfig hci"+str(iface)+" up")
@@ -300,15 +300,15 @@ class EuropaBLE(object):
             pass
             ##print("Fail to turn off hci0")
   
-        time.sleep(0.1)
+        time.sleep(0.01)
 
 
     def stream(self):
         try:
             while self.isStream==True:
-                self.dev.waitForNotifications(0.2)
+                self.dev.waitForNotifications(0.001) #0.2 seems like this value decreases bluetooth delay
         except Exception as e:
-            #print("[EuropaBLE/stream]Error in streaming thread: ",str(e))
+            print("[EuropaBLE/stream]Error in streaming thread: ",str(e))
             # ~ time.sleep(1)
             #raise(LoggingError(str(e),time.time()))
             self.isStream=False
@@ -332,16 +332,16 @@ class EuropaBLE(object):
                 #print("[EuropaBLE/start_stream]",str(time.time())," Europa start streaming...")
                 self.thread.start()
             except Exception as e:
-                pass
-                #print("[EuropaBLE/start_stream]Fail to write start command: "+ str(e))
+                # ~ pass
+                print("[EuropaBLE/start_stream]Fail to write start command: "+ str(e))
  
     def thread_process_data(self):
         try:
             self.msg_count=0
-            freq = 100
-            cycle_time = 1/freq
-            t0 = time.perf_counter()
-            time_counter = t0
+            # ~ freq = 100
+            # ~ cycle_time = 1/freq
+            # ~ t0 = time.perf_counter()
+            # ~ time_counter = t0
             
             while self.isConnect==True and self.isStream==True:
                 # ~ print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_start,withResponse=True))
@@ -409,8 +409,6 @@ class EuropaBLE(object):
                         # ~ time_counter += cycle_time
                         time.sleep(0.01) 
                         # ~ rate.sleep() #makes the thread quit
-                        
-                        # ~ print(self.europa_command.t)
                        
         except Exception as e:
             #pass
@@ -445,7 +443,7 @@ class EuropaBLE(object):
     def stop_stream(self):
         if self.isStream==True:
             try:
-                #print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_end,withResponse=True))
+                print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_end,withResponse=True))
                 self.isStream=False
                 #self.file.write('Stop streaming\n')
                 # ~ while self.dev.waitForNotifications(1):
@@ -453,19 +451,19 @@ class EuropaBLE(object):
                 ##print(self.thread.isAlive())
                 if self.thread.isAlive():
                     self.thread.join()
-                #print('[EuropaBLE/stop_stream]Streaming thread quit, Stop stream')
+                print('[EuropaBLE/stop_stream]Streaming thread quit, Stop stream')
             except Exception as e:
-                pass
-                #print("[EuropaBLE/stop_stream]stop stream failed:",str(e))
+                # ~ pass
+                print("[EuropaBLE/stop_stream]stop stream failed:",str(e))
                 
     def check_stream(self):
         pass
 
 
-    def check_battery(self):      #Not working
+    # ~ def check_battery(self):      #Not working
         #print("----------------check battery---------------------")
         #print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_battery,withResponse=True))
-        self.dev.waitForNotifications(3)  
+        # ~ self.dev.waitForNotifications(0.1)  
         # ~ self.dev.waitForNotifications(3) 
         # ~ self.dev.waitForNotifications(3) 
         
@@ -506,16 +504,17 @@ class EuropaBLE(object):
         for data_timestamp,data in self.raw_data:
             for x in map(ord,data):
                 stream.append(x)
-            while len(stream)>10:
+                length = 1 #10
+            while len(stream)>length: #10
                 if not self.check_opener(stream):
                     stream=stream[1:]
                 if self.check_opener(stream) and flag_time==False:
                     current_time=data_timestamp
                     flag_time=True
-                if self.check_opener(stream) and len(stream)>10:
+                if self.check_opener(stream) and len(stream)>length:
                     ##print(stream[0:11])
-                    converted_data.append(self.convert_data(stream[0:11]) )
-                    stream=stream[11:]
+                    converted_data.append(self.convert_data(stream[0:length+1]) )
+                    stream=stream[length+1:]
                     flag_time=False
                 if self.check_opener(stream) and flag_time==False:
                     current_time=data_timestamp

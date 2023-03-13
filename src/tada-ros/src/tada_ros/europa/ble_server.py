@@ -31,7 +31,7 @@ class BleServer():
         #MPU_Init()
         dev = EuropaBLE.EuropaBLE()   
         dev.set_device_addr(EUROPA_ADDR)
-        dev.set_iface(1)
+        # ~ dev.set_iface(0)
         
         # ~ self.europa_sensing = rospy.Publisher('europa_topic', EuropaMsg, queue_size=10)
         # ~ rospy.init_node('EuropaBLE_node', anonymous=True)

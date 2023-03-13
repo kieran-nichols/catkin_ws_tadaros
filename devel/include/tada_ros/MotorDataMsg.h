@@ -29,7 +29,10 @@ struct MotorDataMsg_
     , motor1_move(0)
     , motor2_move(0)
     , motor1_torque(0)
-    , motor2_torque(0)  {
+    , motor2_torque(0)
+    , PF(0.0)
+    , EV(0.0)
+    , t(0.0)  {
     }
   MotorDataMsg_(const ContainerAllocator& _alloc)
     : mode(0)
@@ -37,7 +40,10 @@ struct MotorDataMsg_
     , motor1_move(0)
     , motor2_move(0)
     , motor1_torque(0)
-    , motor2_torque(0)  {
+    , motor2_torque(0)
+    , PF(0.0)
+    , EV(0.0)
+    , t(0.0)  {
   (void)_alloc;
     }
 
@@ -60,6 +66,15 @@ struct MotorDataMsg_
 
    typedef int32_t _motor2_torque_type;
   _motor2_torque_type motor2_torque;
+
+   typedef float _PF_type;
+  _PF_type PF;
+
+   typedef float _EV_type;
+  _EV_type EV;
+
+   typedef float _t_type;
+  _t_type t;
 
 
 
@@ -95,7 +110,10 @@ bool operator==(const ::tada_ros::MotorDataMsg_<ContainerAllocator1> & lhs, cons
     lhs.motor1_move == rhs.motor1_move &&
     lhs.motor2_move == rhs.motor2_move &&
     lhs.motor1_torque == rhs.motor1_torque &&
-    lhs.motor2_torque == rhs.motor2_torque;
+    lhs.motor2_torque == rhs.motor2_torque &&
+    lhs.PF == rhs.PF &&
+    lhs.EV == rhs.EV &&
+    lhs.t == rhs.t;
 }
 
 template<typename ContainerAllocator1, typename ContainerAllocator2>
@@ -152,12 +170,12 @@ struct MD5Sum< ::tada_ros::MotorDataMsg_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "40e9fd659c4732cd7ff0cddac935981b";
+    return "0122060c184091d374c522c731386ece";
   }
 
   static const char* value(const ::tada_ros::MotorDataMsg_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x40e9fd659c4732cdULL;
-  static const uint64_t static_value2 = 0x7ff0cddac935981bULL;
+  static const uint64_t static_value1 = 0x0122060c184091d3ULL;
+  static const uint64_t static_value2 = 0x74c522c731386eceULL;
 };
 
 template<class ContainerAllocator>
@@ -182,6 +200,9 @@ struct Definition< ::tada_ros::MotorDataMsg_<ContainerAllocator> >
 "int32 motor2_move\n"
 "int32 motor1_torque\n"
 "int32 motor2_torque\n"
+"float32 PF\n"
+"float32 EV\n"
+"float32 t\n"
 ;
   }
 
@@ -206,6 +227,9 @@ namespace serialization
       stream.next(m.motor2_move);
       stream.next(m.motor1_torque);
       stream.next(m.motor2_torque);
+      stream.next(m.PF);
+      stream.next(m.EV);
+      stream.next(m.t);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -236,6 +260,12 @@ struct Printer< ::tada_ros::MotorDataMsg_<ContainerAllocator> >
     Printer<int32_t>::stream(s, indent + "  ", v.motor1_torque);
     s << indent << "motor2_torque: ";
     Printer<int32_t>::stream(s, indent + "  ", v.motor2_torque);
+    s << indent << "PF: ";
+    Printer<float>::stream(s, indent + "  ", v.PF);
+    s << indent << "EV: ";
+    Printer<float>::stream(s, indent + "  ", v.EV);
+    s << indent << "t: ";
+    Printer<float>::stream(s, indent + "  ", v.t);
   }
 };
 

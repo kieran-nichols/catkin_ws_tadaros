@@ -31,6 +31,7 @@ direct the motors. It also takes in sensor input, which will eventually be
 used to direct the motors without user input.
 
 ## How to use
+Remember to include "taskset -c 1,2" as a prefix for all roscore and roslaunch commands
 * "roscore" # run the ROS master node from a terminal
 * To run the TADA system, use "roslaunch catkin_ws_tadaros/src/launch_file.launch"
 * To run individual nodes, use "rosrun tada_ros [NAME_NODE].py" ex: "rosrun tada_ros sensor_node.py" # run
@@ -41,6 +42,7 @@ used to direct the motors without user input.
   
 ## Issues and Error Handling
 If you have any issues, please refer to the issue folder first as someone in our group could have dealt with it already. Also, please post your solutions to your general issues in there.
+If the Europa node is continously reconnecting, please put the Europa three or less fee away from the raspi and let it reconnect. The connection should stay stable if the europa is within 3 ft of the raspi. Anything more and you may experience more connectivity issues.
 
 ## Authors
 Kieran Nichols, Sofya Akhetova, Becca Roembke, Peter Adamczyk

@@ -11,4 +11,10 @@
           MOTOR1_TORQUE
           MOTOR2_TORQUE-VAL
           MOTOR2_TORQUE
+          PF-VAL
+          PF
+          EV-VAL
+          EV
+          T-VAL
+          T
 ))

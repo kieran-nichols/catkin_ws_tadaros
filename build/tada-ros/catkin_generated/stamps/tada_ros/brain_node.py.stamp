@@ -71,11 +71,11 @@ class BrainNode():
         #self.current_IMU_data = IMU_controller.ROS_message_to_IMUData(msg_data)
         pass
 
-    def handle_europa_input(self, msg_data):
+    def handle_europa_input(self, data):
         # translates IMUDataMsg ROS message to IMUData class and stores
-        # ~ print("in the brain")
-        # ~ print(msg_data)
-        pass # temporary
+        self.mx = data.mx
+        self.my = data.my
+        self.fz = data.fz
         #self.current_europa_data = IMU_controller.ROS_message_to_IMUData(msg_data)
     
     def GUI_input(self, msg_data):
@@ -97,12 +97,25 @@ class BrainNode():
     def action(self):
         # Initialize the local variables
         var1 = 0; var2 = 0
-        prev_var1 = 0; prev_var2 = 0
+        self.prev_var1 = 0; self.prev_var2 = 0
         var = []
+        self.mode = 0
+        self.steps = 0
+        self.prev_steps = 0
+        self.start_time = time.perf_counter()
+        self.swing_test = []
+        self.stance_tracker = 0
+        self.prev_stance_tracker = 0
+        self.initial_itr = 0
+        self.load_threshold = 200
+        self.prev_stance_theta, self.prev_stance_alpha = 0,0
 #         rate_motor = rospy.Rate(10) # every 0.1 sec
-        rate = rospy.Rate(10) # every 0.1 sec # slowest control loop 
+        rate = rospy.Rate(100) # every 0.1 sec # slowest control loop 
         # specify home when the motor is turned on to be the motor positions at start
         self.homed1 = self.curr_pos1; self.homed2 = self.curr_pos2
+            
+        def limit(num, minimum, maximum):
+            return max(min(float(num), float(maximum)), float(minimum))
             
         def TADA_angle(self):
             theta_deg = self.theta_deg; alpha_deg = self.alpha_deg
@@ -116,28 +129,69 @@ class BrainNode():
             M1 = 180/math.pi*(alpha - np.arctan2(np.tan(q3/2),np.cos(beta))) 
             M2 = 180/math.pi*(-(alpha + np.arctan2(np.tan(q3/2), np.cos(beta))))
             # print motor angles in non-TADA ref frame
-            print("Motor angles from homed", M1, M2)
+            # ~ print("Motor angles from homed", M1, M2)
             # Wrapping function that ensures that the angle is between 180 and -180;
             ## need to finish verify
             # ~ M1 = np.degrees(np.arctan2(np.sin(np.radians(M1)), np.cos(np.radians(M1))))
             # ~ M2 = np.degrees(np.arctan2(np.sin(np.radians(M2)), np.cos(np.radians(M2))))
             M1 = (M1 + 180)%360 - 180
             M2 = (M2 + 180)%360 - 180
-            print("Wrapped motor angles from homed", M1, M2)
+            # ~ print("Wrapped motor angles from homed", M1, M2)
             # Convert to counts for motor movement
             M1 = M1*self.cnts_per_rev/360 + homed1
             M2 = M2*self.cnts_per_rev/360 + homed2
-            print("Global motor angles", M1, M2,"")
+            # ~ print("Global motor angles", M1, M2,"")
             return [M1, M2]
         
         # Test for sagittal only ankle movement from neutral to dorsiflexed and back to neutral
-        # Inpput array: [initial0 (deg), final1 (deg)   , time (ms), increments (unitless), return (0,1), initial2 (deg)]
-        # Sample array: [theta0, alpha0, theta1, alpha1 , 200      , 5                    , 1           , theta2, alpha2]
-        # Sample array: [theta0, 0     , theta1, 0      , 300      , 3                    , 0           , 0     , 0     ]
-        # All alphas will be 0 or 180 to keep sagittal only movements (0 for plantarflexion and 180 for dors
+        # Input array: [theta (deg)   , alpha (deg)   , time (ms)]
+        # Sample array: [10           , 45            , 300      ]
+        # All alphas will be 0 or 180 to keep sagittal only movements (0 for plantarflexion and 180 for dorsiflexion)
         def move_swing(self):
-            print("need to complete")
+            var1,var2 = 0,0
+            # ~ self.initial_itr = 0
+            # swing state
+            if self.fz < self.load_threshold: # and self.steps > self.prev_steps: # and self.stance_tracker == self.prev_stance_tracker:
+                # ~ print("start of swing")
+                now = time.perf_counter()
+                elapsed_time = now - self.start_time
+                # move to 5 deg dorsiflexed for 2/3 of the time
+                if elapsed_time < 2*self.swing_test[2]/3:
+                    self.theta_deg = 5.0; self.alpha_deg = 0.0
+                # move back to original position
+                elif 2*self.swing_test[2]/3 <= elapsed_time < self.swing_test[2]:
+                    self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
+                    self.initial_itr = 0
+                # end of time
+                else:
+                    if self.initial_itr == 0:
+                        print(elapsed_time)
+                        print("end of motor movement")
+                        # ~ self.start_time = time.perf_counter()
+                        self.prev_steps = self.steps 
+                        self.steps += 1
+                        self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
+                        self.initial_itr = 1       
+                    else: 
+                        self.steps += 1
+                        self.prev_stance_tracker = self.stance_tracker
+                        self.start_time = time.perf_counter()
+                        self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
+            # stance state and everything else
+            else: 
+                # ~ if self.initial_itr != 0:
+                # ~ print("stance")
+                # ~ self.prev_stance_tracker = self.stance_tracker
+                # ~ self.stance_tracker += 1
+                self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
+                self.start_time = time.perf_counter()
             
+            motor = TADA_angle(self)
+            # ~ print(motor)
+            var1 = int(motor[0]) 
+            var2 = int(motor[1])
+            return var1,var2
+                
         # main loop that controls the TADA
         while not rospy.is_shutdown(): #and rospy.on_shutdown(hook):
             # repurpose and shorten the self variables to be local variables
@@ -156,7 +210,7 @@ class BrainNode():
             if self.raw_var: 
                 var = self.raw_var
             else:
-                var = [False] 
+                var = [0, 0] 
             
             # if first command is h then kill motor node; launch file will restart it in 2 seconds
             ## need smarter way to restart the motor node
@@ -170,15 +224,18 @@ class BrainNode():
                         os.system("rosnode kill -a")
                         os.system("killall -9 rosmaster")
                         print("ROS has been killed")
-                        
                     else:
                         print("Please enter options 'm' or 'a'\n")
+                elif var[0]=="bt":
+                    self.load_threshold = var[1]     
                  
                  # if only 2 commands are given then calculate motor angle as a function of the ankle angles which are the inputs
                 else:
-                
-                    self.theta_deg = float(var[0])
-                    self.alpha_deg = float(var[1])
+                    theta = limit(var[0], 0, 10)
+                    alpha = limit(var[1], -180, 180)
+                    self.theta_deg = float(theta) # keep value between 0 and 10
+                    self.alpha_deg = float(alpha) # keep value between -180 and 180
+                    
                     # Convert input of PF, EV, inclination angle to motor angles from homed
                     motor = TADA_angle(self)
                     var1 = int(motor[0]) 
@@ -219,54 +276,62 @@ class BrainNode():
                 
                 ## if first command is i then read the IMU's state
                 elif var[0]=="i":
-                    print() 
+                    print("empty") 
                 
-                ## if first command is i then read the Eropa's sagittal and frontal moments
+                ## if first command is i then read the Europa's sagittal and frontal moments
                 elif var[0]=="e":
-                    print()
+                    print(self.mx, self.my, self.fz)
+                    print("europa threshold = ", self.load_threshold)
+                
+                elif var[0] == "mode0":
+                    self.mode = 0
+                    
+                elif var[0]== "mode1":
+                    # Test for sagittal only ankle movement from neutral to dorsiflexed and back to neutral
+                    # Input array: [theta (deg)   , alpha (deg)   , time (s)]
+                    # Sample array: [10           , 45            , 0.3     ]
+                    # All alphas will be 0 or 180 to keep sagittal only movements (0 for plantarflexion and 180 for dorsiflexion)
+                    self.mode = 1
+                    self.steps += 1
+                    self.start_time = time.perf_counter()
+                    # ~ self.swing_test = [float(var[1]), float(var[2]), 0, 0, 300, 3, 1, 0, 0]
+                    self.swing_test = [self.prev_stance_theta, self.prev_stance_alpha, 1]
+                    print("Starting swing mode")
+                    # ~ var1 = self.prev_var1 #curr_pos1 
+                    # ~ var2 = self.prev_var2 #curr_pos2 
                 
                 # do nothing
                 else:
-                    pass
-#                     print("Did nothing")
+                    # ~ pass
+                    print("Did nothing for enter cmd (2)")
                     
             elif len(var)== 3:             
                 # if first command is m, then send global motor commands
                 if var[0] == "m":
                     var1 = int(var[1]) 
                     var2 = int(var[2])
-                    if (int(var[1])>=0 and int(var[1])<=10 and int(var[2])>=-180 and int(var[2])<=180):
-                        var1 = int(var[1]) 
-                        var2 = int(var[2])
-                        
-                    else:
-                        print("You have put in wrong numbers")
-                        print("\nTo command motor movement: 'm num num' (num is motor ticks where 567 for full rev)")
-                        print("To command ankle angles: 'theta(0 to 10 deg) alpha(-180 to 180 deg)'")
                     
-                elif var[0]== "swing":
-                    # Test for sagittal only ankle movement from neutral to dorsiflexed and back to neutral
-                    # Inpput array: [initial0 (deg), final1 (deg)   , time (ms), increments (unitless), return (0,1), initial2 (deg)]
-                    # Sample array: [theta0, alpha0, theta1, alpha1 , 200      , 5                    , 1           , theta2, alpha2]
-                    # Sample array: [theta0, 0     , theta1, 0      , 300      , 3                    , 0           , 0     , 0     ]
-                    # All alphas will be 0 or 180 to keep sagittal only movements (0 for plantarflexion and 180 for dorsiflexion)
-                    self.swing_test = [float(var[1]), 0, float(var[2]), 0, 300, 3, 1, 0, 0]
-                    move_swing(self)
-                    
-                # do nothing
                 else:
-                    pass
-#                     print("Did nothing")
+                    print("Did nothing for enter cmd (3)")
                                
             # else statement to keep motor position the same; consider also to return to home     
             else:
-                var1 = curr_pos1 # 180
-                var2 = curr_pos2 # 567
+                var1 = self.prev_var1 #curr_pos1 
+                var2 = self.prev_var2 #curr_pos2 
+                # ~ prev_var1, prev_var2 = var1, var2 
                 print("Kept current position", var1, var2,"\n")
             
             # cmd to refresh terminal entry variable
             self.raw_var = [False]
             
+            # condition to test swing
+            if self.mode == 1:
+                theta = limit(self.swing_test[0], 0, 10)
+                alpha = limit(self.swing_test[1], -180, 180)
+                self.theta_deg = float(theta) # keep value between 0 and 10
+                self.alpha_deg = float(alpha) 
+                var1,var2 = move_swing(self)
+                
             # set up object to publish to motor node
             motor_command.mode = 0
             motor_command.duration = 0
@@ -274,8 +339,13 @@ class BrainNode():
             motor_command.motor2_move = var2
             motor_command.motor1_torque = 1500 # be careful with torque values, max torque is dependent on the motor loads
             motor_command.motor2_torque = 1500 # 1000 for no load, above 1500 for assembled TADA
-            prev_var1 = var1
-            prev_var2 = var2
+            motor_command.PF = 0
+            motor_command.EV = 0
+            motor_command.t = time.time()
+            self.prev_var1 = var1
+            self.prev_var2 = var2
+            self.prev_stance_theta, self.prev_stance_alpha = var1, var2
+
 #             rospy.loginfo(motor_command) 
             self.pub.publish(motor_command)
 #             rate_motor.sleep()

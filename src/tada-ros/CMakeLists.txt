@@ -165,7 +165,7 @@ catkin_package()
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  src/tada_ros/user_interface/user_node.py
+  #src/tada_ros/user_interface/user_node.py
   src/tada_ros/ankle_brain/brain_node.py
   src/tada_ros/sensors/IMU_controller.py
   src/tada_ros/sensors/sensor_node.py

@@ -125,10 +125,6 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/tada_ros" TYPE PROGRAM FILES "/home/pi/catkin_ws/build/tada-ros/catkin_generated/installspace/user_node.py")
-endif()
-
-if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/tada_ros" TYPE PROGRAM FILES "/home/pi/catkin_ws/build/tada-ros/catkin_generated/installspace/brain_node.py")
 endif()
 

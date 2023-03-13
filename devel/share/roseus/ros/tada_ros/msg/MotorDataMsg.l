@@ -14,7 +14,7 @@
 
 (defclass tada_ros::MotorDataMsg
   :super ros::object
-  :slots (_mode _duration _motor1_move _motor2_move _motor1_torque _motor2_torque ))
+  :slots (_mode _duration _motor1_move _motor2_move _motor1_torque _motor2_torque _PF _EV _t ))
 
 (defmethod tada_ros::MotorDataMsg
   (:init
@@ -25,6 +25,9 @@
     ((:motor2_move __motor2_move) 0)
     ((:motor1_torque __motor1_torque) 0)
     ((:motor2_torque __motor2_torque) 0)
+    ((:PF __PF) 0.0)
+    ((:EV __EV) 0.0)
+    ((:t __t) 0.0)
     )
    (send-super :init)
    (setq _mode (round __mode))
@@ -33,6 +36,9 @@
    (setq _motor2_move (round __motor2_move))
    (setq _motor1_torque (round __motor1_torque))
    (setq _motor2_torque (round __motor2_torque))
+   (setq _PF (float __PF))
+   (setq _EV (float __EV))
+   (setq _t (float __t))
    self)
   (:mode
    (&optional __mode)
@@ -52,6 +58,15 @@
   (:motor2_torque
    (&optional __motor2_torque)
    (if __motor2_torque (setq _motor2_torque __motor2_torque)) _motor2_torque)
+  (:PF
+   (&optional __PF)
+   (if __PF (setq _PF __PF)) _PF)
+  (:EV
+   (&optional __EV)
+   (if __EV (setq _EV __EV)) _EV)
+  (:t
+   (&optional __t)
+   (if __t (setq _t __t)) _t)
   (:serialization-length
    ()
    (+
@@ -66,6 +81,12 @@
     ;; int32 _motor1_torque
     4
     ;; int32 _motor2_torque
+    4
+    ;; float32 _PF
+    4
+    ;; float32 _EV
+    4
+    ;; float32 _t
     4
     ))
   (:serialize
@@ -84,6 +105,12 @@
        (write-long _motor1_torque s)
      ;; int32 _motor2_torque
        (write-long _motor2_torque s)
+     ;; float32 _PF
+       (sys::poke _PF (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+     ;; float32 _EV
+       (sys::poke _EV (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+     ;; float32 _t
+       (sys::poke _t (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -100,11 +127,17 @@
      (setq _motor1_torque (sys::peek buf ptr- :integer)) (incf ptr- 4)
    ;; int32 _motor2_torque
      (setq _motor2_torque (sys::peek buf ptr- :integer)) (incf ptr- 4)
+   ;; float32 _PF
+     (setq _PF (sys::peek buf ptr- :float)) (incf ptr- 4)
+   ;; float32 _EV
+     (setq _EV (sys::peek buf ptr- :float)) (incf ptr- 4)
+   ;; float32 _t
+     (setq _t (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;;
    self)
   )
 
-(setf (get tada_ros::MotorDataMsg :md5sum-) "40e9fd659c4732cd7ff0cddac935981b")
+(setf (get tada_ros::MotorDataMsg :md5sum-) "0122060c184091d374c522c731386ece")
 (setf (get tada_ros::MotorDataMsg :datatype-) "tada_ros/MotorDataMsg")
 (setf (get tada_ros::MotorDataMsg :definition-)
       "int32 mode
@@ -113,11 +146,14 @@ int32 motor1_move
 int32 motor2_move
 int32 motor1_torque
 int32 motor2_torque
+float32 PF
+float32 EV
+float32 t
 
 ")
 
 
 
-(provide :tada_ros/MotorDataMsg "40e9fd659c4732cd7ff0cddac935981b")
+(provide :tada_ros/MotorDataMsg "0122060c184091d374c522c731386ece")
 
 
