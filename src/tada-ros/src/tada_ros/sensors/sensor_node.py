@@ -54,7 +54,7 @@ class SensorNode():
     initial_itr = 0
     swing_time = 0
     swing = [0, 0, 0]
-    avg_swing = [0.7, 0.7, 0.7]
+    avg_swing = [0.3, 0.3, 0.3]
     avg_val_swing = 0
     initial_itr1 = 0
     gyro_thres = 5

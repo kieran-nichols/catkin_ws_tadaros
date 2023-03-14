@@ -65,11 +65,17 @@ class BrainNode():
         input_thread.start()
     
     ## Functions for IMU and Europa
-    def handle_sensor_input(self, msg_data):
+    def handle_sensor_input(self, data):
         # translates IMUDataMsg ROS message to IMUData class and stores
-        #print("handler trg")
-        #self.current_IMU_data = IMU_controller.ROS_message_to_IMUData(msg_data)
-        pass
+        self.accel_x = data.accel_x
+        self.accel_y = data.accel_y
+        self.accel_z = data.accel_z
+        self.gyro_x = data.gyro_x
+        self.gyro_y = data.gyro_y
+        self.gyro_z = data.gyro_z
+        self.state = data.state
+        self.swing_time = data.swing_time
+        self.t = data.t
 
     def handle_europa_input(self, data):
         # translates IMUDataMsg ROS message to IMUData class and stores
@@ -97,7 +103,9 @@ class BrainNode():
     def action(self):
         # Initialize the local variables
         var1 = 0; var2 = 0
+        # initialize global-like variables
         self.prev_var1 = 0; self.prev_var2 = 0
+        self.prev_var3 = 0; self.prev_var4 = 0
         var = []
         self.mode = 0
         self.steps = 0
@@ -113,7 +121,7 @@ class BrainNode():
         self.load_threshold = 200
         self.prev_stance_theta, self.prev_stance_alpha = 0,0
 #         rate_motor = rospy.Rate(10) # every 0.1 sec
-        rate = rospy.Rate(100) # every 0.1 sec # slowest control loop 
+        rate = rospy.Rate(100) # every 0.01 sec 
         # specify home when the motor is turned on to be the motor positions at start
         self.homed1 = self.curr_pos1; self.homed2 = self.curr_pos2
         
@@ -122,6 +130,7 @@ class BrainNode():
         self. mode = 'tada_v1'
         self.tada_v1_data = ['0, 0'] # empty list that will hold the TADA_angle cmds
         self.itr_v1 = 0
+        # create tada_v1 experiment theta, alpha command angles
         for i in theta_array:
             for j in alpha_array:
                 self.tada_v1_data.append(f"{theta_array[i]},{alpha_array[j]}")
@@ -183,7 +192,8 @@ class BrainNode():
             var1,var2 = 0,0
             # ~ self.initial_itr1 = 0
             # swing state
-            if self.fz < self.load_threshold: # and self.steps > self.prev_steps: # and self.stance_tracker == self.prev_stance_tracker:
+            #if self.fz < self.load_threshold: # for Europa load, there is an inconsistent delay so we won't used Europa for real-time feedback
+            if self.state == 1: # swing
                 if self.initial_itr1 == 0:
                     print("swing")
                     self.start_time = time.perf_counter()
@@ -194,8 +204,8 @@ class BrainNode():
                     now = time.perf_counter()
                     elapsed_time = now - self.start_time
                     # move to 5 deg dorsiflexed for 2/3 of the time
-                    if elapsed_time < 2*self.swing_test[2]/3:
-                        self.theta_deg = 5.0; self.alpha_deg = 0.0
+                    if elapsed_time < 2*self.swing_test[2]/3: # consider changing the time to be dependent on the average of the previous swing times
+                        self.theta_deg = 10.0; self.alpha_deg = 0.0
                     # move back to original position
                     elif 2*self.swing_test[2]/3 <= elapsed_time < self.swing_test[2]:
                         self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
@@ -205,7 +215,7 @@ class BrainNode():
                         # ~ self.start_time = time.perf_counter()
                         self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
                 
-                # end of time
+            # stance
             else:
                 if self.initial_itr == 0:
                     # ~ print(elapsed_time)
@@ -349,7 +359,7 @@ class BrainNode():
                 
                 ## if first command is i then read the IMU's state
                 elif var[0]=="i":
-                    print("empty") 
+                    print(self.accel_x, self.accel_y, self.accel_z, self.gyro_x, self.gyro_y, self.gyro_z, self.state, self.swing_time, self.t) 
                 
                 ## if first command is i then read the Europa's sagittal and frontal moments
                 elif var[0]=="e":
@@ -370,7 +380,7 @@ class BrainNode():
                     self.steps += 1
                     self.start_time = time.perf_counter()
                     # ~ self.swing_test = [float(var[1]), float(var[2]), 0, 0, 300, 3, 1, 0, 0]
-                    self.swing_test = [self.prev_stance_theta, self.prev_stance_alpha, 1]
+                    self.swing_test = [self.prev_stance_theta, self.prev_stance_alpha, 0.3]
                     print("Starting swing mode")
                     # ~ var1 = self.prev_var1 #curr_pos1 
                     # ~ var2 = self.prev_var2 #curr_pos2 
@@ -425,8 +435,8 @@ class BrainNode():
             motor_command.t = time.time()
             self.prev_var1 = var1
             self.prev_var2 = var2
-            self.prev_var1 = self.prev_stance_theta
-            self.prev_var2 = self.prev_stance_alpha
+            self.prev_var3 = self.prev_stance_theta # be careful not to confuse var1 and var2, and var2 and var4
+            self.prev_var4 = self.prev_stance_alpha
 
 #             rospy.loginfo(motor_command) 
             self.pub.publish(motor_command)
