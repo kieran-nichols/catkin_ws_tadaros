@@ -74,7 +74,7 @@ class EuropaBLE(object):
         self.raw_data=[]
         self.target_address=None
         self.key=EUROPA_KEY
-        self.iface=1
+        self.iface=0
         self.data_logger=None
         self.buffer=[]
         self.msg_count=0
@@ -106,7 +106,7 @@ class EuropaBLE(object):
         if time.time()-self.ble_scan_time>1200:             #scan interval 60
             scanner = Scanner(self.iface)                  # use hci1, external dongle
             print("Scanning")
-            self.scan_results = scanner.scan(3.0)
+            self.scan_results = scanner.scan(10.0)
             # ~ print(self.scan_results)
             self.ble_scan_time=time.time()
         device_list=[]
@@ -117,7 +117,6 @@ class EuropaBLE(object):
             for (adtype, desc, value) in dev.getScanData():
                 if "Name" in desc:
                     if flag_add==True: #find name of device with target address
-                        print(value)
                         name=value         
                     if not self.key==None and self.key in value: # find device with target name
                         flag_add=True
@@ -251,7 +250,7 @@ class EuropaBLE(object):
                 except:
                     pass
                 count=count-1
-            time.sleep(0.01)
+            time.sleep(1)
             
     def disconnect(self):
         try:
@@ -275,24 +274,23 @@ class EuropaBLE(object):
     def resetBluetooth(self):
         try:
             os.system("rfkill block bluetooth")
-            # ~ time.sleep(0.1)
+            time.sleep(5)
         except:
             pass
         try:
             os.system("rfkill unblock bluetooth")        
         except:
             pass
-        time.sleep(0.01)
+        time.sleep(2)
         
         
     def turn_off_hci(self,iface):
         try:
             os.system("sudo hciconfig hci"+str(iface)+" down")
         except:
-            pass
-            ##print("Fail to turn off hci0")
+            print("Fail to turn off hci0")
   
-        time.sleep(0.01)
+        time.sleep(1)
     def turn_on_hci(self,iface):
         try:
             os.system("sudo hciconfig hci"+str(iface)+" up")
@@ -300,16 +298,16 @@ class EuropaBLE(object):
             pass
             ##print("Fail to turn off hci0")
   
-        time.sleep(0.01)
+        time.sleep(1)
 
 
     def stream(self):
         try:
             while self.isStream==True:
-                self.dev.waitForNotifications(0.001) #0.2 seems like this value decreases bluetooth delay
+                self.dev.waitForNotifications(0.2) #0.2 seems like this value decreases bluetooth delay
         except Exception as e:
             print("[EuropaBLE/stream]Error in streaming thread: ",str(e))
-            # ~ time.sleep(1)
+            time.sleep(2)
             #raise(LoggingError(str(e),time.time()))
             self.isStream=False
             self.isConnect=False
@@ -338,14 +336,10 @@ class EuropaBLE(object):
     def thread_process_data(self):
         try:
             self.msg_count=0
-            # ~ freq = 100
-            # ~ cycle_time = 1/freq
-            # ~ t0 = time.perf_counter()
-            # ~ time_counter = t0
+
             
             while self.isConnect==True and self.isStream==True:
-                # ~ print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_start,withResponse=True))
-                # ~ print(self.buffer)             
+                time.sleep(0.1)             
                 while len(self.buffer)>13: 
                     while not self.check_opener(self.buffer) and len(self.buffer)>1:
                         self.buffer=self.buffer[1:]
@@ -365,67 +359,26 @@ class EuropaBLE(object):
                             print("None!!")
                             
                         self.msg_count=self.msg_count+1
-                        # ~ self.mx_buffer.append(float(self.last_msg[0]))
-                        # ~ self.my_buffer.append(float(self.last_msg[1]))
-                        # ~ self.fz_buffer.append(float(self.last_msg[2])*CAL_FZ)
-                        
-                        # ~ #publishing
-                        # ~ #I think r is the pressure
-                        # ~ #r is fz_buffer
-                        
-                                            
+                  
                         self.europa_command.mx = float(self.last_msg[0])
                         self.europa_command.my = float(self.last_msg[1])
                         self.europa_command.fz = float(self.last_msg[2])*CAL_FZ
-                        self.europa_command.t = float(time.time())
+                        current_time = rospy.Time.now()
+                        #print(current_time.nsec)
+                        self.europa_command.t = float(0)
                         # ~ # print(self.europa_command.t)
                         self.europa_sensing.publish(self.europa_command)
-                                               
-                        # ~ t=self.last_msg[2]
-                        #if (t>500 or t<-500):
-                        #    #print(msg)
-                        # ~ if self.msg_count>PLOT_BUFFER_MAX:
-                            # ~ self.mx_buffer=self.mx_buffer[1:]
-                            # ~ self.my_buffer=self.my_buffer[1:]
-                            # ~ self.fz_buffer=self.fz_buffer[1:]
-                        ##print("self.fz_buffer: ")
-                        ##print(type(self.fz_buffer))
-                        ##print(self.fz_buffer)
+
+
                             
                         if not self.data_logger==None:
                             self.data_logger.write(str(time.time())+str(self.last_msg)+"\n")
-                        #if self.msg_count % 100 ==0 and DBG_FLAG:
-                            # ~ if len(self.last_msg)==6:
-                                # ~ print("F",msg)
-                        # ~ #         #print("Mx: %3d, My: %3d, Fz: %3d, Ax: %4d, Ay: %4d, Az: %4d" %  (self.last_msg[0],self.last_msg[1],self.last_msg[2],self.last_msg[3],self.last_msg[4],self.last_msg[5] ) )
-                            # ~ else:
-                                # ~ print("None")
-                        
-                        # ~ now = time.perf_counter()
-                        # ~ elapsed_time = now - time_counter
-                        # ~ target_time = cycle_time - time_counter
-                        # ~ if elapsed_time < target_time:
-                            # ~ time.sleep(target_time)
-                        # ~ time_counter += cycle_time
-                        time.sleep(0.01) 
-                        # ~ rate.sleep() #makes the thread quit
+
                        
         except Exception as e:
             #pass
-                #print("[EuropaBLE/thread_process_data]",e)
-            print("[EuropaBLE/thread_process_data] thread quit")
-    
-    # ~ def rospub(self):
-        # ~ #publishing
-        # ~ #I think r is the pressure
-        # ~ #r is fz_buffer
-        # ~ self.europa_command.mx = float(self.last_msg[0])
-        # ~ self.europa_command.my = float(self.last_msg[1])
-        # ~ self.europa_command.fz = float(self.last_msg[2])*CAL_FZ
-        # ~ self.europa_command.t = float(time.time())
-        # ~ self.europa_sensing.publish(self.europa_command)
-        # ~ print("europa publishing")
-        # ~ rate.sleep()
+            print("[EuropaBLE/thread_process_data]",e)
+        print("[EuropaBLE/thread_process_data] thread quit")
                         
     def process_data(self):
         self.process_thread=threading.Thread(target=self.thread_process_data)
@@ -433,21 +386,20 @@ class EuropaBLE(object):
         self.process_thread.setDaemon(True)
         self.process_thread.start()
         
-    # ~ def get_fz_data(self):
-        # ~ return self.fz_buffer
-    # ~ def get_mx_data(self):
-        # ~ return self.mx_buffer
-    # ~ def get_my_data(self):
-        # ~ return self.my_buffer
+    def get_fz_data(self):
+        return self.fz_buffer
+    def get_mx_data(self):
+        return self.mx_buffer
+    def get_my_data(self):
+        return self.my_buffer
         
     def stop_stream(self):
         if self.isStream==True:
             try:
                 print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_end,withResponse=True))
                 self.isStream=False
-                #self.file.write('Stop streaming\n')
-                # ~ while self.dev.waitForNotifications(1):
-                    # ~ pass
+                while self.dev.waitForNotifications(1):
+                    pass
                 ##print(self.thread.isAlive())
                 if self.thread.isAlive():
                     self.thread.join()
@@ -460,12 +412,12 @@ class EuropaBLE(object):
         pass
 
 
-    # ~ def check_battery(self):      #Not working
-        #print("----------------check battery---------------------")
-        #print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_battery,withResponse=True))
-        # ~ self.dev.waitForNotifications(0.1)  
-        # ~ self.dev.waitForNotifications(3) 
-        # ~ self.dev.waitForNotifications(3) 
+    def check_battery(self):      #Not working
+        print("----------------check battery---------------------")
+        print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_battery,withResponse=True))
+        self.dev.waitForNotifications(3)  
+        self.dev.waitForNotifications(3) 
+        self.dev.waitForNotifications(3) 
         
     def check_opener(self,data):
         if len(data)>1:
@@ -504,7 +456,7 @@ class EuropaBLE(object):
         for data_timestamp,data in self.raw_data:
             for x in map(ord,data):
                 stream.append(x)
-                length = 1 #10
+                length = 10 #10
             while len(stream)>length: #10
                 if not self.check_opener(stream):
                     stream=stream[1:]
