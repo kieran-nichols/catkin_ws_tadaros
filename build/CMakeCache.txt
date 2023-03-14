@@ -236,7 +236,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=elmo_stuff
+CMAKE_PROJECT_NAME:STATIC=Project
 
 //Value Computed by CMake
 CMAKE_PROJECT_VERSION:STATIC=1.9.0
@@ -366,6 +366,12 @@ PYTHON_VERSION:STRING=3
 
 //Location of Python module em
 PY_EM:STRING=/usr/lib/python3/dist-packages/em.py
+
+//Value Computed by CMake
+Project_BINARY_DIR:STATIC=/home/pi/catkin_ws/build
+
+//Value Computed by CMake
+Project_SOURCE_DIR:STATIC=/home/pi/catkin_ws/src
 
 //LSB Distrib tag
 RASPBIAN:BOOL=TRUE

@@ -42,10 +42,10 @@ class Triple():
         self.z = float(z)
 
 class IMUData():
-    def __init__(self, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, state, swing_time):
+    def __init__(self, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, state, swing_time, t):
         self.accel = Triple(accel_x, accel_y, accel_z)
         self.gyro = Triple(gyro_x, gyro_y, gyro_z)
-        self.swing = Triple(state, swing_time, 0)
+        self.swing = Triple(state, swing_time, t)
 
     def accel_magnitude(self):
         return numpy.linalg.norm([self.accel.x, self.accel.y, self.accel.z])
@@ -55,7 +55,7 @@ class IMUData():
 
     def to_ROS_message(self):
         return IMUDataMsg(self.accel.x, self.accel.y, self.accel.z, \
-                self.gyro.x, self.gyro.y, self.gyro.z, self.swing.x, self.swing.y)
+                self.gyro.x, self.gyro.y, self.gyro.z, self.swing.x, self.swing.y , self.swing.z)
 
     def to_string(self):
         str = "accel_x: %.6f; accel_y: %.6f; accel_z: %.6f;\n" \
@@ -63,7 +63,7 @@ class IMUData():
         str += "gyro_x: %.6f; gyro_y: %.6f; gyro_z: %.6f;\n" \
             % (self.gyro.x, self.gyro.y, self.gyro.z)
         str += "swing state: %.6f; time: %.6f; " \
-            % (self.swing.x, self.swing.y)
+            % (self.swing.x, self.swing.y, self.swing.z)
         return str
 
     def print(self):
@@ -72,12 +72,12 @@ class IMUData():
         print("gyro_x: %.6f; gyro_y: %.6f; gyro_z: %.6f; " \
             % (self.gyro.x, self.gyro.y, self.gyro.z))
         print ("swing state: %.6f; time: %.6f; " \
-            % (self.swing.x, self.swing.y))
+            % (self.swing.x, self.swing.y, self.swing.z))
 
 def ROS_message_to_IMUData(msg_data):
     #print("IMU message function")
     return IMUData(msg_data.accel_x, msg_data.accel_y, msg_data.accel_z, \
-                    msg_data.gyro_x, msg_data.gyro_y, msg_data.gyro_z, msg_data.state, msg_data.swing_time)
+                    msg_data.gyro_x, msg_data.gyro_y, msg_data.gyro_z, msg_data.state, msg_data.swing_time, msg_data.t)
 
 class IMUController():
     # initialize class variables
@@ -118,7 +118,7 @@ class IMUController():
         initial_itr = 0
         swing_time = 0
         swing = [0, 0, 0]
-        avg_swing = [0.7, 0.7, 0.7]
+        avg_swing = [0.3, 0.3, 0.3]
         avg_val_swing = 0
         initial_itr1 = 0
         gyro_thres = 5 #FINE TUNE THIS
@@ -174,6 +174,6 @@ class IMUController():
         
         #SWING
 
-        imu_data = IMUData(accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, state, time.time())
+        imu_data = IMUData(accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, state, avg_val_swing, time.time())
     
         return imu_data

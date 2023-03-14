@@ -31,7 +31,8 @@ struct IMUDataMsg_
     , gyro_y(0.0)
     , gyro_z(0.0)
     , state(0.0)
-    , swing_time(0.0)  {
+    , swing_time(0.0)
+    , t(0.0)  {
     }
   IMUDataMsg_(const ContainerAllocator& _alloc)
     : accel_x(0.0)
@@ -41,7 +42,8 @@ struct IMUDataMsg_
     , gyro_y(0.0)
     , gyro_z(0.0)
     , state(0.0)
-    , swing_time(0.0)  {
+    , swing_time(0.0)
+    , t(0.0)  {
   (void)_alloc;
     }
 
@@ -70,6 +72,9 @@ struct IMUDataMsg_
 
    typedef double _swing_time_type;
   _swing_time_type swing_time;
+
+   typedef double _t_type;
+  _t_type t;
 
 
 
@@ -107,7 +112,8 @@ bool operator==(const ::tada_ros::IMUDataMsg_<ContainerAllocator1> & lhs, const 
     lhs.gyro_y == rhs.gyro_y &&
     lhs.gyro_z == rhs.gyro_z &&
     lhs.state == rhs.state &&
-    lhs.swing_time == rhs.swing_time;
+    lhs.swing_time == rhs.swing_time &&
+    lhs.t == rhs.t;
 }
 
 template<typename ContainerAllocator1, typename ContainerAllocator2>
@@ -164,12 +170,12 @@ struct MD5Sum< ::tada_ros::IMUDataMsg_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "0ebe3b0305f6c75def5f0d35a26d8b2f";
+    return "da5d7a09c9faf63610a2bba9af4b9ac8";
   }
 
   static const char* value(const ::tada_ros::IMUDataMsg_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x0ebe3b0305f6c75dULL;
-  static const uint64_t static_value2 = 0xef5f0d35a26d8b2fULL;
+  static const uint64_t static_value1 = 0xda5d7a09c9faf636ULL;
+  static const uint64_t static_value2 = 0x10a2bba9af4b9ac8ULL;
 };
 
 template<class ContainerAllocator>
@@ -196,6 +202,7 @@ struct Definition< ::tada_ros::IMUDataMsg_<ContainerAllocator> >
 "float64 gyro_z\n"
 "float64 state\n"
 "float64 swing_time\n"
+"float64 t\n"
 ;
   }
 
@@ -222,6 +229,7 @@ namespace serialization
       stream.next(m.gyro_z);
       stream.next(m.state);
       stream.next(m.swing_time);
+      stream.next(m.t);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -256,6 +264,8 @@ struct Printer< ::tada_ros::IMUDataMsg_<ContainerAllocator> >
     Printer<double>::stream(s, indent + "  ", v.state);
     s << indent << "swing_time: ";
     Printer<double>::stream(s, indent + "  ", v.swing_time);
+    s << indent << "t: ";
+    Printer<double>::stream(s, indent + "  ", v.t);
   }
 };
 

@@ -51,11 +51,23 @@ class BrainNode():
         self.homed1 = 0; self.homed2 = 0
         self.cnts_per_rev = 567
         self.raw_var = [False]
+        self.accel_x = 0
+        self.accel_y = 0
+        self.accel_z = 0
+        self.gyro_x = 0
+        self.gyro_y = 0
+        self.gyro_z = 0
+        self.state = 0
+        self.swing_time = 0
+        self.t = 0
+        self.mx = 0
+        self.my = 0
+        self.fz = 0
         
         def input_thread():
             while not rospy.is_shutdown():
                 # sleep function so other commands can be typed first
-                time.sleep(0.1)
+                # ~ time.sleep(0.01)
                 print("type 'help' for description of full instructions")
                 print("Enter command(s): ")
                 self.raw_var = list(input().split())
@@ -67,22 +79,27 @@ class BrainNode():
     ## Functions for IMU and Europa
     def handle_sensor_input(self, data):
         # translates IMUDataMsg ROS message to IMUData class and stores
-        self.accel_x = data.accel_x
-        self.accel_y = data.accel_y
-        self.accel_z = data.accel_z
-        self.gyro_x = data.gyro_x
-        self.gyro_y = data.gyro_y
-        self.gyro_z = data.gyro_z
-        self.state = data.state
-        self.swing_time = data.swing_time
-        self.t = data.t
+        try:
+            self.accel_x = data.accel_x
+            self.accel_y = data.accel_y
+            self.accel_z = data.accel_z
+            self.gyro_x = data.gyro_x
+            self.gyro_y = data.gyro_y
+            self.gyro_z = data.gyro_z
+            self.state = data.state
+            self.swing_time = data.swing_time
+            self.t = data.t
+        except: 
+            print("no data from IMU")
 
     def handle_europa_input(self, data):
         # translates IMUDataMsg ROS message to IMUData class and stores
-        self.mx = data.mx
-        self.my = data.my
-        self.fz = data.fz
-        #self.current_europa_data = IMU_controller.ROS_message_to_IMUData(msg_data)
+        try:
+            self.mx = data.mx
+            self.my = data.my
+            self.fz = data.fz
+        except: 
+            print("no data from Europa")
     
     def GUI_input(self, msg_data):
         # translates IMUDataMsg ROS message to IMUData class and stores
@@ -119,6 +136,7 @@ class BrainNode():
         self.PF = 0
         self.EV = 0
         self.load_threshold = 200
+        self.elapsed_time = 0
         self.prev_stance_theta, self.prev_stance_alpha = 0,0
 #         rate_motor = rospy.Rate(10) # every 0.1 sec
         rate = rospy.Rate(100) # every 0.01 sec 
@@ -128,12 +146,16 @@ class BrainNode():
         theta_array = [2.5, 5, 7.5, 10]
         alpha_array = [-135, -90, -45, 0, 45, 90, 135, 180]
         self. mode = 'tada_v1'
-        self.tada_v1_data = ['0, 0'] # empty list that will hold the TADA_angle cmds
+        self.tada_v1_data = [] # empty list that will hold the TADA_angle cmds
         self.itr_v1 = 0
+        
         # create tada_v1 experiment theta, alpha command angles
-        for i in theta_array:
-            for j in alpha_array:
-                self.tada_v1_data.append(f"{theta_array[i]},{alpha_array[j]}")
+        for i in range(5): # five sets of movements
+            self.tada_v1_data.append([0.0, 0.0])
+            for x in theta_array:
+                for y in alpha_array:
+                    # ~ print(x,y)
+                    self.tada_v1_data.append([x,y])
                 
         def limit(num, minimum, maximum):
             return max(min(float(num), float(maximum)), float(minimum))
@@ -204,16 +226,17 @@ class BrainNode():
                     now = time.perf_counter()
                     elapsed_time = now - self.start_time
                     # move to 5 deg dorsiflexed for 2/3 of the time
-                    if elapsed_time < 2*self.swing_test[2]/3: # consider changing the time to be dependent on the average of the previous swing times
+                    if elapsed_time <= 2*self.swing_test[2]/3: # consider changing the time to be dependent on the average of the previous swing times
                         self.theta_deg = 10.0; self.alpha_deg = 0.0
                     # move back to original position
-                    elif 2*self.swing_test[2]/3 <= elapsed_time < self.swing_test[2]:
+                    elif 2*self.swing_test[2]/3 <= elapsed_time <= self.swing_test[2]:
                         self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
                     else: 
                         self.initial_itr = 0
                         self.initial_itr1 = 1
                         # ~ self.start_time = time.perf_counter()
                         self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
+                        # ~ self.start_time = time.perf_counter()
                 
             # stance
             else:
@@ -248,28 +271,32 @@ class BrainNode():
             var4 = float(motor[3])
             return var1, var2, var3, var4
         
-        def tada_v1_expt_unique():
+        def tada_v1_expt_unique(self):
             var1,var2 = 0,0
             cmd = []
             now = time.perf_counter()
 
-            if self.mode == 'tada_v1':
-                cmd = self.tada_v1_data[self.itr_v1].split
+            if self.mode == 2 and self.itr_v1 < 32*5-1: # number of total itr
+                cmd = self.tada_v1_data[self.itr_v1]
+                # ~ print(cmd)
                 self.theta_deg = cmd[0]
                 self.alpha_deg =  cmd[1]
                     
                 now = time.perf_counter()
-                elapsed_time = now - self.start_time 
+                self.elapsed_time = now - self.start_time 
                 # if elapsed time has passed, move to the next position, and reset the start timer
-                if elapsed_time >= 1: 
-                    self_v1 += 1
+                if self.elapsed_time >= 0.1: # time to wait
+                    self.itr_v1 += 1
                     self.start_time = time.perf_counter()
+                    # ~ print("move to next")
 	
-                # stop movement, return TADA to neutral, and return to default mode
-                else:
-                    self.mode = 'mode0'   
-                    self.theta_deg = 0
-                    self.alpha_deg = 0
+            # stop movement, return TADA to neutral, and return to default mode
+            else:
+                self.mode = 0   
+                print("end tada_v1 expt")
+                self.itr_v1 = 0
+                self.theta_deg = 0
+                self.alpha_deg = 0
       
             motor = TADA_angle(self)
             # ~ print(motor)

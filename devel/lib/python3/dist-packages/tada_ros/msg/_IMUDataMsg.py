@@ -8,7 +8,7 @@ import struct
 
 
 class IMUDataMsg(genpy.Message):
-  _md5sum = "0ebe3b0305f6c75def5f0d35a26d8b2f"
+  _md5sum = "da5d7a09c9faf63610a2bba9af4b9ac8"
   _type = "tada_ros/IMUDataMsg"
   _has_header = False  # flag to mark the presence of a Header object
   _full_text = """float64 accel_x
@@ -19,9 +19,10 @@ float64 gyro_y
 float64 gyro_z
 float64 state
 float64 swing_time
+float64 t
 """
-  __slots__ = ['accel_x','accel_y','accel_z','gyro_x','gyro_y','gyro_z','state','swing_time']
-  _slot_types = ['float64','float64','float64','float64','float64','float64','float64','float64']
+  __slots__ = ['accel_x','accel_y','accel_z','gyro_x','gyro_y','gyro_z','state','swing_time','t']
+  _slot_types = ['float64','float64','float64','float64','float64','float64','float64','float64','float64']
 
   def __init__(self, *args, **kwds):
     """
@@ -31,7 +32,7 @@ float64 swing_time
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z,state,swing_time
+       accel_x,accel_y,accel_z,gyro_x,gyro_y,gyro_z,state,swing_time,t
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -56,6 +57,8 @@ float64 swing_time
         self.state = 0.
       if self.swing_time is None:
         self.swing_time = 0.
+      if self.t is None:
+        self.t = 0.
     else:
       self.accel_x = 0.
       self.accel_y = 0.
@@ -65,6 +68,7 @@ float64 swing_time
       self.gyro_z = 0.
       self.state = 0.
       self.swing_time = 0.
+      self.t = 0.
 
   def _get_types(self):
     """
@@ -79,7 +83,7 @@ float64 swing_time
     """
     try:
       _x = self
-      buff.write(_get_struct_8d().pack(_x.accel_x, _x.accel_y, _x.accel_z, _x.gyro_x, _x.gyro_y, _x.gyro_z, _x.state, _x.swing_time))
+      buff.write(_get_struct_9d().pack(_x.accel_x, _x.accel_y, _x.accel_z, _x.gyro_x, _x.gyro_y, _x.gyro_z, _x.state, _x.swing_time, _x.t))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -94,8 +98,8 @@ float64 swing_time
       end = 0
       _x = self
       start = end
-      end += 64
-      (_x.accel_x, _x.accel_y, _x.accel_z, _x.gyro_x, _x.gyro_y, _x.gyro_z, _x.state, _x.swing_time,) = _get_struct_8d().unpack(str[start:end])
+      end += 72
+      (_x.accel_x, _x.accel_y, _x.accel_z, _x.gyro_x, _x.gyro_y, _x.gyro_z, _x.state, _x.swing_time, _x.t,) = _get_struct_9d().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -109,7 +113,7 @@ float64 swing_time
     """
     try:
       _x = self
-      buff.write(_get_struct_8d().pack(_x.accel_x, _x.accel_y, _x.accel_z, _x.gyro_x, _x.gyro_y, _x.gyro_z, _x.state, _x.swing_time))
+      buff.write(_get_struct_9d().pack(_x.accel_x, _x.accel_y, _x.accel_z, _x.gyro_x, _x.gyro_y, _x.gyro_z, _x.state, _x.swing_time, _x.t))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -125,8 +129,8 @@ float64 swing_time
       end = 0
       _x = self
       start = end
-      end += 64
-      (_x.accel_x, _x.accel_y, _x.accel_z, _x.gyro_x, _x.gyro_y, _x.gyro_z, _x.state, _x.swing_time,) = _get_struct_8d().unpack(str[start:end])
+      end += 72
+      (_x.accel_x, _x.accel_y, _x.accel_z, _x.gyro_x, _x.gyro_y, _x.gyro_z, _x.state, _x.swing_time, _x.t,) = _get_struct_9d().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -135,9 +139,9 @@ _struct_I = genpy.struct_I
 def _get_struct_I():
     global _struct_I
     return _struct_I
-_struct_8d = None
-def _get_struct_8d():
-    global _struct_8d
-    if _struct_8d is None:
-        _struct_8d = struct.Struct("<8d")
-    return _struct_8d
+_struct_9d = None
+def _get_struct_9d():
+    global _struct_9d
+    if _struct_9d is None:
+        _struct_9d = struct.Struct("<9d")
+    return _struct_9d

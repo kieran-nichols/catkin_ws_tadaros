@@ -106,7 +106,7 @@ class EuropaBLE(object):
         if time.time()-self.ble_scan_time>1200:             #scan interval 60
             scanner = Scanner(self.iface)                  # use hci1, external dongle
             print("Scanning")
-            self.scan_results = scanner.scan(10.0)
+            self.scan_results = scanner.scan(3.0)
             # ~ print(self.scan_results)
             self.ble_scan_time=time.time()
         device_list=[]
@@ -251,7 +251,7 @@ class EuropaBLE(object):
                 except:
                     pass
                 count=count-1
-            time.sleep(0.1)
+            time.sleep(0.01)
             
     def disconnect(self):
         try:
@@ -282,7 +282,7 @@ class EuropaBLE(object):
             os.system("rfkill unblock bluetooth")        
         except:
             pass
-        time.sleep(0.1)
+        time.sleep(0.01)
         
         
     def turn_off_hci(self,iface):
@@ -292,7 +292,7 @@ class EuropaBLE(object):
             pass
             ##print("Fail to turn off hci0")
   
-        time.sleep(0.1)
+        time.sleep(0.01)
     def turn_on_hci(self,iface):
         try:
             os.system("sudo hciconfig hci"+str(iface)+" up")
@@ -300,13 +300,13 @@ class EuropaBLE(object):
             pass
             ##print("Fail to turn off hci0")
   
-        time.sleep(0.1)
+        time.sleep(0.01)
 
 
     def stream(self):
         try:
             while self.isStream==True:
-                self.dev.waitForNotifications(0.2)
+                self.dev.waitForNotifications(0.001) #0.2 seems like this value decreases bluetooth delay
         except Exception as e:
             print("[EuropaBLE/stream]Error in streaming thread: ",str(e))
             # ~ time.sleep(1)
@@ -460,10 +460,10 @@ class EuropaBLE(object):
         pass
 
 
-    def check_battery(self):      #Not working
+    # ~ def check_battery(self):      #Not working
         #print("----------------check battery---------------------")
         #print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_battery,withResponse=True))
-        self.dev.waitForNotifications(3)  
+        # ~ self.dev.waitForNotifications(0.1)  
         # ~ self.dev.waitForNotifications(3) 
         # ~ self.dev.waitForNotifications(3) 
         
@@ -504,16 +504,17 @@ class EuropaBLE(object):
         for data_timestamp,data in self.raw_data:
             for x in map(ord,data):
                 stream.append(x)
-            while len(stream)>10:
+                length = 1 #10
+            while len(stream)>length: #10
                 if not self.check_opener(stream):
                     stream=stream[1:]
                 if self.check_opener(stream) and flag_time==False:
                     current_time=data_timestamp
                     flag_time=True
-                if self.check_opener(stream) and len(stream)>10:
+                if self.check_opener(stream) and len(stream)>length:
                     ##print(stream[0:11])
-                    converted_data.append(self.convert_data(stream[0:11]) )
-                    stream=stream[11:]
+                    converted_data.append(self.convert_data(stream[0:length+1]) )
+                    stream=stream[length+1:]
                     flag_time=False
                 if self.check_opener(stream) and flag_time==False:
                     current_time=data_timestamp

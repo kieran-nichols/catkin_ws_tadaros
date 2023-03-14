@@ -46,6 +46,11 @@
     :reader swing_time
     :initarg :swing_time
     :type cl:float
+    :initform 0.0)
+   (t
+    :reader t
+    :initarg :t
+    :type cl:float
     :initform 0.0))
 )
 
@@ -96,6 +101,11 @@
 (cl:defmethod swing_time-val ((m <IMUDataMsg>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:swing_time-val is deprecated.  Use tada_ros-msg:swing_time instead.")
   (swing_time m))
+
+(cl:ensure-generic-function 't-val :lambda-list '(m))
+(cl:defmethod t-val ((m <IMUDataMsg>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:t-val is deprecated.  Use tada_ros-msg:t instead.")
+  (t m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <IMUDataMsg>) ostream)
   "Serializes a message object of type '<IMUDataMsg>"
   (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 'accel_x))))
@@ -162,6 +172,15 @@
     (cl:write-byte (cl:ldb (cl:byte 8 48) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 56) bits) ostream))
   (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 'swing_time))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 32) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 40) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 48) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 56) bits) ostream))
+  (cl:let ((bits (roslisp-utils:encode-double-float-bits (cl:slot-value msg 't))))
     (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
@@ -253,6 +272,16 @@
       (cl:setf (cl:ldb (cl:byte 8 48) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 56) bits) (cl:read-byte istream))
     (cl:setf (cl:slot-value msg 'swing_time) (roslisp-utils:decode-double-float-bits bits)))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 32) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 40) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 48) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 56) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 't) (roslisp-utils:decode-double-float-bits bits)))
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<IMUDataMsg>)))
@@ -263,18 +292,19 @@
   "tada_ros/IMUDataMsg")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<IMUDataMsg>)))
   "Returns md5sum for a message object of type '<IMUDataMsg>"
-  "0ebe3b0305f6c75def5f0d35a26d8b2f")
+  "da5d7a09c9faf63610a2bba9af4b9ac8")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'IMUDataMsg)))
   "Returns md5sum for a message object of type 'IMUDataMsg"
-  "0ebe3b0305f6c75def5f0d35a26d8b2f")
+  "da5d7a09c9faf63610a2bba9af4b9ac8")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<IMUDataMsg>)))
   "Returns full string definition for message of type '<IMUDataMsg>"
-  (cl:format cl:nil "float64 accel_x~%float64 accel_y~%float64 accel_z~%float64 gyro_x~%float64 gyro_y~%float64 gyro_z~%float64 state~%float64 swing_time~%~%~%"))
+  (cl:format cl:nil "float64 accel_x~%float64 accel_y~%float64 accel_z~%float64 gyro_x~%float64 gyro_y~%float64 gyro_z~%float64 state~%float64 swing_time~%float64 t~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'IMUDataMsg)))
   "Returns full string definition for message of type 'IMUDataMsg"
-  (cl:format cl:nil "float64 accel_x~%float64 accel_y~%float64 accel_z~%float64 gyro_x~%float64 gyro_y~%float64 gyro_z~%float64 state~%float64 swing_time~%~%~%"))
+  (cl:format cl:nil "float64 accel_x~%float64 accel_y~%float64 accel_z~%float64 gyro_x~%float64 gyro_y~%float64 gyro_z~%float64 state~%float64 swing_time~%float64 t~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <IMUDataMsg>))
   (cl:+ 0
+     8
      8
      8
      8
@@ -295,4 +325,5 @@
     (cl:cons ':gyro_z (gyro_z msg))
     (cl:cons ':state (state msg))
     (cl:cons ':swing_time (swing_time msg))
+    (cl:cons ':t (t msg))
 ))

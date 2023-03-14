@@ -15,4 +15,6 @@
           STATE
           SWING_TIME-VAL
           SWING_TIME
+          T-VAL
+          T
 ))

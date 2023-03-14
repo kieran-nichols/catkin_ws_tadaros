@@ -94,6 +94,19 @@ class IMUController():
         self.bus.write_byte_data(DEVICE_ADDR, CONFIG, 0)
         self.bus.write_byte_data(DEVICE_ADDR, GYRO_CONFIG, 24)
         self.bus.write_byte_data(DEVICE_ADDR, INT_ENABLE, 1)
+        
+        self.state = 0
+        self.start = time.time()
+        self.start_time = time.time()
+        self.initial_itr = 0
+        self.swing_time = 0
+        self.swing = [0, 0, 0]
+        self.avg_swing = [0.3, 0.3, 0.3]
+        self.avg_val_swing = 0
+        self.initial_itr1 = 0
+        self.gyro_thres = 60 #FINE TUNE THIS
+        self.accel_thres = 0.5
+        self.swing_time=0
 
     ## read raw bytes from IMU
     def read_raw_data(self, addr):
@@ -112,19 +125,6 @@ class IMUController():
     ## collect continuous steam of IMU accel and gyro data and output de-biased data
     def get_data(self):
         
-        state = 0
-        start = time.time()
-        start_time = time.time()
-        initial_itr = 0
-        swing_time = 0
-        swing = [0, 0, 0]
-        avg_swing = [0.3, 0.3, 0.3]
-        avg_val_swing = 0
-        initial_itr1 = 0
-        gyro_thres = 5 #FINE TUNE THIS
-        accel_thres = 0.5
-        state=0
-        swing_time=0
         # Read Accelerometer values
         raw_accel_x = self.read_raw_data(ACCEL_XOUT_H)
         raw_accel_y = self.read_raw_data(ACCEL_YOUT_H)
@@ -145,35 +145,40 @@ class IMUController():
         gyro_z = raw_gyro_z/131.0
 
         #SWING
-        if gyro_z < gyro_thres: # stance
-            initial_itr = 0
+        if gyro_z > self.gyro_thres: # swing
+            # ~ initial_itr = 0
+            self.state = 1
             # collect the swing time and save the data only once
-            if initial_itr == 0:
-                state = 0
-    #             print(swing_time)
-                start_time = time.time()
-                swing.append(swing_time)
-                avg_swing = swing[3:]
-                avg_val_swing = np.mean(avg_swing)
-                swing_time = 0
-                initial_itr = 1
-                initial_itr1 = 0
+            if self.initial_itr == 0:
+                
+                # ~ print(self.swing_time)
+                self.start_time = time.time()
+                self.swing.append(self.swing_time)
+                avg_swing = self.swing[-3:]
+                self.avg_val_swing = np.mean(avg_swing)
+                # limit the avg swing time to be at minimum 0.2
+                if self.avg_val_swing < 0.2: self.avg_val_swing = 0.2
+                print(self.avg_val_swing)
+                # ~ self.swing_time = 0
+                self.initial_itr = 1
+                self.initial_itr1 = 0
             else: # to ensure that swing is only appended once
-                state = 0
+                self.swing_time = time.time() - self.start_time
         # when not saving data, move the motor at the first itr
-        # and collect the swing timeb
-        else: # swing
-            if (initial_itr1==0):
-                avg_swing_command = int(1000 * avg_val_swing)
+        # and collect the swing time
+        else: # stance
+            # ~ if (self.initial_itr1==0):
+                # ~ self.avg_swing_command = int(1000 * self.avg_val_swing)
     #             move_command(avg_swing_command)
                 # sleep(avg_val_swing+0.3)
-                initial_itr1 = 1
-            else:
-                state = 1
-                swing_time = time.time() - start_time
+                self.initial_itr1 = 1
+                self.initial_itr = 0
+            # ~ else:
+                self.state = 0
+                # ~ sleep(0.5)
         
         #SWING
 
-        imu_data = IMUData(accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, state, avg_val_swing, time.time())
+        imu_data = IMUData(accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, self.state, self.avg_val_swing, time.time())
     
         return imu_data

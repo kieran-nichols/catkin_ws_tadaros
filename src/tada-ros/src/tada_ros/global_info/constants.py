@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import math
 ## IMU
 # IMU reconstruction
 STANCE_THRESHOLD = 50 # 50 [deg/s] angular velocity threshold for stance

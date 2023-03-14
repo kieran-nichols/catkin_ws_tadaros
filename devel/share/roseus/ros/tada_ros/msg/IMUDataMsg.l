@@ -14,7 +14,7 @@
 
 (defclass tada_ros::IMUDataMsg
   :super ros::object
-  :slots (_accel_x _accel_y _accel_z _gyro_x _gyro_y _gyro_z _state _swing_time ))
+  :slots (_accel_x _accel_y _accel_z _gyro_x _gyro_y _gyro_z _state _swing_time _t ))
 
 (defmethod tada_ros::IMUDataMsg
   (:init
@@ -27,6 +27,7 @@
     ((:gyro_z __gyro_z) 0.0)
     ((:state __state) 0.0)
     ((:swing_time __swing_time) 0.0)
+    ((:t __t) 0.0)
     )
    (send-super :init)
    (setq _accel_x (float __accel_x))
@@ -37,6 +38,7 @@
    (setq _gyro_z (float __gyro_z))
    (setq _state (float __state))
    (setq _swing_time (float __swing_time))
+   (setq _t (float __t))
    self)
   (:accel_x
    (&optional __accel_x)
@@ -62,6 +64,9 @@
   (:swing_time
    (&optional __swing_time)
    (if __swing_time (setq _swing_time __swing_time)) _swing_time)
+  (:t
+   (&optional __t)
+   (if __t (setq _t __t)) _t)
   (:serialization-length
    ()
    (+
@@ -80,6 +85,8 @@
     ;; float64 _state
     8
     ;; float64 _swing_time
+    8
+    ;; float64 _t
     8
     ))
   (:serialize
@@ -102,6 +109,8 @@
        (sys::poke _state (send s :buffer) (send s :count) :double) (incf (stream-count s) 8)
      ;; float64 _swing_time
        (sys::poke _swing_time (send s :buffer) (send s :count) :double) (incf (stream-count s) 8)
+     ;; float64 _t
+       (sys::poke _t (send s :buffer) (send s :count) :double) (incf (stream-count s) 8)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -122,11 +131,13 @@
      (setq _state (sys::peek buf ptr- :double)) (incf ptr- 8)
    ;; float64 _swing_time
      (setq _swing_time (sys::peek buf ptr- :double)) (incf ptr- 8)
+   ;; float64 _t
+     (setq _t (sys::peek buf ptr- :double)) (incf ptr- 8)
    ;;
    self)
   )
 
-(setf (get tada_ros::IMUDataMsg :md5sum-) "0ebe3b0305f6c75def5f0d35a26d8b2f")
+(setf (get tada_ros::IMUDataMsg :md5sum-) "da5d7a09c9faf63610a2bba9af4b9ac8")
 (setf (get tada_ros::IMUDataMsg :datatype-) "tada_ros/IMUDataMsg")
 (setf (get tada_ros::IMUDataMsg :definition-)
       "float64 accel_x
@@ -137,11 +148,12 @@ float64 gyro_y
 float64 gyro_z
 float64 state
 float64 swing_time
+float64 t
 
 ")
 
 
 
-(provide :tada_ros/IMUDataMsg "0ebe3b0305f6c75def5f0d35a26d8b2f")
+(provide :tada_ros/IMUDataMsg "da5d7a09c9faf63610a2bba9af4b9ac8")
 
 

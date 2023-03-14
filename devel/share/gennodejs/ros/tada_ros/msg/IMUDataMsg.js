@@ -26,6 +26,7 @@ class IMUDataMsg {
       this.gyro_z = null;
       this.state = null;
       this.swing_time = null;
+      this.t = null;
     }
     else {
       if (initObj.hasOwnProperty('accel_x')) {
@@ -76,6 +77,12 @@ class IMUDataMsg {
       else {
         this.swing_time = 0.0;
       }
+      if (initObj.hasOwnProperty('t')) {
+        this.t = initObj.t
+      }
+      else {
+        this.t = 0.0;
+      }
     }
   }
 
@@ -97,6 +104,8 @@ class IMUDataMsg {
     bufferOffset = _serializer.float64(obj.state, buffer, bufferOffset);
     // Serialize message field [swing_time]
     bufferOffset = _serializer.float64(obj.swing_time, buffer, bufferOffset);
+    // Serialize message field [t]
+    bufferOffset = _serializer.float64(obj.t, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -120,11 +129,13 @@ class IMUDataMsg {
     data.state = _deserializer.float64(buffer, bufferOffset);
     // Deserialize message field [swing_time]
     data.swing_time = _deserializer.float64(buffer, bufferOffset);
+    // Deserialize message field [t]
+    data.t = _deserializer.float64(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
-    return 64;
+    return 72;
   }
 
   static datatype() {
@@ -134,7 +145,7 @@ class IMUDataMsg {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '0ebe3b0305f6c75def5f0d35a26d8b2f';
+    return 'da5d7a09c9faf63610a2bba9af4b9ac8';
   }
 
   static messageDefinition() {
@@ -148,6 +159,7 @@ class IMUDataMsg {
     float64 gyro_z
     float64 state
     float64 swing_time
+    float64 t
     
     `;
   }
@@ -212,6 +224,13 @@ class IMUDataMsg {
     }
     else {
       resolved.swing_time = 0.0
+    }
+
+    if (msg.t !== undefined) {
+      resolved.t = msg.t;
+    }
+    else {
+      resolved.t = 0.0
     }
 
     return resolved;
