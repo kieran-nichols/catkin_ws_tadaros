@@ -16,8 +16,6 @@ import EuropaBLE as eu
 from tada_ros.europa import EuropaBLE
 import time
 import os
-#import matplotlib.pyplot as plt
-#import matplotlib.animation as animation
 import threading
 
 #EUROPA_ADDR=u"06:11"
@@ -31,29 +29,14 @@ class BleServer():
         #MPU_Init()
         dev = EuropaBLE.EuropaBLE()   
         dev.set_device_addr(EUROPA_ADDR)
-        # ~ dev.set_iface(0)
-        
-        # ~ self.europa_sensing = rospy.Publisher('europa_topic', EuropaMsg, queue_size=10)
-        # ~ rospy.init_node('EuropaBLE_node', anonymous=True)
-        # ~ self.europa_command = EuropaMsg()        
-        # ~ rate = rospy.Rate(100)#100 hz
+        dev.set_iface(0)
         
         while dev.search_europa()==0 and not rospy.is_shutdown():
             
             dev.connect() #create new file for each connection
             dev.start_stream()
             dev.thread_process_data()
-            # ~ dev.rospub()
-            ##print(EuropaBLE.get_fz_data())
-            ##print(get_mz_data())
-            ##print("Reconnect")
-            # ~ time.sleep(6)
-        # two seperate threads for ros pub and bluetooth functions
-        # ~ while not rospy.is_shutdown(): 
-            # ~ dev.rospub()
-            # ~ rate.sleep()       
-        #if os.path.isdir(europa_file_path)==False:
-        #os.makedirs(europa_file_path)
+            
  
 if __name__ == '__main__':
     try:
