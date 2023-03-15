@@ -180,6 +180,7 @@ class IMUController():
         #SWING
         current_time = rospy.Time.now()
         current_time_value = current_time.to_sec()
+        current_time_value = current_time_value%100000
         imu_data = IMUData(accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, self.state, self.avg_val_swing, current_time_value)
     
         return imu_data

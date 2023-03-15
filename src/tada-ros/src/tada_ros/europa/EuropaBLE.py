@@ -362,6 +362,7 @@ class EuropaBLE(object):
                         self.europa_command.fz = float(self.last_msg[2])*CAL_FZ
                         current_time = rospy.Time.now()
                         current_time_value = current_time.to_sec()
+                        current_time_value = current_time_value%100000
                         #print(current_time_value)
                         self.europa_command.t = float(current_time_value)
                         self.europa_sensing.publish(self.europa_command)
