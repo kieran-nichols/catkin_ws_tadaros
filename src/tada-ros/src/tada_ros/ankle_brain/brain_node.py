@@ -476,7 +476,7 @@ class BrainNode():
                 self.alpha_deg = float(alpha) 
                 var1,var2, self.PF, self.EV = move_swing(self)
             elif self.mode == 2 or self.mode == 3:
-                var1,var2, self.PF, self.EV = tada_v1_expt_unique(self)
+                var1,var2, self.PF, self.EV = tada_v1_expt(self)
             # ~ elif self.mode == 3:
                 # ~ var1,var2, self.PF, self.EV = tada_v1_expt_unique(self)
             else: 
