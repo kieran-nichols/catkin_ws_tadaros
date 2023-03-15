@@ -7,6 +7,7 @@ import smbus # SMBus module of I2C
 import numpy
 import time
 import os, sys
+import rospy
 import math
 import numpy as np
 from time import sleep
