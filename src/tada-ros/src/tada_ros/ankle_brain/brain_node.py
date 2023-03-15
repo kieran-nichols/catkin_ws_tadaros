@@ -145,7 +145,7 @@ class BrainNode():
         
         theta_array = [2.5, 5, 7.5, 10]
         alpha_array = [-135, -90, -45, 0, 45, 90, 135, 180]
-        self. mode = 'tada_v1'
+        # ~ self.mode = 0
         self.tada_v1_data = [] # empty list that will hold the TADA_angle cmds
         self.itr_v1 = 0
         
@@ -226,10 +226,10 @@ class BrainNode():
                     now = time.perf_counter()
                     elapsed_time = now - self.start_time
                     # move to 5 deg dorsiflexed for 2/3 of the time
-                    if elapsed_time <= 2*self.swing_test[2]/3: # consider changing the time to be dependent on the average of the previous swing times
+                    if elapsed_time <= self.swing_test[2]/2: # consider changing the time to be dependent on the average of the previous swing times
                         self.theta_deg = 10.0; self.alpha_deg = 0.0
                     # move back to original position
-                    elif 2*self.swing_test[2]/3 <= elapsed_time <= self.swing_test[2]:
+                    elif self.swing_test[2]/2 < elapsed_time <= self.swing_test[2]:
                         self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
                     else: 
                         self.initial_itr = 0
@@ -271,21 +271,45 @@ class BrainNode():
             var4 = float(motor[3])
             return var1, var2, var3, var4
         
-        def tada_v1_expt_unique(self):
+        def tada_v1_expt(self):
             var1,var2 = 0,0
             cmd = []
             now = time.perf_counter()
-
-            if self.mode == 2 and self.itr_v1 < 32*5-1: # number of total itr
+            toe_lift_time = 0.3
+            total_time = 1
+            # ~ if (self.mode == 1 or self.mode == 2):
+            if self.itr_v1 < 33*5-1 and self.mode != 0: # number of total itr
                 cmd = self.tada_v1_data[self.itr_v1]
-                # ~ print(cmd)
-                self.theta_deg = cmd[0]
-                self.alpha_deg =  cmd[1]
-                    
+                # ~ print("here")
+                
                 now = time.perf_counter()
                 self.elapsed_time = now - self.start_time 
+                    
+                # mode 3 
+                # move the motor to 10 DF for 0.15 s and return back to original position for the
+                if self.mode == 3:   
+                    # 0 - 0.15          
+                    if self.elapsed_time <= toe_lift_time/2: # consider changing the time to be dependent on the average of the previous swing times
+                        self.theta_deg = 10.0; self.alpha_deg = 0.0
+                    # move back to original position
+                    # 0.15 - 0.3
+                    elif toe_lift_time/2 < self.elapsed_time <= toe_lift_time:
+                        self.theta_deg = cmd[0]; self.alpha_deg = cmd[1]
+                    # 0.3 - 0.9
+                    elif toe_lift_time < self.elapsed_time <= total_time - 0.1:
+                        self.theta_deg = cmd[0]; self.alpha_deg = cmd[1]
+                    # at 0.9 sec move to new position
+                    # 0.9 - 1
+                    else: 
+                        cmd1 = self.tada_v1_data[self.itr_v1+1]
+                        self.theta_deg = cmd1[0]; self.alpha_deg = cmd1[1]
+                # mode 2
+                else: 
+                    self.theta_deg = cmd[0]
+                    self.alpha_deg = cmd[1]                
+                
                 # if elapsed time has passed, move to the next position, and reset the start timer
-                if self.elapsed_time >= 0.1: # time to wait
+                if self.elapsed_time >= total_time: # time to wait
                     self.itr_v1 += 1
                     self.start_time = time.perf_counter()
                     # ~ print("move to next")
@@ -297,6 +321,7 @@ class BrainNode():
                 self.itr_v1 = 0
                 self.theta_deg = 0
                 self.alpha_deg = 0
+                self.start_time = time.perf_counter()
       
             motor = TADA_angle(self)
             # ~ print(motor)
@@ -312,10 +337,8 @@ class BrainNode():
             motor_command = self.motor_command
             curr_pos1 = self.curr_pos1; curr_pos2 = self.curr_pos2
             homed1 = self.homed1; homed2 = self.homed2
-            ## variables that are called here are updated to be used in this while loop
-                       
+            ## variables that are called here are updated to be used in this while loop          
             # read input from the terminal; expecting between 1 and 3 inputs
-            
             # assigns the raw input data to var and ignores error if no input was given
             if self.raw_var: 
                 var = self.raw_var
@@ -336,6 +359,7 @@ class BrainNode():
                         print("ROS has been killed")
                     else:
                         print("Please enter options 'm' or 'a'\n")
+                        
                 elif var[0]=="bt":
                     self.load_threshold = int(var[1])     
                  
@@ -393,7 +417,8 @@ class BrainNode():
                     print(self.mx, self.my, self.fz)
                     print("europa threshold = ", self.load_threshold)
                 
-                elif var[0] == "mode0":
+                elif var[0] == "mode0" or var[0] == "x":
+                    print("return to mode 0")
                     self.mode = 0
                     var1 = self.prev_var1 #curr_pos1 
                     var2 = self.prev_var2 #curr_pos2 
@@ -412,9 +437,13 @@ class BrainNode():
                     # ~ var1 = self.prev_var1 #curr_pos1 
                     # ~ var2 = self.prev_var2 #curr_pos2 
                     
-                if var[0]=="tada_v1":
+                elif var[0]=="expt1":
+                    print("Starting TADA_v1 experiment #1")
                     self.mode = 2
-                    print("Starting TADA_v1 experiment")
+                    
+                elif var[0]=="expt2":
+                    print("Starting TADA_v1 experiment #2")
+                    self.mode = 3
                 
                 # do nothing
                 else:
@@ -446,9 +475,13 @@ class BrainNode():
                 self.theta_deg = float(theta) # keep value between 0 and 10
                 self.alpha_deg = float(alpha) 
                 var1,var2, self.PF, self.EV = move_swing(self)
-            elif self.mode == 2:
-                var1,var2, self.PF, self.EV = tada_v1_expt_unique(self)
-            else: self.mode = 0
+            elif self.mode == 2 or self.mode == 3:
+                var1,var2, self.PF, self.EV = tada_v1_expt(self)
+            # ~ elif self.mode == 3:
+                # ~ var1,var2, self.PF, self.EV = tada_v1_expt_unique(self)
+            else: 
+                self.mode = 0
+                # var1, var2 are defined previous to these if statements, if there is terminal output or its keeps the prev_var's
                 
             # set up object to publish to motor node
             motor_command.mode = 0
