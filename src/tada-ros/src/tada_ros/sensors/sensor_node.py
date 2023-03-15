@@ -48,19 +48,19 @@ class SensorNode():
     m1_pos = 0
     m2_pos = 0
     # Initial variables
-    # ~ state = 0
-    # ~ start = time.time()
-    # ~ start_time = time.time()
-    # ~ initial_itr = 0
-    # ~ swing_time = 0
-    # ~ swing = [0, 0, 0]
-    # ~ avg_swing = [0.3, 0.3, 0.3]
-    # ~ avg_val_swing = 0
-    # ~ initial_itr1 = 0
-    # ~ gyro_thres = 5
-    # ~ accel_thres = 0.5
-    # ~ state=0
-    # ~ swing_time=0
+    state = 0
+    start = time.time()
+    start_time = time.time()
+    initial_itr = 0
+    swing_time = 0
+    swing = [0, 0, 0]
+    avg_swing = [0.3, 0.3, 0.3]
+    avg_val_swing = 0
+    initial_itr1 = 0
+    gyro_thres = 5
+    accel_thres = 0.5
+    state=0
+    swing_time=0
 
 
     pub_killed_confirm = None

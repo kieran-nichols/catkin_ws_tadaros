@@ -187,12 +187,9 @@ class EuropaBLE(object):
                 for x in list_data:
                     self.device_handle.buffer.append(x)
                 if len(self.device_handle.buffer)>3000:
-                    print("in if")
                     self.device_handle.buffer=self.device_handle.buffer[1100:]
-                    ##print("drop")
+
                 self.msg_count=self.msg_count+1
-                #if self.msg_count % 50 ==0:
-                #    #print(self.msg_count)
         
         try:
             self.dev=Peripheral(self.device_addr.decode('utf-8'),iface=self.iface).withDelegate(NotifyDelegate(self))   # hci1, external dongle
@@ -364,9 +361,9 @@ class EuropaBLE(object):
                         self.europa_command.my = float(self.last_msg[1])
                         self.europa_command.fz = float(self.last_msg[2])*CAL_FZ
                         current_time = rospy.Time.now()
-                        #print(current_time.nsec)
-                        self.europa_command.t = float(0)
-                        # ~ # print(self.europa_command.t)
+                        current_time_value = current_time.to_sec()
+                        #print(current_time_value)
+                        self.europa_command.t = float(current_time_value)
                         self.europa_sensing.publish(self.europa_command)
 
 
