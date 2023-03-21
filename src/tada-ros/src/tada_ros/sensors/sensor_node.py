@@ -78,14 +78,6 @@ class SensorNode():
         imu = IMU_controller.IMUController()
         while not rospy.is_shutdown():
             imu_data = imu.get_data()
-            #self.imu_msg.accel_x =
-            #self.imu_msg.accel_y = 
-            #self.imu_msg.accel_z = 
-            #self.imu_msg.gyro_x =
-            #self.imu_msg.gyro_y =
-            #self.imu_msg.gyro_z =
-            #self.imu_msg.state =
-            #self.imu_msg.swing_time =
             msg_imu = imu_data.to_ROS_message()
             pub_sensing.publish(msg_imu)
             rate.sleep()
