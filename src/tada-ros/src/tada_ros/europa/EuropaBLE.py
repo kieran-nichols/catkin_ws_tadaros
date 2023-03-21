@@ -74,7 +74,7 @@ class EuropaBLE(object):
         self.raw_data=[]
         self.target_address=None
         self.key=EUROPA_KEY
-        self.iface=0
+        # ~ self.iface=0
         self.data_logger=None
         self.buffer=[]
         self.msg_count=0
@@ -247,7 +247,7 @@ class EuropaBLE(object):
                 except:
                     pass
                 count=count-1
-            time.sleep(1)
+            time.sleep(0.5)
             
     def disconnect(self):
         try:
@@ -271,14 +271,14 @@ class EuropaBLE(object):
     def resetBluetooth(self):
         try:
             os.system("rfkill block bluetooth")
-            time.sleep(5)
+            time.sleep(1)
         except:
             pass
         try:
             os.system("rfkill unblock bluetooth")        
         except:
             pass
-        time.sleep(2)
+        time.sleep(1)
         
         
     def turn_off_hci(self,iface):
@@ -304,7 +304,7 @@ class EuropaBLE(object):
                 self.dev.waitForNotifications(0.2) #0.2 seems like this value decreases bluetooth delay
         except Exception as e:
             print("[EuropaBLE/stream]Error in streaming thread: ",str(e))
-            time.sleep(2)
+            time.sleep(1)
             #raise(LoggingError(str(e),time.time()))
             self.isStream=False
             self.isConnect=False
@@ -336,7 +336,7 @@ class EuropaBLE(object):
 
             
             while self.isConnect==True and self.isStream==True:
-                time.sleep(0.1)             
+                time.sleep(0.01)             
                 while len(self.buffer)>13: 
                     while not self.check_opener(self.buffer) and len(self.buffer)>1:
                         self.buffer=self.buffer[1:]
@@ -410,12 +410,12 @@ class EuropaBLE(object):
         pass
 
 
-    def check_battery(self):      #Not working
-        print("----------------check battery---------------------")
-        print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_battery,withResponse=True))
-        self.dev.waitForNotifications(3)  
-        self.dev.waitForNotifications(3) 
-        self.dev.waitForNotifications(3) 
+    # ~ def check_battery(self):      #Not working
+        # ~ print("----------------check battery---------------------")
+        # ~ print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_battery,withResponse=True))
+        # ~ self.dev.waitForNotifications(3)  
+        # ~ self.dev.waitForNotifications(3) 
+        # ~ self.dev.waitForNotifications(3) 
         
     def check_opener(self,data):
         if len(data)>1:

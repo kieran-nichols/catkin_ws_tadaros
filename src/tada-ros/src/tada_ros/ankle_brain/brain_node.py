@@ -138,6 +138,7 @@ class BrainNode():
         self.load_threshold = 200
         self.elapsed_time = 0
         self.prev_stance_theta, self.prev_stance_alpha = 0,0
+        self.home_multiple1 = 0; self.home_multiple2 = 0
 #         rate_motor = rospy.Rate(10) # every 0.1 sec
         rate = rospy.Rate(100) # every 0.01 sec 
         # specify home when the motor is turned on to be the motor positions at start
@@ -150,12 +151,14 @@ class BrainNode():
         self.itr_v1 = 0
         
         # create tada_v1 experiment theta, alpha command angles
-        for i in range(5): # five sets of movements
+        for i in range(1): # five sets of movements
             self.tada_v1_data.append([0.0, 0.0])
             for x in theta_array:
                 for y in alpha_array:
                     # ~ print(x,y)
                     self.tada_v1_data.append([x,y])
+        self.tada_v1_data.append([0.0, 0.0])
+        # end with 0,0 giving a total of 33 unique combinations
                 
         def limit(num, minimum, maximum):
             return max(min(float(num), float(maximum)), float(minimum))
@@ -163,6 +166,7 @@ class BrainNode():
         def TADA_angle(self):
             theta_deg = self.theta_deg; alpha_deg = self.alpha_deg
             homed1 = self.homed1; homed2 = self.homed2
+            home_multiple1 = self.home_multiple1; home_multiple2 = self.home_multiple2 
             
             theta = theta_deg*math.pi/180
             beta = 5*math.pi/180
@@ -173,12 +177,13 @@ class BrainNode():
             M2 = 180/math.pi*(-(alpha + np.arctan2(np.tan(q3/2), np.cos(beta))))
             # print motor angles in non-TADA ref frame
             # ~ print("Motor angles from homed", M1, M2)
+            
             # Wrapping function that ensures that the angle is between 180 and -180;
             ## need to finish verify
             # ~ M1 = np.degrees(np.arctan2(np.sin(np.radians(M1)), np.cos(np.radians(M1))))
             # ~ M2 = np.degrees(np.arctan2(np.sin(np.radians(M2)), np.cos(np.radians(M2))))
-            M1 = (M1 + 180)%360 - 180
-            M2 = (M2 + 180)%360 - 180
+            # ~ M1 = (M1 + 180)%360 - 180
+            # ~ M2 = (M2 + 180)%360 - 180
             # ~ print("Wrapped motor angles from homed", M1, M2)
             
             q1 = M1*np.pi/180;
@@ -196,15 +201,37 @@ class BrainNode():
             R04 = np.matmul(R03,R34)
             R05 = np.matmul(R04,R45)
             
-            self.PF = float(180/np.pi*R05[0,2])
-            self.EV = float(180/np.pi*R05[1,2])
+            PF = float(180/np.pi*R05[0,2])
+            EV = float(180/np.pi*R05[1,2])
+            
+            ## To minimize wrapping issues and automatic redifinition of homed if the motor moves too far from original homed
+            # Ensure that M1 and M2 are moving the minimum path (less than 180 deg)
+            delta_M1 = 180 - M1 if M1>180 else M1
+            delta_M2 = 180 - M2 if M2>180 else M2
             
             # Convert to counts for motor movement
-            M1 = M1*self.cnts_per_rev/360 + homed1
-            M2 = M2*self.cnts_per_rev/360 + homed2
-            # ~ print("Global motor angles", M1, M2,"")
+            M1_counts = delta_M1*self.cnts_per_rev/360
+            M2_counts = delta_M2*self.cnts_per_rev/360
             
-            return [M1, M2, self.PF, self.EV]
+            # Keep track of new homed position
+            self.home_multiple1 = int(homed1/self.cnts_per_rev)
+            self.home_multiple2 = int(homed2/self.cnts_per_rev)
+            
+            # Enusre that M1 and M2 are close to homed position if not then redefine a new homed multiple
+            proposed_moevement_from_homed1 = M1_counts -  (self.home_multiple1*self.cnts_per_rev + homed1)
+            proposed_moevement_from_homed2 = M2_counts - (self.home_multiple2*self.cnts_per_rev + homed2)
+            if not -self.cnts_per_rev/2 < proposed_moevement_from_homed1 < self.cnts_per_rev/2: 
+                self.home_multiple1 = int((homed1 + M1_counts)/self.cnts_per_rev)
+            if not -self.cnts_per_rev/2 < proposed_moevement_from_homed2 < self.cnts_per_rev/2: 
+                self.home_multiple2 = int((homed2 + M2_counts)/self.cnts_per_rev)
+                
+            # Create command for motors from user specified homed with a continous adjustment to ensure motor is close to a multiple of the homed value
+            global_M1 = M1_counts + self.home_multiple1*self.cnts_per_rev + homed1
+            global_M2 = M2_counts + self.home_multiple2*self.cnts_per_rev + homed2
+
+            # ~ print("Global motor angles", global_M1, global_M2,"")
+            
+            return [global_M1, global_M2, PF, EV]
         
         # Test for sagittal only ankle movement from neutral to dorsiflexed and back to neutral
         # Input array: [theta (deg)   , alpha (deg)   , time (ms)]
@@ -276,9 +303,9 @@ class BrainNode():
             cmd = []
             now = time.perf_counter()
             toe_lift_time = 0.3
-            total_time = 1
+            
             # ~ if (self.mode == 1 or self.mode == 2):
-            if self.itr_v1 < 33*5-1 and self.mode != 0: # number of total itr
+            if self.itr_v1 < 33*1 and self.mode != 0: # number of total itr
                 cmd = self.tada_v1_data[self.itr_v1]
                 # ~ print("here")
                 
@@ -287,24 +314,26 @@ class BrainNode():
                     
                 # mode 3 
                 # move the motor to 10 DF for 0.15 s and return back to original position for the
-                if self.mode == 3:   
-                    # 0 - 0.15          
+                if self.mode == 3: 
+                    total_time = 2 # 2 seconds 
+                    # 0 - 0.10          
                     if self.elapsed_time <= toe_lift_time/2: # consider changing the time to be dependent on the average of the previous swing times
-                        self.theta_deg = 10.0; self.alpha_deg = 0.0
+                        self.theta_deg = 10.0; self.alpha_deg = 180.0
                     # move back to original position
                     # 0.15 - 0.3
-                    elif toe_lift_time/2 < self.elapsed_time <= toe_lift_time:
+                    elif toe_lift_time/2 < self.elapsed_time < toe_lift_time:
                         self.theta_deg = cmd[0]; self.alpha_deg = cmd[1]
-                    # 0.3 - 0.9
-                    elif toe_lift_time < self.elapsed_time <= total_time - 0.1:
+                    # 0.3 - 1.0
+                    elif toe_lift_time < self.elapsed_time < 1:
                         self.theta_deg = cmd[0]; self.alpha_deg = cmd[1]
-                    # at 0.9 sec move to new position
-                    # 0.9 - 1
+                    # at 1.0 sec move to new position
+                    # 1.0 - 2
                     else: 
                         cmd1 = self.tada_v1_data[self.itr_v1+1]
                         self.theta_deg = cmd1[0]; self.alpha_deg = cmd1[1]
                 # mode 2
-                else: 
+                else:
+                    total_time = 1 # one second
                     self.theta_deg = cmd[0]
                     self.alpha_deg = cmd[1]                
                 
@@ -454,7 +483,12 @@ class BrainNode():
                 if var[0] == "m":
                     var1 = int(var[1]) 
                     var2 = int(var[2])
-                    
+                # manually set the motor location of homed
+                elif var[0] == "h":
+                    self.homed1 = int(var[1]) 
+                    self.homed2 = int(var[2])
+                    var1 = int(var[1]) 
+                    var2 = int(var[2])
                 else:
                     pass #print("Did nothing for enter cmd (3)")
                                
