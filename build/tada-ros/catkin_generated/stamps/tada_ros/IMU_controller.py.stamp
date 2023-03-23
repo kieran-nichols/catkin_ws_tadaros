@@ -4,15 +4,18 @@
 # http://www.electronicwings.com
 
 import smbus # SMBus module of I2C
+from mpu6050 import mpu6050
 import numpy
 import time
 import os, sys
+import rospy
 import math
 import numpy as np
 from time import sleep
 from enum import Enum
 from tada_ros.msg import IMUDataMsg, ReconDataMsg
 from tada_ros.global_info import constants
+import rospy
 
 
 DEBUG_FLAG = 0
@@ -82,98 +85,63 @@ def ROS_message_to_IMUData(msg_data):
 class IMUController():
     # initialize class variables
     # bus for I2C
-    bus = smbus.SMBus(1)
     cur_time = time.time()
     measured_dt = constants.DT
     Device_Address = 0x68   # MPU6050 device address
+    sensor = mpu6050(Device_Address)
     ## initialization of IMU
     def __init__(self):
-        # initialize the MPU6050 Module IMU
-        self.bus.write_byte_data(DEVICE_ADDR, SMPLRT_DIV, 7)
-        self.bus.write_byte_data(DEVICE_ADDR, PWR_MGMT_1, 1)
-        self.bus.write_byte_data(DEVICE_ADDR, CONFIG, 0)
-        self.bus.write_byte_data(DEVICE_ADDR, GYRO_CONFIG, 24)
-        self.bus.write_byte_data(DEVICE_ADDR, INT_ENABLE, 1)
 
-    ## read raw bytes from IMU
-    def read_raw_data(self, addr):
-        high = self.bus.read_byte_data(DEVICE_ADDR, addr)
-        low = self.bus.read_byte_data(DEVICE_ADDR, addr+1)
+        self.state = 0
+        self.start = time.time()
+        self.start_time = time.time()
+        self.initial_itr = 0
+        self.swing_time = 0
+        self.swing = [0, 0, 0]
+        self.avg_swing = [0.3, 0.3, 0.3]
+        self.avg_val_swing = 0
+        self.gyro_thres = 20 #FINE TUNE THIS
+        self.accel_thres = 0.5
+        self.swing_time=0
 
-        # concatenate higher and lower value
-        value = ((high << 8) | low)
-
-        # get signed value from mpu6050
-        if(value > 32768):
-                value = value - 65536
-        return value
-    
-    
     ## collect continuous steam of IMU accel and gyro data and output de-biased data
     def get_data(self):
         
-        state = 0
-        start = time.time()
-        start_time = time.time()
-        initial_itr = 0
-        swing_time = 0
-        swing = [0, 0, 0]
-        avg_swing = [0.3, 0.3, 0.3]
-        avg_val_swing = 0
-        initial_itr1 = 0
-        gyro_thres = 5 #FINE TUNE THIS
-        accel_thres = 0.5
-        state=0
-        swing_time=0
-        # Read Accelerometer values
-        raw_accel_x = self.read_raw_data(ACCEL_XOUT_H)
-        raw_accel_y = self.read_raw_data(ACCEL_YOUT_H)
-        raw_accel_z = self.read_raw_data(ACCEL_ZOUT_H)
-
-        # Read gyro_yroscope values
-        raw_gyro_x = self.read_raw_data(GYRO_XOUT_H)
-        raw_gyro_y = self.read_raw_data(GYRO_YOUT_H)
-        raw_gyro_z = self.read_raw_data(GYRO_ZOUT_H)
-
         # Adjust raw data for scale factor
-        accel_x = raw_accel_x/16384.0
-        accel_y = raw_accel_y/16384.0
-        accel_z = raw_accel_z/16384.0
+        accel_x = self.sensor.get_accel_data().get('x')
+        accel_y = self.sensor.get_accel_data().get('y')
+        accel_z = self.sensor.get_accel_data().get('z')
 
-        gyro_x = raw_gyro_x/131.0
-        gyro_y = raw_gyro_y/131.0
-        gyro_z = raw_gyro_z/131.0
+        gyro_x = self.sensor.get_gyro_data().get('x')
+        gyro_y = self.sensor.get_gyro_data().get('y')
+        gyro_z = self.sensor.get_gyro_data().get('z')
 
         #SWING
-        if gyro_z < gyro_thres: # stance
-            initial_itr = 0
+        if gyro_z > self.gyro_thres: # swing
+            self.state = 1
             # collect the swing time and save the data only once
-            if initial_itr == 0:
-                state = 0
-    #             print(swing_time)
-                start_time = time.time()
-                swing.append(swing_time)
-                avg_swing = swing[3:]
-                avg_val_swing = np.mean(avg_swing)
-                swing_time = 0
-                initial_itr = 1
-                initial_itr1 = 0
-            else: # to ensure that swing is only appended once
-                state = 0
+            if self.initial_itr == 0:
+                self.start_time = time.time()
+                #print(self.avg_val_swing)
+                self.initial_itr = 1
         # when not saving data, move the motor at the first itr
-        # and collect the swing timeb
-        else: # swing
-            if (initial_itr1==0):
-                avg_swing_command = int(1000 * avg_val_swing)
-    #             move_command(avg_swing_command)
-                # sleep(avg_val_swing+0.3)
-                initial_itr1 = 1
-            else:
-                state = 1
-                swing_time = time.time() - start_time
+        # and collect the swing time
+        else: # stance
+            if self.initial_itr ==1:
+                
+                self.swing_time = time.time() - self.start_time
+                if self.swing_time > 0.1:
+                    self.swing.append(self.swing_time)
+                    avg_swing = self.swing[-3:]
+                    self.avg_val_swing = np.mean(avg_swing)
+                # limit the avg swing time to be at minimum 0.2
+                
+            self.initial_itr = 0
+            self.state = 0
         
-        #SWING
-
-        imu_data = IMUData(accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, state, avg_val_swing, time.time())
+        current_time = rospy.Time.now()
+        current_time_value = current_time.to_sec()
+        current_time_value = current_time_value%100000
+        imu_data = IMUData(accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, self.state, self.avg_val_swing, current_time_value)
     
         return imu_data
