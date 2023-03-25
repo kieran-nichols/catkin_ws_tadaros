@@ -105,8 +105,6 @@ class BrainNode():
         # translates IMUDataMsg ROS message to IMUData class and stores
         #print("handler trg")
         string = str(msg_data.data)
-#         print("Enter command(s): ")
-#         print(string)
         self.raw_var = list(string.split())
 
         ## Add variables for IMU and Europa here
@@ -145,7 +143,6 @@ class BrainNode():
         
         theta_array = [2.5, 5, 7.5, 10]
         alpha_array = [-135, -90, -45, 0, 45, 90, 135, 180]
-        # ~ self.mode = 0
         self.tada_v1_data = [] # empty list that will hold the TADA_angle cmds
         self.itr_v1 = 0
         
@@ -154,7 +151,6 @@ class BrainNode():
             self.tada_v1_data.append([0.0, 0.0])
             for x in theta_array:
                 for y in alpha_array:
-                    # ~ print(x,y)
                     self.tada_v1_data.append([x,y])
                 
         def limit(num, minimum, maximum):
@@ -175,11 +171,8 @@ class BrainNode():
             # ~ print("Motor angles from homed", M1, M2)
             # Wrapping function that ensures that the angle is between 180 and -180;
             ## need to finish verify
-            # ~ M1 = np.degrees(np.arctan2(np.sin(np.radians(M1)), np.cos(np.radians(M1))))
-            # ~ M2 = np.degrees(np.arctan2(np.sin(np.radians(M2)), np.cos(np.radians(M2))))
             M1 = (M1 + 180)%360 - 180
             M2 = (M2 + 180)%360 - 180
-            # ~ print("Wrapped motor angles from homed", M1, M2)
             
             q1 = M1*np.pi/180;
             q5 = M2*np.pi/180;
@@ -202,8 +195,6 @@ class BrainNode():
             # Convert to counts for motor movement
             M1 = M1*self.cnts_per_rev/360 + homed1
             M2 = M2*self.cnts_per_rev/360 + homed2
-            # ~ print("Global motor angles", M1, M2,"")
-            
             return [M1, M2, self.PF, self.EV]
         
         # Test for sagittal only ankle movement from neutral to dorsiflexed and back to neutral
@@ -212,9 +203,7 @@ class BrainNode():
         # All alphas will be 0 or 180 to keep sagittal only movements (0 for plantarflexion and 180 for dorsiflexion)
         def move_swing(self):
             var1,var2 = 0,0
-            # ~ self.initial_itr1 = 0
             # swing state
-            #if self.fz < self.load_threshold: # for Europa load, there is an inconsistent delay so we won't used Europa for real-time feedback
             if self.state == 1: # swing
                 if self.initial_itr1 == 0:
                     print("swing")
@@ -222,10 +211,13 @@ class BrainNode():
                     self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
                     self.initial_itr = 0
                     self.initial_itr1 = 1
-                else:
+                else:#stance
                     now = time.perf_counter()
                     elapsed_time = now - self.start_time
-                    # move to 5 deg dorsiflexed for 2/3 of the time
+                    print("finished swing")
+                    print(elapsed_time)
+                    print(self.swing_time)
+                    # move to 5 deg dorsiflexed for 1/2 of the time
                     if elapsed_time <= self.swing_test[2]/2: # consider changing the time to be dependent on the average of the previous swing times
                         self.theta_deg = 10.0; self.alpha_deg = 0.0
                     # move back to original position
@@ -234,37 +226,19 @@ class BrainNode():
                     else: 
                         self.initial_itr = 0
                         self.initial_itr1 = 1
-                        # ~ self.start_time = time.perf_counter()
                         self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
-                        # ~ self.start_time = time.perf_counter()
                 
             # stance
             else:
                 if self.initial_itr == 0:
-                    # ~ print(elapsed_time)
                     print("stance")
-                    # ~ self.start_time = time.perf_counter()
-                    # ~ self.prev_steps = self.steps 
-                    # ~ self.steps += 1
                     self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
                     self.initial_itr = 1
                     self.initial_itr1 = 0       
                 else: 
-                    # ~ self.steps += 1
-                    # ~ self.prev_stance_tracker = self.stance_tracker
-                    # ~ self.start_time = time.perf_counter()
                     self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
-            # stance state and everything else
-            # ~ else: 
-                #if self.initial_itr != 0:
-                #print("stance")
-                #self.prev_stance_tracker = self.stance_tracker
-                #self.stance_tracker += 1
-                # ~ self.theta_deg = self.swing_test[0]; self.alpha_deg = self.swing_test[1]
-                # ~ self.start_time = time.perf_counter()
             
             motor = TADA_angle(self)
-            # ~ print(motor)
             var1 = int(motor[0]) 
             var2 = int(motor[1])
             var3 = float(motor[2])
@@ -277,11 +251,8 @@ class BrainNode():
             now = time.perf_counter()
             toe_lift_time = 0.3
             total_time = 1
-            # ~ if (self.mode == 1 or self.mode == 2):
             if self.itr_v1 < 33*5-1 and self.mode != 0: # number of total itr
                 cmd = self.tada_v1_data[self.itr_v1]
-                # ~ print("here")
-                
                 now = time.perf_counter()
                 self.elapsed_time = now - self.start_time 
                     
@@ -312,7 +283,6 @@ class BrainNode():
                 if self.elapsed_time >= total_time: # time to wait
                     self.itr_v1 += 1
                     self.start_time = time.perf_counter()
-                    # ~ print("move to next")
 	
             # stop movement, return TADA to neutral, and return to default mode
             else:
@@ -324,7 +294,6 @@ class BrainNode():
                 self.start_time = time.perf_counter()
       
             motor = TADA_angle(self)
-            # ~ print(motor)
             var1 = int(motor[0]) 
             var2 = int(motor[1])
             var3 = float(motor[2])
@@ -431,11 +400,9 @@ class BrainNode():
                     self.mode = 1
                     self.steps += 1
                     self.start_time = time.perf_counter()
-                    # ~ self.swing_test = [float(var[1]), float(var[2]), 0, 0, 300, 3, 1, 0, 0]
                     self.swing_test = [self.prev_stance_theta, self.prev_stance_alpha, 0.3]
                     print("Starting swing mode")
-                    # ~ var1 = self.prev_var1 #curr_pos1 
-                    # ~ var2 = self.prev_var2 #curr_pos2 
+
                     
                 elif var[0]=="expt1":
                     print("Starting TADA_v1 experiment #1")
@@ -477,11 +444,9 @@ class BrainNode():
                 var1,var2, self.PF, self.EV = move_swing(self)
             elif self.mode == 2 or self.mode == 3:
                 var1,var2, self.PF, self.EV = tada_v1_expt(self)
-            # ~ elif self.mode == 3:
-                # ~ var1,var2, self.PF, self.EV = tada_v1_expt_unique(self)
             else: 
                 self.mode = 0
-                # var1, var2 are defined previous to these if statements, if there is terminal output or its keeps the prev_var's
+                
                 
             # set up object to publish to motor node
             motor_command.mode = 0
@@ -498,7 +463,6 @@ class BrainNode():
             self.prev_var3 = self.prev_stance_theta # be careful not to confuse var1 and var2, and var2 and var4
             self.prev_var4 = self.prev_stance_alpha
 
-#             rospy.loginfo(motor_command) 
             self.pub.publish(motor_command)
             rate.sleep()
             

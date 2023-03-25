@@ -4,6 +4,7 @@
 # http://www.electronicwings.com
 
 import smbus # SMBus module of I2C
+#pypi.org/project/mpu6050-raspberrypi
 from mpu6050 import mpu6050
 import numpy
 import time
@@ -45,10 +46,11 @@ class Triple():
         self.z = float(z)
 
 class IMUData():
-    def __init__(self, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, state, swing_time, t):
+    def __init__(self, accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, state, swing_time, t, steps):
         self.accel = Triple(accel_x, accel_y, accel_z)
         self.gyro = Triple(gyro_x, gyro_y, gyro_z)
         self.swing = Triple(state, swing_time, t)
+        self.data = Triple(steps, 0, 0)
 
     def accel_magnitude(self):
         return numpy.linalg.norm([self.accel.x, self.accel.y, self.accel.z])
@@ -58,7 +60,7 @@ class IMUData():
 
     def to_ROS_message(self):
         return IMUDataMsg(self.accel.x, self.accel.y, self.accel.z, \
-                self.gyro.x, self.gyro.y, self.gyro.z, self.swing.x, self.swing.y , self.swing.z)
+                self.gyro.x, self.gyro.y, self.gyro.z, self.swing.x, self.swing.y , self.swing.z, self.data.x)
 
     def to_string(self):
         str = "accel_x: %.6f; accel_y: %.6f; accel_z: %.6f;\n" \
@@ -80,7 +82,7 @@ class IMUData():
 def ROS_message_to_IMUData(msg_data):
     #print("IMU message function")
     return IMUData(msg_data.accel_x, msg_data.accel_y, msg_data.accel_z, \
-                    msg_data.gyro_x, msg_data.gyro_y, msg_data.gyro_z, msg_data.state, msg_data.swing_time, msg_data.t)
+                    msg_data.gyro_x, msg_data.gyro_y, msg_data.gyro_z, msg_data.state, msg_data.swing_time, msg_data.t, msg_data.steps)
 
 class IMUController():
     # initialize class variables
@@ -103,6 +105,7 @@ class IMUController():
         self.gyro_thres = 20 #FINE TUNE THIS
         self.accel_thres = 0.5
         self.swing_time=0
+        self.steps = 0
 
     ## collect continuous steam of IMU accel and gyro data and output de-biased data
     def get_data(self):
@@ -130,7 +133,8 @@ class IMUController():
             if self.initial_itr ==1:
                 
                 self.swing_time = time.time() - self.start_time
-                if self.swing_time > 0.1:
+                if self.swing_time > 0.2:
+                    self.steps+=1
                     self.swing.append(self.swing_time)
                     avg_swing = self.swing[-3:]
                     self.avg_val_swing = np.mean(avg_swing)
@@ -142,6 +146,5 @@ class IMUController():
         current_time = rospy.Time.now()
         current_time_value = current_time.to_sec()
         current_time_value = current_time_value%100000
-        imu_data = IMUData(accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, self.state, self.avg_val_swing, current_time_value)
-    
+        imu_data = IMUData(accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, self.state, self.avg_val_swing, current_time_value, self.steps)
         return imu_data
