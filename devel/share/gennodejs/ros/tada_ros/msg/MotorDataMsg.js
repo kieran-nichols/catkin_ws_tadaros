@@ -26,6 +26,10 @@ class MotorDataMsg {
       this.motor2_torque = null;
       this.PF = null;
       this.EV = null;
+      this.CPU0 = null;
+      this.CPU1 = null;
+      this.CPU2 = null;
+      this.CPU3 = null;
       this.t = null;
     }
     else {
@@ -77,6 +81,30 @@ class MotorDataMsg {
       else {
         this.EV = 0.0;
       }
+      if (initObj.hasOwnProperty('CPU0')) {
+        this.CPU0 = initObj.CPU0
+      }
+      else {
+        this.CPU0 = 0.0;
+      }
+      if (initObj.hasOwnProperty('CPU1')) {
+        this.CPU1 = initObj.CPU1
+      }
+      else {
+        this.CPU1 = 0.0;
+      }
+      if (initObj.hasOwnProperty('CPU2')) {
+        this.CPU2 = initObj.CPU2
+      }
+      else {
+        this.CPU2 = 0.0;
+      }
+      if (initObj.hasOwnProperty('CPU3')) {
+        this.CPU3 = initObj.CPU3
+      }
+      else {
+        this.CPU3 = 0.0;
+      }
       if (initObj.hasOwnProperty('t')) {
         this.t = initObj.t
       }
@@ -104,6 +132,14 @@ class MotorDataMsg {
     bufferOffset = _serializer.float32(obj.PF, buffer, bufferOffset);
     // Serialize message field [EV]
     bufferOffset = _serializer.float32(obj.EV, buffer, bufferOffset);
+    // Serialize message field [CPU0]
+    bufferOffset = _serializer.float32(obj.CPU0, buffer, bufferOffset);
+    // Serialize message field [CPU1]
+    bufferOffset = _serializer.float32(obj.CPU1, buffer, bufferOffset);
+    // Serialize message field [CPU2]
+    bufferOffset = _serializer.float32(obj.CPU2, buffer, bufferOffset);
+    // Serialize message field [CPU3]
+    bufferOffset = _serializer.float32(obj.CPU3, buffer, bufferOffset);
     // Serialize message field [t]
     bufferOffset = _serializer.float32(obj.t, buffer, bufferOffset);
     return bufferOffset;
@@ -129,13 +165,21 @@ class MotorDataMsg {
     data.PF = _deserializer.float32(buffer, bufferOffset);
     // Deserialize message field [EV]
     data.EV = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [CPU0]
+    data.CPU0 = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [CPU1]
+    data.CPU1 = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [CPU2]
+    data.CPU2 = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [CPU3]
+    data.CPU3 = _deserializer.float32(buffer, bufferOffset);
     // Deserialize message field [t]
     data.t = _deserializer.float32(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
-    return 36;
+    return 52;
   }
 
   static datatype() {
@@ -145,7 +189,7 @@ class MotorDataMsg {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '0122060c184091d374c522c731386ece';
+    return '9af5263dec48e390e62e66f239203e3c';
   }
 
   static messageDefinition() {
@@ -159,6 +203,10 @@ class MotorDataMsg {
     int32 motor2_torque
     float32 PF
     float32 EV
+    float32 CPU0
+    float32 CPU1
+    float32 CPU2
+    float32 CPU3
     float32 t
     
     `;
@@ -224,6 +272,34 @@ class MotorDataMsg {
     }
     else {
       resolved.EV = 0.0
+    }
+
+    if (msg.CPU0 !== undefined) {
+      resolved.CPU0 = msg.CPU0;
+    }
+    else {
+      resolved.CPU0 = 0.0
+    }
+
+    if (msg.CPU1 !== undefined) {
+      resolved.CPU1 = msg.CPU1;
+    }
+    else {
+      resolved.CPU1 = 0.0
+    }
+
+    if (msg.CPU2 !== undefined) {
+      resolved.CPU2 = msg.CPU2;
+    }
+    else {
+      resolved.CPU2 = 0.0
+    }
+
+    if (msg.CPU3 !== undefined) {
+      resolved.CPU3 = msg.CPU3;
+    }
+    else {
+      resolved.CPU3 = 0.0
     }
 
     if (msg.t !== undefined) {

@@ -15,6 +15,14 @@
           PF
           EV-VAL
           EV
+          CPU0-VAL
+          CPU0
+          CPU1-VAL
+          CPU1
+          CPU2-VAL
+          CPU2
+          CPU3-VAL
+          CPU3
           T-VAL
           T
 ))

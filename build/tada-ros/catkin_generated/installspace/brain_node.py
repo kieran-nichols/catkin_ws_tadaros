@@ -12,8 +12,8 @@ from tada_ros.msg import MotorListenMsg
 from tada_ros.msg import IMUDataMsg
 from tada_ros.msg import EuropaMsg
 #from tada_ros.europa import EuropaBLE
-from tada_ros.sensors import IMU_controller
-from tada_ros.sensors import sensor_node
+# ~ from tada_ros.sensors import IMU_controller
+# ~ from tada_ros.sensors import sensor_node
 import numpy as np
 import math
 import os
@@ -63,6 +63,7 @@ class BrainNode():
         self.mx = 0
         self.my = 0
         self.fz = 0
+        self.CPU = []
         
         def input_thread():
             while not rospy.is_shutdown():
@@ -71,10 +72,16 @@ class BrainNode():
                 print("type 'help' for description of full instructions")
                 print("Enter command(s): ")
                 self.raw_var = list(input().split())
-#                 return raw_var
-    
         input_thread = threading.Thread(target=input_thread, args=())
         input_thread.start()
+        
+        # Need separate thread to collect CPU info
+        def cpu_stats_thread():
+            while not rospy.is_shutdown():
+                # read individual core usuage over 0.1 sec (minimum)
+                self.CPU = psutil.cpu_percent(interval=0.1, percpu=True)
+        cpu_stats_thread = threading.Thread(target=cpu_stats_thread, args=())
+        cpu_stats_thread.start()
     
     ## Functions for IMU and Europa
     def handle_sensor_input(self, data):
@@ -143,6 +150,8 @@ class BrainNode():
         rate = rospy.Rate(100) # every 0.01 sec 
         # specify home when the motor is turned on to be the motor positions at start
         self.homed1 = self.curr_pos1; self.homed2 = self.curr_pos2
+        self.global_M1 = 0; self.global_M2 = 0;
+        self.prev_M1 = 0; self.prev_M2 = 0
         
         theta_array = [2.5, 5, 7.5, 10]
         alpha_array = [0, 180, 0, 180, 0, 180, 0, 180] # only sagittal
@@ -169,7 +178,7 @@ class BrainNode():
             theta_deg = self.theta_deg; alpha_deg = self.alpha_deg
             homed1 = self.homed1; homed2 = self.homed2
             home_multiple1 = self.home_multiple1; home_multiple2 = self.home_multiple2 
-            
+            # ~ global_M1 = self.global_M1 + homed1; global_M2 = self.global_M2 + homed2
             theta = theta_deg*math.pi/180
             beta = 5*math.pi/180
             q3 = 2*np.real((np.arccos(np.sin(theta/2)/np.sin(beta)))) # arccos in python always returns real values
@@ -184,8 +193,8 @@ class BrainNode():
             ## need to finish verify
             # ~ M1 = np.degrees(np.arctan2(np.sin(np.radians(M1)), np.cos(np.radians(M1))))
             # ~ M2 = np.degrees(np.arctan2(np.sin(np.radians(M2)), np.cos(np.radians(M2))))
-            # ~ M1 = (M1 + 180)%360 - 180
-            # ~ M2 = (M2 + 180)%360 - 180
+            M1 = (M1 + 180)%360 - 180
+            M2 = (M2 + 180)%360 - 180
             # ~ print("Wrapped motor angles from homed", M1, M2)
             
             q1 = M1*np.pi/180;
@@ -210,34 +219,79 @@ class BrainNode():
             # Ensure that M1 and M2 are moving the minimum path (less than 180 deg)
             # ~ print("M1,M2:",M1,M2)
             # M1
-            if M1>180:
-                delta_M1 = M1 - 360 
-            elif M1<-180:
-                delta_M1 = M1 + 360 
-            else: delta_M1 = M1
-            # M2
-            if M2>180:
-                delta_M2 = M2 - 360 
-            elif M2<-180:
-                delta_M2 = M2 + 360 
-            else: delta_M2 = M2
+            # ~ if M1>180:
+                # ~ delta_M1 = M1 - 360 
+            # ~ elif M1<-180:
+                # ~ delta_M1 = M1 + 360 
+            # ~ else: delta_M1 = M1
+            # ~ # M2
+            # ~ if M2>180:
+                # ~ delta_M2 = M2 - 360 
+            # ~ elif M2<-180:
+                # ~ delta_M2 = M2 + 360 
+            # ~ else: delta_M2 = M2
 
-            if abs(M1 - self.M1_prev)<180 & abs(M1) + abs(self.M1_prev)>180:
-                self.home_multiple1 += 1
-                delta_M1 = M1 - 360 
-            elif M1<-180:
-                delta_M1 = M1 + 360 
-            else: delta_M1 = M1
-            # M2
-            if M2>180:
-                delta_M2 = M2 - 360 
-            elif M2<-180:
-                delta_M2 = M2 + 360 
-            else: delta_M2 = M2
+            ################
+            
+            #run expt1 to check things
+            
+            # self.prev_var1 and self.prev_var2
+            M1_prev = ((self.prev_var1+homed1)/self.cnts_per_rev*360)%360 - 180
+            M2_prev = ((self.prev_var2+homed2)/self.cnts_per_rev*360)%360 - 180
+            # ~ self.prev_M1 = M1
+            # ~ self.prev_M2 = M2 
+            
+            rot1=0
+            rot2=0
+            #print(self.prev_var1,self.prev_var2)
+            #M1 motor position
+            if ((abs(M1) + abs(M1_prev))>180) and (abs(M1 + M1_prev)<180):
+                rot1 = 360-(abs(M1_prev)+abs(M1))
+                if M1_prev>0 and M1<0:
+                    rot1=-rot1
+            elif (M1_prev>0 and M1>0) or (M1_prev<0 and M1<0):
+                rot1=M1_prev-M1
+            else:
+                rot1=abs(M1_prev)+abs(M1)
+                if M1_prev>0 and M1<0:
+                    rot1=-rot1
+                    
+            #M2 motor position
+            if ((abs(M2) + abs(M2_prev))>180) and (abs(M2 + M2_prev)<180):
+                #self.home_multiple1 += 1
+                rot2 = 360-(abs(M2_prev)+abs(M2))
+                if M2_prev>0 and M2<0:
+                    rot2=-rot2
+            elif (M2_prev>0 and M2>0) or (M2_prev<0 and M2<0):
+                rot2=M2_prev-M2
+            else:
+                rot2=abs(M2_prev)+abs(M2)
+                if M2_prev>0 and M2<0:
+                    rot2=-rot2
+            print("M1 prev M2 prev:")
+            print(M1_prev, M2_prev) 
+            print("M1 new M2 new:")
+            print(M1, M2)  
+            print("rot1, rot2:")
+            print(rot1, rot2) 
+            
+            
+            # ~ elif M1<-180:
+                # ~ delta_M1 = M1 + 360 
+            # ~ else: delta_M1 = M1
+            # ~ # M2
+            # ~ if M2>180:
+                # ~ delta_M2 = M2 - 360 
+            # ~ elif M2<-180:
+                # ~ delta_M2 = M2 + 360 
+            # ~ else: delta_M2 = M2
+            ################
             
             # Convert to counts for motor movement
-            M1_counts = delta_M1*self.cnts_per_rev/360
-            M2_counts = delta_M2*self.cnts_per_rev/360
+            rot1_counts = rot1*self.cnts_per_rev/360
+            rot2_counts = rot2*self.cnts_per_rev/360
+            # ~ self.prev_var3 = M1_counts
+            # ~ self.prev_var4 = M2_counts
             
             # Keep track of homed multiple
             # ~ self.home_multiple1 = round(homed1/self.cnts_per_rev)
@@ -252,9 +306,11 @@ class BrainNode():
                 # ~ self.home_multiple2 = round((0*homed2 + M2_counts)/self.cnts_per_rev)
                 
             # Create command for motors from user specified homed with a continous adjustment to ensure motor is close to a multiple of the homed value
-            global_M1 = M1_counts + 0*self.home_multiple1*self.cnts_per_rev + homed1
-            global_M2 = M2_counts + 0*self.home_multiple2*self.cnts_per_rev + homed2
-
+            # ~ global_M1 = M1_counts + 0*self.home_multiple1*self.cnts_per_rev + homed1
+            # ~ global_M2 = M2_counts + 0*self.home_multiple2*self.cnts_per_rev + homed2
+            global_M1 = rot1_counts + self.global_M1 - homed1
+            global_M2 = rot2_counts + self.global_M2 - homed2
+            
             # ~ print("Global motor angles", global_M1, global_M2,"")
             
             return [global_M1, global_M2, self.PF, self.EV]
@@ -552,7 +608,9 @@ class BrainNode():
             motor_command.motor2_torque = 1500 # 1000 for no load, above 1500 for assembled TADA
             motor_command.PF = self.PF
             motor_command.EV = self.EV
+            [motor_command.CPU0, motor_command.CPU0, motor_command.CPU0, motor_command.CPU0] =self.CPU
             motor_command.t = time.time()
+            
             self.prev_var1 = var1
             self.prev_var2 = var2
             self.prev_var3 = self.prev_stance_theta # be careful not to confuse var1 and var2, and var2 and var4

@@ -3,4 +3,8 @@
           CURR_POS1
           CURR_POS2-VAL
           CURR_POS2
+          TOFF-VAL
+          TOFF
+          T-VAL
+          T
 ))

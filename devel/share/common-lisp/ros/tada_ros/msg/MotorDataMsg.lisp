@@ -47,6 +47,26 @@
     :initarg :EV
     :type cl:float
     :initform 0.0)
+   (CPU0
+    :reader CPU0
+    :initarg :CPU0
+    :type cl:float
+    :initform 0.0)
+   (CPU1
+    :reader CPU1
+    :initarg :CPU1
+    :type cl:float
+    :initform 0.0)
+   (CPU2
+    :reader CPU2
+    :initarg :CPU2
+    :type cl:float
+    :initform 0.0)
+   (CPU3
+    :reader CPU3
+    :initarg :CPU3
+    :type cl:float
+    :initform 0.0)
    (t
     :reader t
     :initarg :t
@@ -102,6 +122,26 @@
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:EV-val is deprecated.  Use tada_ros-msg:EV instead.")
   (EV m))
 
+(cl:ensure-generic-function 'CPU0-val :lambda-list '(m))
+(cl:defmethod CPU0-val ((m <MotorDataMsg>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:CPU0-val is deprecated.  Use tada_ros-msg:CPU0 instead.")
+  (CPU0 m))
+
+(cl:ensure-generic-function 'CPU1-val :lambda-list '(m))
+(cl:defmethod CPU1-val ((m <MotorDataMsg>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:CPU1-val is deprecated.  Use tada_ros-msg:CPU1 instead.")
+  (CPU1 m))
+
+(cl:ensure-generic-function 'CPU2-val :lambda-list '(m))
+(cl:defmethod CPU2-val ((m <MotorDataMsg>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:CPU2-val is deprecated.  Use tada_ros-msg:CPU2 instead.")
+  (CPU2 m))
+
+(cl:ensure-generic-function 'CPU3-val :lambda-list '(m))
+(cl:defmethod CPU3-val ((m <MotorDataMsg>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:CPU3-val is deprecated.  Use tada_ros-msg:CPU3 instead.")
+  (CPU3 m))
+
 (cl:ensure-generic-function 't-val :lambda-list '(m))
 (cl:defmethod t-val ((m <MotorDataMsg>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:t-val is deprecated.  Use tada_ros-msg:t instead.")
@@ -150,6 +190,26 @@
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
   (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'EV))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
+  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'CPU0))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
+  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'CPU1))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
+  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'CPU2))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
+  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'CPU3))))
     (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
@@ -215,6 +275,30 @@
       (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'CPU0) (roslisp-utils:decode-single-float-bits bits)))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'CPU1) (roslisp-utils:decode-single-float-bits bits)))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'CPU2) (roslisp-utils:decode-single-float-bits bits)))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'CPU3) (roslisp-utils:decode-single-float-bits bits)))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
     (cl:setf (cl:slot-value msg 't) (roslisp-utils:decode-single-float-bits bits)))
   msg
 )
@@ -226,18 +310,22 @@
   "tada_ros/MotorDataMsg")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<MotorDataMsg>)))
   "Returns md5sum for a message object of type '<MotorDataMsg>"
-  "0122060c184091d374c522c731386ece")
+  "9af5263dec48e390e62e66f239203e3c")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'MotorDataMsg)))
   "Returns md5sum for a message object of type 'MotorDataMsg"
-  "0122060c184091d374c522c731386ece")
+  "9af5263dec48e390e62e66f239203e3c")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<MotorDataMsg>)))
   "Returns full string definition for message of type '<MotorDataMsg>"
-  (cl:format cl:nil "int32 mode~%int32 duration~%int32 motor1_move~%int32 motor2_move~%int32 motor1_torque~%int32 motor2_torque~%float32 PF~%float32 EV~%float32 t~%~%~%"))
+  (cl:format cl:nil "int32 mode~%int32 duration~%int32 motor1_move~%int32 motor2_move~%int32 motor1_torque~%int32 motor2_torque~%float32 PF~%float32 EV~%float32 CPU0~%float32 CPU1~%float32 CPU2~%float32 CPU3~%float32 t~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'MotorDataMsg)))
   "Returns full string definition for message of type 'MotorDataMsg"
-  (cl:format cl:nil "int32 mode~%int32 duration~%int32 motor1_move~%int32 motor2_move~%int32 motor1_torque~%int32 motor2_torque~%float32 PF~%float32 EV~%float32 t~%~%~%"))
+  (cl:format cl:nil "int32 mode~%int32 duration~%int32 motor1_move~%int32 motor2_move~%int32 motor1_torque~%int32 motor2_torque~%float32 PF~%float32 EV~%float32 CPU0~%float32 CPU1~%float32 CPU2~%float32 CPU3~%float32 t~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <MotorDataMsg>))
   (cl:+ 0
+     4
+     4
+     4
+     4
      4
      4
      4
@@ -259,5 +347,9 @@
     (cl:cons ':motor2_torque (motor2_torque msg))
     (cl:cons ':PF (PF msg))
     (cl:cons ':EV (EV msg))
+    (cl:cons ':CPU0 (CPU0 msg))
+    (cl:cons ':CPU1 (CPU1 msg))
+    (cl:cons ':CPU2 (CPU2 msg))
+    (cl:cons ':CPU3 (CPU3 msg))
     (cl:cons ':t (t msg))
 ))

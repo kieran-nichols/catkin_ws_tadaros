@@ -559,10 +559,23 @@ void extra_function(clock_t start_time) {
     while(ros::ok()){
         if(itr!=0) {
             
+            //Get current time
+            ros::Time::init();
+            ros::Time now = ros::Time::now();
+            int lowtime = now.nsec/1000000;
+            int hightime = now.sec%100000;
+            float lower_final_time = (float) lowtime;
+            float high_final_time = (float) hightime;
+            float final_time = floorf(lower_final_time)/1000 + high_final_time;
+            
+            
             ros::Publisher pub_motor = m.advertise<tada_ros::MotorListenMsg>("motor_listen", 10);
             tada_ros::MotorListenMsg motor_listen;
             motor_listen.curr_pos1 = curr_pos;
             motor_listen.curr_pos2 = curr_pos2;
+            motor_listen.toff = toff;
+            motor_listen.t = final_time;
+            
             pub_motor.publish(motor_listen);
                    
             ros::Subscriber sub_motor = m.subscribe("motor_command", 10, motor_commandCallback);

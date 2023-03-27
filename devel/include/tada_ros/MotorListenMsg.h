@@ -25,11 +25,15 @@ struct MotorListenMsg_
 
   MotorListenMsg_()
     : curr_pos1(0)
-    , curr_pos2(0)  {
+    , curr_pos2(0)
+    , toff(0)
+    , t(0.0)  {
     }
   MotorListenMsg_(const ContainerAllocator& _alloc)
     : curr_pos1(0)
-    , curr_pos2(0)  {
+    , curr_pos2(0)
+    , toff(0)
+    , t(0.0)  {
   (void)_alloc;
     }
 
@@ -40,6 +44,12 @@ struct MotorListenMsg_
 
    typedef int32_t _curr_pos2_type;
   _curr_pos2_type curr_pos2;
+
+   typedef int64_t _toff_type;
+  _toff_type toff;
+
+   typedef float _t_type;
+  _t_type t;
 
 
 
@@ -71,7 +81,9 @@ template<typename ContainerAllocator1, typename ContainerAllocator2>
 bool operator==(const ::tada_ros::MotorListenMsg_<ContainerAllocator1> & lhs, const ::tada_ros::MotorListenMsg_<ContainerAllocator2> & rhs)
 {
   return lhs.curr_pos1 == rhs.curr_pos1 &&
-    lhs.curr_pos2 == rhs.curr_pos2;
+    lhs.curr_pos2 == rhs.curr_pos2 &&
+    lhs.toff == rhs.toff &&
+    lhs.t == rhs.t;
 }
 
 template<typename ContainerAllocator1, typename ContainerAllocator2>
@@ -128,12 +140,12 @@ struct MD5Sum< ::tada_ros::MotorListenMsg_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "b5e8d7932558c0150376d4a17f7d0f96";
+    return "458821757342d0f4a30215b0ee1690f8";
   }
 
   static const char* value(const ::tada_ros::MotorListenMsg_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0xb5e8d7932558c015ULL;
-  static const uint64_t static_value2 = 0x0376d4a17f7d0f96ULL;
+  static const uint64_t static_value1 = 0x458821757342d0f4ULL;
+  static const uint64_t static_value2 = 0xa30215b0ee1690f8ULL;
 };
 
 template<class ContainerAllocator>
@@ -154,6 +166,8 @@ struct Definition< ::tada_ros::MotorListenMsg_<ContainerAllocator> >
   {
     return "int32 curr_pos1\n"
 "int32 curr_pos2\n"
+"int64 toff\n"
+"float32 t\n"
 ;
   }
 
@@ -174,6 +188,8 @@ namespace serialization
     {
       stream.next(m.curr_pos1);
       stream.next(m.curr_pos2);
+      stream.next(m.toff);
+      stream.next(m.t);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -196,6 +212,10 @@ struct Printer< ::tada_ros::MotorListenMsg_<ContainerAllocator> >
     Printer<int32_t>::stream(s, indent + "  ", v.curr_pos1);
     s << indent << "curr_pos2: ";
     Printer<int32_t>::stream(s, indent + "  ", v.curr_pos2);
+    s << indent << "toff: ";
+    Printer<int64_t>::stream(s, indent + "  ", v.toff);
+    s << indent << "t: ";
+    Printer<float>::stream(s, indent + "  ", v.t);
   }
 };
 

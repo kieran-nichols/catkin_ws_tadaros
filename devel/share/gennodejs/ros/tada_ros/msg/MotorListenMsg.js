@@ -20,6 +20,8 @@ class MotorListenMsg {
       // initObj === null is a special case for deserialization where we don't initialize fields
       this.curr_pos1 = null;
       this.curr_pos2 = null;
+      this.toff = null;
+      this.t = null;
     }
     else {
       if (initObj.hasOwnProperty('curr_pos1')) {
@@ -34,6 +36,18 @@ class MotorListenMsg {
       else {
         this.curr_pos2 = 0;
       }
+      if (initObj.hasOwnProperty('toff')) {
+        this.toff = initObj.toff
+      }
+      else {
+        this.toff = 0;
+      }
+      if (initObj.hasOwnProperty('t')) {
+        this.t = initObj.t
+      }
+      else {
+        this.t = 0.0;
+      }
     }
   }
 
@@ -43,6 +57,10 @@ class MotorListenMsg {
     bufferOffset = _serializer.int32(obj.curr_pos1, buffer, bufferOffset);
     // Serialize message field [curr_pos2]
     bufferOffset = _serializer.int32(obj.curr_pos2, buffer, bufferOffset);
+    // Serialize message field [toff]
+    bufferOffset = _serializer.int64(obj.toff, buffer, bufferOffset);
+    // Serialize message field [t]
+    bufferOffset = _serializer.float32(obj.t, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -54,11 +72,15 @@ class MotorListenMsg {
     data.curr_pos1 = _deserializer.int32(buffer, bufferOffset);
     // Deserialize message field [curr_pos2]
     data.curr_pos2 = _deserializer.int32(buffer, bufferOffset);
+    // Deserialize message field [toff]
+    data.toff = _deserializer.int64(buffer, bufferOffset);
+    // Deserialize message field [t]
+    data.t = _deserializer.float32(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
-    return 8;
+    return 20;
   }
 
   static datatype() {
@@ -68,7 +90,7 @@ class MotorListenMsg {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return 'b5e8d7932558c0150376d4a17f7d0f96';
+    return '458821757342d0f4a30215b0ee1690f8';
   }
 
   static messageDefinition() {
@@ -76,6 +98,8 @@ class MotorListenMsg {
     return `
     int32 curr_pos1
     int32 curr_pos2
+    int64 toff
+    float32 t
     `;
   }
 
@@ -97,6 +121,20 @@ class MotorListenMsg {
     }
     else {
       resolved.curr_pos2 = 0
+    }
+
+    if (msg.toff !== undefined) {
+      resolved.toff = msg.toff;
+    }
+    else {
+      resolved.toff = 0
+    }
+
+    if (msg.t !== undefined) {
+      resolved.t = msg.t;
+    }
+    else {
+      resolved.t = 0.0
     }
 
     return resolved;
