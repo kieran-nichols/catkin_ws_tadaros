@@ -227,21 +227,13 @@ class EuropaBLE(object):
         while (count>0):
             try:
                 self.connectDevice()
-                ##print("got stuck 1 in open")
                 self.findSerialPortSrv()
-                ##print("got stuck 2 in open")
-                ##print('Turn on first notification')
                 self.turnOnNotify(self.FIFOCh.getHandle()+1)
-                ##print("got stuck 3 in open")
-                ##print('Turn on second notification')
                 self.turnOnNotify(self.CreditsCh.getHandle()+1)
                 self.isConnect=True
                 count=0
-                ##print("[EuropaBLE/connect] Europa configure finished")
-                ##print('---------------------Europa Ready------------------------\n')
             except Exception as e:
                 print("[EuropaBLE/connect]Connect failed: "+str(e))
-                #print("Try times left "+str(count))
                 try:
                     self.dev.disconnect()
                 except:
@@ -251,18 +243,15 @@ class EuropaBLE(object):
             
     def disconnect(self):
         try:
-            ##printt('[EuropaBLE/disconnect]Europa disconnected')
             self.dev.disconnect()
             self.isConnect=False
         except Exception as e:
             pass
-            ##print("[EuropaBLE/disconnect]Error in disconnect Europa:",e)
         finally:
             pass
 
     def check_connect(self):  #Not working due to bluepy bug
         res=self.dev.getState()
-        ##print("checkConnect--------------------------------------------",res)
         if res=='conn':
             self.isConnect=True
         elif res=='disc':
@@ -293,7 +282,6 @@ class EuropaBLE(object):
             os.system("sudo hciconfig hci"+str(iface)+" up")
         except:
             pass
-            ##print("Fail to turn off hci0")
   
         time.sleep(1)
 
@@ -304,8 +292,8 @@ class EuropaBLE(object):
                 self.dev.waitForNotifications(0.2) #0.2 seems like this value decreases bluetooth delay
         except Exception as e:
             print("[EuropaBLE/stream]Error in streaming thread: ",str(e))
+
             time.sleep(1)
-            #raise(LoggingError(str(e),time.time()))
             self.isStream=False
             self.isConnect=False
             self.disconnect()
@@ -327,7 +315,6 @@ class EuropaBLE(object):
                 #print("[EuropaBLE/start_stream]",str(time.time())," Europa start streaming...")
                 self.thread.start()
             except Exception as e:
-                # ~ pass
                 print("[EuropaBLE/start_stream]Fail to write start command: "+ str(e))
  
     def thread_process_data(self):
@@ -366,7 +353,7 @@ class EuropaBLE(object):
                         #print(current_time_value)
                         self.europa_command.t = float(current_time_value)
                         self.europa_sensing.publish(self.europa_command)
-
+                        #self.rate.sleep()
 
                             
                         if not self.data_logger==None:
@@ -408,14 +395,6 @@ class EuropaBLE(object):
                 
     def check_stream(self):
         pass
-
-
-    # ~ def check_battery(self):      #Not working
-        # ~ print("----------------check battery---------------------")
-        # ~ print(self.dev.writeCharacteristic(self.FIFOCh.getHandle(), command_battery,withResponse=True))
-        # ~ self.dev.waitForNotifications(3)  
-        # ~ self.dev.waitForNotifications(3) 
-        # ~ self.dev.waitForNotifications(3) 
         
     def check_opener(self,data):
         if len(data)>1:

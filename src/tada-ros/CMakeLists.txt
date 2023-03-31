@@ -56,7 +56,6 @@ add_message_files(
   ConfigMsg.msg
   EuropaMsg.msg
   IMUDataMsg.msg
-  ReconDataMsg.msg
   MotorDataMsg.msg
   MotorListenMsg.msg
 )

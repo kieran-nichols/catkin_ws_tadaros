@@ -3,7 +3,7 @@ import rospy
 import os
 import sys
 import signal
-from tada_ros.msg import KillConfirmationMsg, IMUDataMsg, ReconDataMsg, EuropaMsg
+from tada_ros.msg import KillConfirmationMsg, IMUDataMsg, EuropaMsg
 from std_msgs.msg import Bool
 from time import sleep
 from std_msgs.msg import String
@@ -17,7 +17,7 @@ import os, sys
 import math
 from time import sleep
 from enum import Enum
-from tada_ros.msg import IMUDataMsg, ReconDataMsg
+from tada_ros.msg import IMUDataMsg
 from tada_ros.global_info import constants
 from tada_ros.sensors import IMU_controller
 
