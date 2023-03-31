@@ -11,14 +11,13 @@ from tada_ros.msg import MotorDataMsg
 from tada_ros.msg import MotorListenMsg
 from tada_ros.msg import IMUDataMsg
 from tada_ros.msg import EuropaMsg
-#from tada_ros.europa import EuropaBLE
-# ~ from tada_ros.sensors import IMU_controller
-# ~ from tada_ros.sensors import sensor_node
+
 import numpy as np
 import math
 import os
 import threading
 import psutil
+import random
 
 class BrainNode():
     # motor_command = [0, 0, 180,180, 1500, 1500] # motor mode, time to complete, motor1 position, motor2 position, motor1 torque, motor2 torque
@@ -65,6 +64,7 @@ class BrainNode():
         self.my = 0
         self.fz = 0
         self.CPU = [0.0, 0.0, 0.0, 0.0]
+        self.rate = rospy.Rate(100) # every 0.01 sec 
         
         def input_thread():
             while not rospy.is_shutdown():
@@ -73,6 +73,7 @@ class BrainNode():
                 print("type 'help' for description of full instructions")
                 print("Enter command(s): ")
                 self.raw_var = list(input().split())
+                #self.rate.sleep
         input_thread = threading.Thread(target=input_thread, args=())
         input_thread.start()
         
@@ -99,6 +100,7 @@ class BrainNode():
             self.state = data.state
             self.swing_time = data.swing_time
             self.t = data.t
+            self.steps = data.steps
         except: 
             print("no data from IMU")
 
@@ -147,8 +149,6 @@ class BrainNode():
         self.elapsed_time = 0
         self.prev_stance_theta, self.prev_stance_alpha = 0,0
         self.home_multiple1 = 0; self.home_multiple2 = 0
-#         rate_motor = rospy.Rate(10) # every 0.1 sec
-        rate = rospy.Rate(100) # every 0.01 sec 
         # specify home when the motor is turned on to be the motor positions at start
         self.homed1 = self.curr_pos1; self.homed2 = self.curr_pos2
         self.global_M1 = 0; self.global_M2 = 0;
@@ -177,12 +177,11 @@ class BrainNode():
         
         # create tada_v2 experiment theta, alpha command angles
         # ~ for i in range(1): # five sets of movements
-        self.tada_v2_data.append([0.0, 180.0])
         for x in theta_array:
-            for y in alpha_array:
+            for y in alpha_array_v2:
                 # ~ print(x,y)
-                self.tada_v1_data.append([x,y])
-        self.tada_v1_data.append([0.0, 180.0])
+                self.tada_v2_data.append([x,y])
+
         # end with 0,0 giving a total of 34 unique combinations
                 
         def limit(num, minimum, maximum):
@@ -192,17 +191,13 @@ class BrainNode():
             theta_deg = self.theta_deg; alpha_deg = self.alpha_deg
             homed1 = self.homed1; homed2 = self.homed2
             home_multiple1 = self.home_multiple1; home_multiple2 = self.home_multiple2 
-            # ~ global_M1 = self.global_M1 + homed1; global_M2 = self.global_M2 + homed2
             theta = theta_deg*math.pi/180
             beta = 5*math.pi/180
             q3 = 2*np.real((np.arccos(np.sin(theta/2)/np.sin(beta)))) # arccos in python always returns real values
-#             alpha = np.arctan2(PF*math.pi/180, EV*math.pi/180)
+
             alpha = alpha_deg*math.pi/180
             M1 = 180/math.pi*(alpha - np.arctan2(np.tan(q3/2),np.cos(beta))) 
             M2 = 180/math.pi*(-(alpha + np.arctan2(np.tan(q3/2), np.cos(beta))))
-            # print motor angles in non-TADA ref frame
-            # ~ print("Motor angles from homed", M1, M2)
-            
             # Wrapping function that ensures that the angle is between 180 and -180;
             ## need to finish verify
             M1 = (M1 + 180)%360 - 180
@@ -253,61 +248,44 @@ class BrainNode():
             M2_prev = ((self.prev_var2+homed2)*360/self.cnts_per_rev)%360
             if M2_prev>180:
                 M2_prev=M2_prev-360
-            # ~ self.prev_M1 = M1
-            # ~ self.prev_M2 = M2 
-            
             rot1=0
             rot2=0
-            #print(self.prev_var1,self.prev_var2)
+
             #M1 motor position
             if ((abs(M1) + abs(M1_prev))>180) and (abs(M1 + M1_prev)<180):
-                #print("moves more than 180 the regular way M1")
                 rot1 = 360-(abs(M1_prev)+abs(M1))
                 if M1_prev<0 and M1>0:
                     rot1=-rot1
             elif (M1_prev>0 and M1>0) or (M1_prev<0 and M1<0):
-                #print("both pos or both neg M1")
                 rot1=M1-M1_prev
             elif M1_prev==M1:
-                #("no rotation")
                 rot1=0
             elif M1_prev==0:
                 rot1=M1
-                #print("M1_prev==0")
             elif M1==0:
                 rot1=M1_prev*(-1)
-                #print("M1==0")
             else:
-                #print("Usual method? M1")
                 rot1=abs(M1_prev)+abs(M1)
                 if M1_prev<0 and M1>0:
                     rot1=-rot1
                     
             #M2 motor position
             if ((abs(M2) + abs(M2_prev))>180) and (abs(M2 + M2_prev)<180):
-                #print("moves more than 180 the regular way M2")
                 rot2 = 360-(abs(M2_prev)+abs(M2))
                 if M2_prev<0 and M2>0:
                     rot2=-rot2
             elif (M2_prev>0 and M2>0) or (M2_prev<0 and M2<0):
                 rot2=M2-M2_prev
-                #print("both pos or both neg M2")
             elif M2_prev==M2:
-                #print("no rotation M2")
                 rot2=0
             elif M2_prev==0:
                 rot2=M2
-                #print("M2_prev==0")
             elif M2==0:
                 rot2=M2_prev*(-1)
-                #print("M2==0")
             else:
-                #print("Usual method? M2")
                 rot2=abs(M2_prev)+abs(M2)
                 if M2_prev<0 and M2>0:
                     rot2=-rot2
-            # ~ print("M1 prev count, M2 prev count:")
-            # ~ print(self.prev_var1,self.prev_var2)
             print("global M1, global M2:")
             print(self.prev_var1,self.prev_var2)
             print("M1 prev M2 prev:")
@@ -333,9 +311,6 @@ class BrainNode():
 
             rot1_counts = rot1*self.cnts_per_rev/360
             rot2_counts = rot2*self.cnts_per_rev/360
-            #print(rot1_counts)
-            # ~ self.prev_var3 = M1_counts
-            # ~ self.prev_var4 = M2_counts
             
             # Keep track of homed multiple
             # ~ self.home_multiple1 = round(homed1/self.cnts_per_rev)
@@ -353,11 +328,7 @@ class BrainNode():
             # ~ global_M1 = M1_counts + 0*self.home_multiple1*self.cnts_per_rev + homed1
             # ~ global_M2 = M2_counts + 0*self.home_multiple2*self.cnts_per_rev + homed2
             self.global_M1 = rot1_counts + self.global_M1 - homed1
-            self.global_M2 = rot2_counts + self.global_M2 - homed2
-            #print(self.global_M1)
-            
-            # ~ print("Global motor angles", global_M1, global_M2,"")
-            
+            self.global_M2 = rot2_counts + self.global_M2 - homed2        
             return [self.global_M1, self.global_M2, self.PF, self.EV]
         
         # Test for sagittal only ankle movement from neutral to dorsiflexed and back to neutral
@@ -472,9 +443,34 @@ class BrainNode():
         
         # Sofya please add to this tada_v1 expt. You can use/adpat the code move_swing 
         # and tada_v1_expt functions
+        
         # input: self
         # output: var1, var2, var3, var4 which are motor1_cmd, motor2_cmd, PF, EV
-        def tada_v2_expt(self):
+        def tada_v2_expt(self, theta, alpha):
+            expt_trial_num =0
+            taken = []
+            current_location = [theta, alpha]
+            while len(taken)!=len(self.tada_v2_data):
+                taken.append(current_location)
+                expt_trial_num+=1
+                starting_step_neutral = self.steps
+                #SEND MOTOR COMMAND HERE NEUTRAL
+                while (self.steps-starting_step_neutral)<=5:
+                    continue
+                
+                #SEND MOTOR COMMAND HERE ANGLED
+                starting_step_exp = self.steps
+                while (self.steps-starting_step_exp)<=10:
+                    continue
+                
+                random_index = random.randint(0, len(self.tada_v2_data)-1)
+                while (self.tada_v2_data[random_index] in taken):
+                    if len(taken) >= len(self.tada_v2_data):
+                        break
+                    random_index = random.randint(0, len(self.tada_v2_data)-1)
+                current_location = self.tada_v2_data[random_index]
+                self.rate.sleep()
+            self.mode = 0
             return 0, 0, 0, 0 # empty pass
             
         # main loop that controls the TADA
@@ -486,6 +482,7 @@ class BrainNode():
             ## variables that are called here are updated to be used in this while loop          
             # read input from the terminal; expecting between 1 and 3 inputs
             # assigns the raw input data to var and ignores error if no input was given
+            
             if self.raw_var: 
                 var = self.raw_var
             else:
@@ -542,8 +539,7 @@ class BrainNode():
                 # if first command is r then return the motors back to home
                 elif var[0]=="r":
                 # create new homed value and specify the movement toward the new home which should be the same position as the old home
-    #                 var1 = cnts_per_rev*round(homed1*cnts_per_rev)
-    #                 var2 = cnts_per_rev*round(homed2*cnts_per_rev)
+
                     var1 = homed1
                     var2 = homed2
                     print("returned to home\n")  
@@ -632,7 +628,7 @@ class BrainNode():
                 var1,var2, self.PF, self.EV = tada_v1_expt(self)
 
             elif self.mode == 4:
-                var1,var2, self.PF, self.EV = tada_v2_expt(self)
+                var1,var2, self.PF, self.EV = tada_v2_expt(self, 5, -90)
             else: 
                 self.mode = 0
                 
@@ -660,7 +656,7 @@ class BrainNode():
             self.prev_var4 = self.prev_stance_alpha
 
             self.pub.publish(motor_command)
-            rate.sleep()
+            self.rate.sleep()
             
 if __name__ == '__main__':
     try:

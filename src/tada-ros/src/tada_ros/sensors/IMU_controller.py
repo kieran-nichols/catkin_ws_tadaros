@@ -14,7 +14,7 @@ import math
 import numpy as np
 from time import sleep
 from enum import Enum
-from tada_ros.msg import IMUDataMsg, ReconDataMsg
+from tada_ros.msg import IMUDataMsg
 from tada_ros.global_info import constants
 import rospy
 
