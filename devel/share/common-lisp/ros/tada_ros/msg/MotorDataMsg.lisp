@@ -37,14 +37,24 @@
     :initarg :motor2_torque
     :type cl:integer
     :initform 0)
-   (PF
-    :reader PF
-    :initarg :PF
+   (PF_cmd
+    :reader PF_cmd
+    :initarg :PF_cmd
     :type cl:float
     :initform 0.0)
-   (EV
-    :reader EV
-    :initarg :EV
+   (EV_cmd
+    :reader EV_cmd
+    :initarg :EV_cmd
+    :type cl:float
+    :initform 0.0)
+   (PF_curr
+    :reader PF_curr
+    :initarg :PF_curr
+    :type cl:float
+    :initform 0.0)
+   (EV_curr
+    :reader EV_curr
+    :initarg :EV_curr
     :type cl:float
     :initform 0.0)
    (CPU0
@@ -112,15 +122,25 @@
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:motor2_torque-val is deprecated.  Use tada_ros-msg:motor2_torque instead.")
   (motor2_torque m))
 
-(cl:ensure-generic-function 'PF-val :lambda-list '(m))
-(cl:defmethod PF-val ((m <MotorDataMsg>))
-  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:PF-val is deprecated.  Use tada_ros-msg:PF instead.")
-  (PF m))
+(cl:ensure-generic-function 'PF_cmd-val :lambda-list '(m))
+(cl:defmethod PF_cmd-val ((m <MotorDataMsg>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:PF_cmd-val is deprecated.  Use tada_ros-msg:PF_cmd instead.")
+  (PF_cmd m))
 
-(cl:ensure-generic-function 'EV-val :lambda-list '(m))
-(cl:defmethod EV-val ((m <MotorDataMsg>))
-  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:EV-val is deprecated.  Use tada_ros-msg:EV instead.")
-  (EV m))
+(cl:ensure-generic-function 'EV_cmd-val :lambda-list '(m))
+(cl:defmethod EV_cmd-val ((m <MotorDataMsg>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:EV_cmd-val is deprecated.  Use tada_ros-msg:EV_cmd instead.")
+  (EV_cmd m))
+
+(cl:ensure-generic-function 'PF_curr-val :lambda-list '(m))
+(cl:defmethod PF_curr-val ((m <MotorDataMsg>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:PF_curr-val is deprecated.  Use tada_ros-msg:PF_curr instead.")
+  (PF_curr m))
+
+(cl:ensure-generic-function 'EV_curr-val :lambda-list '(m))
+(cl:defmethod EV_curr-val ((m <MotorDataMsg>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:EV_curr-val is deprecated.  Use tada_ros-msg:EV_curr instead.")
+  (EV_curr m))
 
 (cl:ensure-generic-function 'CPU0-val :lambda-list '(m))
 (cl:defmethod CPU0-val ((m <MotorDataMsg>))
@@ -184,12 +204,22 @@
     (cl:write-byte (cl:ldb (cl:byte 8 16) unsigned) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) unsigned) ostream)
     )
-  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'PF))))
+  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'PF_cmd))))
     (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
-  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'EV))))
+  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'EV_cmd))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
+  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'PF_curr))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
+  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'EV_curr))))
     (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
@@ -263,13 +293,25 @@
       (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
-    (cl:setf (cl:slot-value msg 'PF) (roslisp-utils:decode-single-float-bits bits)))
+    (cl:setf (cl:slot-value msg 'PF_cmd) (roslisp-utils:decode-single-float-bits bits)))
     (cl:let ((bits 0))
       (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
-    (cl:setf (cl:slot-value msg 'EV) (roslisp-utils:decode-single-float-bits bits)))
+    (cl:setf (cl:slot-value msg 'EV_cmd) (roslisp-utils:decode-single-float-bits bits)))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'PF_curr) (roslisp-utils:decode-single-float-bits bits)))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'EV_curr) (roslisp-utils:decode-single-float-bits bits)))
     (cl:let ((bits 0))
       (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
@@ -310,18 +352,20 @@
   "tada_ros/MotorDataMsg")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<MotorDataMsg>)))
   "Returns md5sum for a message object of type '<MotorDataMsg>"
-  "9af5263dec48e390e62e66f239203e3c")
+  "81f4ae7b8853b19df4672cd6f30b2548")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'MotorDataMsg)))
   "Returns md5sum for a message object of type 'MotorDataMsg"
-  "9af5263dec48e390e62e66f239203e3c")
+  "81f4ae7b8853b19df4672cd6f30b2548")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<MotorDataMsg>)))
   "Returns full string definition for message of type '<MotorDataMsg>"
-  (cl:format cl:nil "int32 mode~%int32 duration~%int32 motor1_move~%int32 motor2_move~%int32 motor1_torque~%int32 motor2_torque~%float32 PF~%float32 EV~%float32 CPU0~%float32 CPU1~%float32 CPU2~%float32 CPU3~%float32 t~%~%~%"))
+  (cl:format cl:nil "int32 mode~%int32 duration~%int32 motor1_move~%int32 motor2_move~%int32 motor1_torque~%int32 motor2_torque~%float32 PF_cmd~%float32 EV_cmd~%float32 PF_curr~%float32 EV_curr~%float32 CPU0~%float32 CPU1~%float32 CPU2~%float32 CPU3~%float32 t~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'MotorDataMsg)))
   "Returns full string definition for message of type 'MotorDataMsg"
-  (cl:format cl:nil "int32 mode~%int32 duration~%int32 motor1_move~%int32 motor2_move~%int32 motor1_torque~%int32 motor2_torque~%float32 PF~%float32 EV~%float32 CPU0~%float32 CPU1~%float32 CPU2~%float32 CPU3~%float32 t~%~%~%"))
+  (cl:format cl:nil "int32 mode~%int32 duration~%int32 motor1_move~%int32 motor2_move~%int32 motor1_torque~%int32 motor2_torque~%float32 PF_cmd~%float32 EV_cmd~%float32 PF_curr~%float32 EV_curr~%float32 CPU0~%float32 CPU1~%float32 CPU2~%float32 CPU3~%float32 t~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <MotorDataMsg>))
   (cl:+ 0
+     4
+     4
      4
      4
      4
@@ -345,8 +389,10 @@
     (cl:cons ':motor2_move (motor2_move msg))
     (cl:cons ':motor1_torque (motor1_torque msg))
     (cl:cons ':motor2_torque (motor2_torque msg))
-    (cl:cons ':PF (PF msg))
-    (cl:cons ':EV (EV msg))
+    (cl:cons ':PF_cmd (PF_cmd msg))
+    (cl:cons ':EV_cmd (EV_cmd msg))
+    (cl:cons ':PF_curr (PF_curr msg))
+    (cl:cons ':EV_curr (EV_curr msg))
     (cl:cons ':CPU0 (CPU0 msg))
     (cl:cons ':CPU1 (CPU1 msg))
     (cl:cons ':CPU2 (CPU2 msg))

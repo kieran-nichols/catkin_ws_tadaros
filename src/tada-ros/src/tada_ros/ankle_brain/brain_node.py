@@ -145,6 +145,8 @@ class BrainNode():
         self.initial_itr1 = 0
         self.PF = 0
         self.EV = 0
+        self.curr_PF = 0
+        self.curr_EV = 0
         self.load_threshold = 200
         self.elapsed_time = 0
         self.prev_stance_theta, self.prev_stance_alpha = 0,0
@@ -157,7 +159,7 @@ class BrainNode():
         self.prev_M1 = 0; self.prev_M2 = 0
         
         theta_array = [2.5, 5, 7.5, 10]
-        alpha_array = [0, 180, 0, 180, 0, 180, 0, 180] # only sagittal
+        alpha_array = [0, 180 , 0, 180, 0, 180, 0, 180] # only sagittal
         theta_array_v2 = [5, 10]
         alpha_array_v2 = [-90, 0, 90, 180] # only sagittal
         # ~ alpha_array = [-90, 90, -90, 90, -90, 90, -90, 90] # only frontal
@@ -190,6 +192,41 @@ class BrainNode():
         def limit(num, minimum, maximum):
             return max(min(float(num), float(maximum)), float(minimum))
             
+        def TADA_angle_read(self):
+            theta_deg = self.theta_deg; alpha_deg = self.alpha_deg
+            homed1 = self.homed1; homed2 = self.homed2
+            home_multiple1 = self.home_multiple1; home_multiple2 = self.home_multiple2 
+            
+            theta = theta_deg*math.pi/180
+            beta = 5*math.pi/180
+            q3 = 2*np.real((np.arccos(np.sin(theta/2)/np.sin(beta)))) # arccos in python always returns real values
+            alpha = alpha_deg*math.pi/180
+            M1 = 180/math.pi*(alpha - np.arctan2(np.tan(q3/2),np.cos(beta))) 
+            M2 = 180/math.pi*(-(alpha + np.arctan2(np.tan(q3/2), np.cos(beta))))
+            
+            # need to use curr motor positions from motor
+            M1 = (M1 + 180)%360 - 180
+            M2 = (M2 + 180)%360 - 180
+            
+            q1 = M1*np.pi/180;
+            q5 = M2*np.pi/180;
+            q2 = np.pi/36; q4 = q2;
+            R01 = np.array([[np.cos(q1), -np.sin(q1), 0], [np.sin(q1), np.cos(q1), 0], [0, 0, 1]])
+            R12 = np.array([[np.cos(q2), 0 , np.sin(q2)], [0, 1, 0], [-np.sin(q2), 0, np.cos(q2)]])
+            q3 = -q1 - q5;
+            R23 = np.array([[np.cos(q3), -np.sin(q3), 0], [np.sin(q3), np.cos(q3), 0], [0, 0, 1]])
+            R34 = np.array([[np.cos(q4), 0, np.sin(q4)], [0, 1, 0], [-np.sin(q4), 0, np.cos(q4)]])
+            R45 = np.array([[np.cos(q5), -np.sin(q5), 0], [np.sin(q5), np.cos(q5), 0], [0, 0, 1]])
+            
+            R02 = np.matmul(R01,R12)
+            R03 = np.matmul(R02,R23)
+            R04 = np.matmul(R03,R34)
+            R05 = np.matmul(R04,R45)
+            
+            self.curr_PF = float(180/np.pi*R05[0,2])
+            self.curr_EV = float(180/np.pi*R05[1,2])
+            return self.curr_PF, self.curr_EV
+            
         def TADA_angle(self):
             theta_deg = self.theta_deg; alpha_deg = self.alpha_deg
             homed1 = self.homed1; homed2 = self.homed2
@@ -200,6 +237,7 @@ class BrainNode():
             q3 = 2*np.real((np.arccos(np.sin(theta/2)/np.sin(beta)))) # arccos in python always returns real values
 #             alpha = np.arctan2(PF*math.pi/180, EV*math.pi/180)
             alpha = alpha_deg*math.pi/180
+            # clockwise is positive 
             M1 = 180/math.pi*(alpha - np.arctan2(np.tan(q3/2),np.cos(beta))) 
             M2 = 180/math.pi*(-(alpha + np.arctan2(np.tan(q3/2), np.cos(beta))))
             # print motor angles in non-TADA ref frame
@@ -251,76 +289,103 @@ class BrainNode():
             
             #run expt1 to check things
             
-            # self.prev_var1 and self.prev_var2
-            M1_prev = ((self.prev_var1+homed1)*360/self.cnts_per_rev)%360
+            #this is taking the output of the previous global motor command, converting it to degrees, and then making it local
+            M1_prev = ((self.prev_var1+self.homed1)*360/self.cnts_per_rev)%360
+            #this is if it is over 180, I think it should be negative, so I subtract 360. eg -450%360=270, but it should be -90 so 270-360=-90
             if M1_prev>180:
                 M1_prev=M1_prev-360
-            M2_prev = ((self.prev_var2+homed2)*360/self.cnts_per_rev)%360
+            #this is taking the output of the previous global motor command, converting it to degrees, and then making it local
+            M2_prev = ((self.prev_var2+self.homed2)*360/self.cnts_per_rev)%360
+            #this is if it is over 180, I think it should be negative, so I subtract 360. eg -450%360=270, but it should be -90 so 270-360=-90
             if M2_prev>180:
                 M2_prev=M2_prev-360
-            # ~ self.prev_M1 = M1
-            # ~ self.prev_M2 = M2 
+            
+            #print("M1_prev +homed")
+            #print(M1_prev)
             
             rot1=0
             rot2=0
-            #print(self.prev_var1,self.prev_var2)
-            #M1 motor position
+            print("M1_prev before conversion")
+            print(self.prev_var1)
+            #M1=new motor command we give it in deg, should be between -180 and 180
+            #M1_pre=previous motor command given in deg, should be between -180 and 180
+            #rot1/rot2= rotation in degrees that we want to move it. CW=positive, CCW=negative rotation should always be less than abs(180) if it isn't, that means there's wrapping issues
+            
+            #this is if crossing 0 to get to the new position makes it move more than 180 deg
+            #then it will rotate in the opposite direction
             if ((abs(M1) + abs(M1_prev))>180) and (abs(M1 + M1_prev)<180):
                 #print("moves more than 180 the regular way M1")
                 rot1 = 360-(abs(M1_prev)+abs(M1))
+                #this makes it move in the right direction
                 if M1_prev<0 and M1>0:
                     rot1=-rot1
+            #this is if the previous and the new value are on the same side of the motor
+            #eg both pos or both neg
             elif (M1_prev>0 and M1>0) or (M1_prev<0 and M1<0):
                 #print("both pos or both neg M1")
                 rot1=M1-M1_prev
+            #this is if you tell it to move to the position it's in already it won't move
             elif M1_prev==M1:
                 #("no rotation")
                 rot1=0
+            #edge case of if you're at 0, just rotate it to the number you want it to go
             elif M1_prev==0:
                 rot1=M1
                 #print("M1_prev==0")
+            #this is if you're at a certain number and want to move it back to home rotate it the the value of itself but in the opposite direction
             elif M1==0:
                 rot1=M1_prev*(-1)
                 #print("M1==0")
+            #this is just if the previous and new values are opposite signs, but less than 180, move it across 0 to get to the new value
             else:
-                #print("Usual method? M1")
+                #print("opposite signs, rotation crosses 0 to get back to home M1")
                 rot1=abs(M1_prev)+abs(M1)
                 if M1_prev<0 and M1>0:
                     rot1=-rot1
                     
             #M2 motor position
+            #this is if crossing 0 to get to the new position makes it move more than 180 deg
+            #then it will rotate in the opposite direction
             if ((abs(M2) + abs(M2_prev))>180) and (abs(M2 + M2_prev)<180):
                 #print("moves more than 180 the regular way M2")
                 rot2 = 360-(abs(M2_prev)+abs(M2))
                 if M2_prev<0 and M2>0:
                     rot2=-rot2
+            #this is if the previous and the new value are on the same side of the motor
+            #eg both pos or both neg
             elif (M2_prev>0 and M2>0) or (M2_prev<0 and M2<0):
                 rot2=M2-M2_prev
                 #print("both pos or both neg M2")
             elif M2_prev==M2:
                 #print("no rotation M2")
                 rot2=0
+            #edge case of if you're at 0, just rotate it to the number you want it to go
             elif M2_prev==0:
                 rot2=M2
                 #print("M2_prev==0")
+            #this is if you're at a certain number and want to move it back to home rotate it the the value of itself but in the opposite direction
             elif M2==0:
                 rot2=M2_prev*(-1)
                 #print("M2==0")
+            #this is just if the previous and new values are opposite signs, but less than 180, move it across 0 to get to the new value
             else:
                 #print("Usual method? M2")
                 rot2=abs(M2_prev)+abs(M2)
                 if M2_prev<0 and M2>0:
                     rot2=-rot2
+                    
+                    
             # ~ print("M1 prev count, M2 prev count:")
             # ~ print(self.prev_var1,self.prev_var2)
-            print("global M1, global M2:")
-            print(self.prev_var1,self.prev_var2)
-            print("M1 prev M2 prev:")
-            print(M1_prev, M2_prev) 
-            print("M1 new M2 new:")
-            print(M1, M2)  
-            print("rot1, rot2:")
-            print(rot1, rot2) 
+            
+            # ~ print("global M1, global M2:")
+            # ~ print(self.prev_var1,self.prev_var2)
+            # ~ print("M1 prev M2 prev:")
+            # ~ print(M1_prev, M2_prev) 
+            # ~ print("M1 new M2 new:")
+            # ~ print(M1, M2)  
+            # ~ print("rot1, rot2:")
+            # ~ print(rot1, rot2) 
             
             
             # ~ elif M1<-180:
@@ -334,7 +399,7 @@ class BrainNode():
             # ~ else: delta_M2 = M2
             ################
             
-            # Convert to counts for motor movement
+            # Convert rotation in deg to rotation we need to move it in counts
             rot1_counts = rot1*self.cnts_per_rev/360
             rot2_counts = rot2*self.cnts_per_rev/360
             #print(rot1_counts)
@@ -352,14 +417,17 @@ class BrainNode():
                 # ~ self.home_multiple1 = round((0*homed1 + M1_counts)/self.cnts_per_rev)
             # ~ if not -self.cnts_per_rev/2 < proposed_moevement_from_homed2 < self.cnts_per_rev/2: 
                 # ~ self.home_multiple2 = round((0*homed2 + M2_counts)/self.cnts_per_rev)
-                
             # Create command for motors from user specified homed with a continous adjustment to ensure motor is close to a multiple of the homed value
             # ~ global_M1 = M1_counts + 0*self.home_multiple1*self.cnts_per_rev + homed1
             # ~ global_M2 = M2_counts + 0*self.home_multiple2*self.cnts_per_rev + homed2
-            self.global_M1 = rot1_counts + self.global_M1 - homed1
-            self.global_M2 = rot2_counts + self.global_M2 - homed2
+            #This iss the updated global position after adding in the counts
+            #we subtracted the homed values in case we rehome it. make sure to add in the homed values in the other parts of the code though
+            print(self.global_M1)
+            self.global_M1 = rot1_counts + self.global_M1 #+ self.homed1
+            self.global_M2 = rot2_counts + self.global_M2 #+ self.homed2
             #print(self.global_M1)
-            
+            print("rot in counts, global w/o homed, global with homed")
+            print(rot1_counts, self.global_M1)
             # ~ print("Global motor angles", global_M1, global_M2,"")
             
             return [self.global_M1, self.global_M2, self.PF, self.EV]
@@ -423,10 +491,10 @@ class BrainNode():
             
             motor = TADA_angle(self)
             # ~ print(motor)
-            var1 = round(motor[0]) 
-            var2 = round(motor[1])
-            var3 = float(motor[2])
-            var4 = float(motor[3])
+            var1 = motor[0] # int
+            var2 = motor[1]
+            var3 = motor[2]
+            var4 = motor[3]
             return var1, var2, var3, var4
         
         def tada_v1_expt(self):
@@ -447,7 +515,7 @@ class BrainNode():
                 # move the motor to 10 DF for 0.15 s and return back to original position for the
                 if self.mode == 3: 
                     total_time = 2 # 2 seconds 
-                    # 0 - 0.10          
+                    # 0 - 0.15          
                     if self.elapsed_time <= toe_lift_time/2: # consider changing the time to be dependent on the average of the previous swing times
                         self.theta_deg = 10.0; self.alpha_deg = 180.0
                     # move back to original position
@@ -485,10 +553,10 @@ class BrainNode():
       
             motor = TADA_angle(self)
             # ~ print(motor)
-            var1 = round(motor[0]) 
-            var2 = round(motor[1])
-            var3 = float(motor[2])
-            var4 = float(motor[3])
+            var1 = motor[0]
+            var2 = motor[1]
+            var3 = motor[2]
+            var4 = motor[3]
             return var1, var2, var3, var4
         
         # Sofya please add to this tada_v1 expt. You can use/adpat the code move_swing 
@@ -539,8 +607,8 @@ class BrainNode():
                     
                     # Convert input of PF, EV, inclination angle to motor angles from homed
                     motor = TADA_angle(self)
-                    var1 = int(motor[0]) 
-                    var2 = int(motor[1])
+                    var1 = motor[0] 
+                    var2 = motor[1]
                     print("Moving to", var1, var2,"\n")
                 
             elif len(var)== 1:
@@ -623,14 +691,14 @@ class BrainNode():
             elif len(var)== 3:             
                 # if first command is m, then send global motor commands
                 if var[0] == "m":
-                    var1 = int(var[1]) 
-                    var2 = int(var[2])
+                    var1 = float(var[1])
+                    var2 = float(var[2])
                 # manually set the motor location of homed
                 elif var[0] == "h":
-                    self.homed1 = int(var[1]) 
-                    self.homed2 = int(var[2])
-                    var1 = int(var[1]) 
-                    var2 = int(var[2])
+                    self.homed1 = var[1]
+                    self.homed2 = var[2]
+                    var1 = var[1]
+                    var2 = var[2]
                 else:
                     pass #print("Did nothing for enter cmd (3)")
                                
@@ -643,7 +711,7 @@ class BrainNode():
             
             # cmd to refresh terminal entry variable
             self.raw_var = [False]
-            
+                        
             # condition to test swing
             if self.mode == 1:
                 theta = limit(self.swing_test[0], 0, 10)
@@ -653,6 +721,8 @@ class BrainNode():
                 var1,var2, self.PF, self.EV = move_swing(self)
             elif self.mode == 2 or self.mode == 3:
                 var1,var2, self.PF, self.EV = tada_v1_expt(self)
+                # get current PF and EV
+                self.curr_PF, self.curr_EV = TADA_angle_read(self)
             elif self.mode == 4:
                 var1,var2, self.PF, self.EV = tada_v2_expt(self)
             else: 
@@ -664,15 +734,21 @@ class BrainNode():
             current_time_value = current_time.to_sec()
             current_time_value = current_time_value%100000
             
+            # need to create int of motor commands
+            var1 = int(round(var1))
+            var2 = int(round(var2))
+            
             # set up object to publish to motor node
             motor_command.mode = 0
             motor_command.duration = 0
-            motor_command.motor1_move = int(var1)
-            motor_command.motor2_move = int(var2)
+            motor_command.motor1_move = var1 # round the value then make it into an int
+            motor_command.motor2_move = var2
             motor_command.motor1_torque = 1500 # be careful with torque values, max torque is dependent on the motor loads
             motor_command.motor2_torque = 1500 # 1000 for no load, above 1500 for assembled TADA
-            motor_command.PF = self.PF
-            motor_command.EV = self.EV
+            motor_command.PF_cmd = self.PF
+            motor_command.EV_cmd = self.EV
+            motor_command.PF_curr = self.curr_PF
+            motor_command.EV_curr = self.curr_EV
             [motor_command.CPU0, motor_command.CPU1, motor_command.CPU2, motor_command.CPU3] = self.CPU
             motor_command.t = current_time_value
             

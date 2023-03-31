@@ -11,10 +11,14 @@
           MOTOR1_TORQUE
           MOTOR2_TORQUE-VAL
           MOTOR2_TORQUE
-          PF-VAL
-          PF
-          EV-VAL
-          EV
+          PF_CMD-VAL
+          PF_CMD
+          EV_CMD-VAL
+          EV_CMD
+          PF_CURR-VAL
+          PF_CURR
+          EV_CURR-VAL
+          EV_CURR
           CPU0-VAL
           CPU0
           CPU1-VAL
