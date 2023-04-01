@@ -446,21 +446,40 @@ class BrainNode():
         
         # input: self
         # output: var1, var2, var3, var4 which are motor1_cmd, motor2_cmd, PF, EV
-        def tada_v2_expt(self, theta, alpha):
-            expt_trial_num =0
+        def tada_v2_expt(self, theta, alpha, paused=False):
+            expt_trial_num =-1
             taken = []
             current_location = [theta, alpha]
             while len(taken)!=len(self.tada_v2_data):
+                
+                #pause after 5
+                if(expt_trial_num%5==0)&(expt_trial_num/5>0):
+                    paused = True
+                    
+                    while paused:
+                        print("Experiment paused. Please let the participant take a breal.\n")
+                        print("type 'up' twice, one after another, to un-pause\n")
+                        input_for_pause = list(input().split())
+                        if input_for_pause[0] == 'up':
+                                paused = False
+                                print()
+                                print("Experiment resumed")
+                    
                 taken.append(current_location)
                 expt_trial_num+=1
+                print()
+                print("Experiment trial number: ", expt_trial_num)
                 starting_step_neutral = self.steps
                 #SEND MOTOR COMMAND HERE NEUTRAL
+                print("5 Steps to turn around/walk in neutral")
                 while (self.steps-starting_step_neutral)<=5:
                     continue
                 
                 #SEND MOTOR COMMAND HERE ANGLED
                 starting_step_exp = self.steps
-                while (self.steps-starting_step_exp)<=10:
+                random_step = random.randint(0,4)
+                print("Walk for ", 10+random_step, " for ", current_location)
+                while (self.steps-starting_step_exp)<=(10+random_step):
                     continue
                 
                 random_index = random.randint(0, len(self.tada_v2_data)-1)
@@ -471,6 +490,8 @@ class BrainNode():
                 current_location = self.tada_v2_data[random_index]
                 self.rate.sleep()
             self.mode = 0
+            print()
+            print("Experiment finished")
             return 0, 0, 0, 0 # empty pass
             
         # main loop that controls the TADA
