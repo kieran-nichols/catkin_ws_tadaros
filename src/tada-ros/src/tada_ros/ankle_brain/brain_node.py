@@ -64,7 +64,16 @@ class BrainNode():
         self.my = 0
         self.fz = 0
         self.CPU = [0.0, 0.0, 0.0, 0.0]
-        self.rate = rospy.Rate(100) # every 0.01 sec 
+        self.rate = rospy.Rate(100) # every 0.01 sec
+        
+        #for tada_v2_expt
+        #tada_v2_expt(self, theta = 5, alpha = -90, taken = [], paused=False, neutral = True, expt_trial_num=-1
+        self.tada_v2_taken_angles = []
+        self.tada_v2_paused = False
+        self.tada_v2_neutral = True
+        self.tada_v2_expt_num = 0
+        self.tada_v2_current_rotation = [5, -90]
+        self.print_once = True
         
         def input_thread():
             while not rospy.is_shutdown():
@@ -358,21 +367,6 @@ class BrainNode():
 
             rot1_counts = rot1*self.cnts_per_rev/360
             rot2_counts = rot2*self.cnts_per_rev/360
-            
-            # Keep track of homed multiple
-            # ~ self.home_multiple1 = round(homed1/self.cnts_per_rev)
-            # ~ self.home_multiple2 = round(homed2/self.cnts_per_rev)
-            
-            # Enusre that M1 and M2 are close to homed position if not then redefine a new homed multiple
-            # ~ proposed_moevement_from_homed1 = M1_counts - 0*(self.home_multiple1*self.cnts_per_rev)
-            # ~ proposed_moevement_from_homed2 = M2_counts - 0*(self.home_multiple2*self.cnts_per_rev)
-            # ~ if not -self.cnts_per_rev/2 < proposed_moevement_from_homed1 < self.cnts_per_rev/2: 
-                # ~ self.home_multiple1 = round((0*homed1 + M1_counts)/self.cnts_per_rev)
-            # ~ if not -self.cnts_per_rev/2 < proposed_moevement_from_homed2 < self.cnts_per_rev/2: 
-                # ~ self.home_multiple2 = round((0*homed2 + M2_counts)/self.cnts_per_rev)
-            # Create command for motors from user specified homed with a continous adjustment to ensure motor is close to a multiple of the homed value
-            # ~ global_M1 = M1_counts + 0*self.home_multiple1*self.cnts_per_rev + homed1
-            # ~ global_M2 = M2_counts + 0*self.home_multiple2*self.cnts_per_rev + homed2
 
             self.global_M1 = rot1_counts + self.global_M1 - homed1
             self.global_M2 = rot2_counts + self.global_M2 - homed2        
@@ -493,60 +487,73 @@ class BrainNode():
         
         # input: self
         # output: var1, var2, var3, var4 which are motor1_cmd, motor2_cmd, PF, EV
-        def tada_v2_expt(self, theta, alpha, paused=False):
-            expt_trial_num =-1
-            taken = []
-            current_location = [theta, alpha]
-            while len(taken)!=len(self.tada_v2_data):
-                
-                #pause after 5
-                if(expt_trial_num%5==0)&(expt_trial_num/5>0):
-                    paused = True
-                    
-                    while paused:
-                        print("Experiment paused. Please let the participant take a breal.\n")
-                        print("type 'up' twice, one after another, to un-pause\n")
-                        input_for_pause = list(input().split())
-                        if input_for_pause[0] == 'up':
-                                paused = False
-                                print()
-                                print("Experiment resumed")
-                    
-                taken.append(current_location)
-                expt_trial_num+=1
+        def tada_v2_expt(self):
+            if len(self.tada_v2_taken_angles)>len(self.tada_v2_data):
+                self.mode = 0
+                self.tada_v2_taken_angles = []
+                self.tada_v2_paused = False
+                self.tada_v2_neutral = True
+                self.tada_v2_expt_num = -1
                 print()
-                print("Experiment trial number: ", expt_trial_num)
-                starting_step_neutral = self.steps
+                print("Experiment finished")
+                return 0, 0, 0, 0
                 
-                #SEND MOTOR COMMAND HERE NEUTRAL
-                self.theta_deg = 10.0; self.alpha_deg = 180.0
+            if self.tada_v2_paused:
+                if self.print_once:
+                    print("Experiment paused. Please let the participant take a break.\n")
+                    print("type 'up' twice, one after another, to un-pause\n")
+                    self.print_once = False
+                return -1, -1, -1, -1
                 
-                
-                print("5 Steps to turn around/walk in neutral")
-                while (self.steps-starting_step_neutral)<=5:
-                    continue
-                
-                #SEND MOTOR COMMAND HERE ANGLED
-                self.theta_deg = current_location[0]; self.alpha_deg = current_location[1]
-                
-                
-                starting_step_exp = self.steps
-                random_step = random.randint(0,4)
-                print("Walk for ", 10+random_step, " for ", current_location)
-                while (self.steps-starting_step_exp)<=(10+random_step):
-                    continue
-                
-                random_index = random.randint(0, len(self.tada_v2_data)-1)
-                while (self.tada_v2_data[random_index] in taken):
-                    if len(taken) >= len(self.tada_v2_data):
-                        break
-                    random_index = random.randint(0, len(self.tada_v2_data)-1)
-                current_location = self.tada_v2_data[random_index]
-                self.rate.sleep()
-            self.mode = 0
+                    
             print()
-            print("Experiment finished")
-            return 0, 0, 0, 0 # empty pass
+            print("Experiment trial number: ", self.tada_v2_expt_num)
+            starting_step = self.steps
+            if self.tada_v2_neutral:
+                #
+
+                print("5 Steps to turn around/walk in neutral")
+                while (self.steps-starting_step)<=5:
+                    continue
+                self.tada_v2_neutral = False
+                
+                #SET ANGLE FOR ANGLED
+                self.theta_deg = self.tada_v2_current_rotation[0]
+                self.alpha_deg = self.tada_v2_current_rotation[1]
+            else:
+                random_step = random.randint(0,4)
+                print("Walk for ", 10+random_step, " for ", self.tada_v2_current_rotation)
+                while (self.steps-starting_step)<=(10+random_step):
+                    continue
+                #exeriment for that rotation finished so change
+                self.tada_v2_neutral = True
+                self.tada_v2_taken_angles.append(self.tada_v2_current_rotation)
+                self.tada_v2_expt_num+=1
+                #pause after 
+                if(self.tada_v2_expt_num%2==0)&(self.tada_v2_expt_num/2>0):
+                    self.print_once = True
+                    self.tada_v2_paused = True 
+                
+                #Getting the next random rotation
+                random_index = random.randint(0, len(self.tada_v2_data)-1)
+                while (self.tada_v2_data[random_index] in self.tada_v2_taken_angles):
+                    #this means that we are done
+                    if len(self.tada_v2_taken_angles)>=len(self.tada_v2_data):
+                        return 0, 0, 0, 0
+                    random_index = random.randint(0, len(self.tada_v2_data)-1)
+                self.tada_v2_current_rotation = self.tada_v2_data[random_index]
+                
+                #SET ANGLE FOR NEUTRAL
+                self.theta_deg = 0
+                self.alpha_deg = 0
+                 
+            motor = TADA_angle(self)
+            var1 = round(motor[0]) 
+            var2 = round(motor[1])
+
+            var3 = float(motor[2])
+            var4 = float(motor[3])
+            return var1, var2, var3, var4
             
         # main loop that controls the TADA
         while not rospy.is_shutdown(): #and rospy.on_shutdown(hook):
@@ -596,6 +603,9 @@ class BrainNode():
                 
             elif len(var)== 1:
                 # print statement to describe instructions
+                if var[0]== "up":
+                    self.tada_v2_paused = False
+                    self.mode = 4
                 if var[0]=="help":                
                     print("\nTo command motor movement: 'm num num' (num is motor ticks where 567 for full rev)")
                     print("To command ankle angles: 'theta(0 to 10 deg) alpha(-180 to 180 deg)'")
@@ -706,7 +716,7 @@ class BrainNode():
                 self.curr_PF, self.curr_EV = TADA_angle_read(self)
 
             elif self.mode == 4:
-                var1,var2, self.PF, self.EV = tada_v2_expt(self, 5, -90)
+                var1,var2, self.PF, self.EV = tada_v2_expt(self)
             else: 
                 self.mode = 0
                 
