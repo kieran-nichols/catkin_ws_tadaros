@@ -334,7 +334,7 @@ class BrainNode():
             #edge case of if you're at 0, just rotate it to the number you want it to go
             elif M2_prev==0:
                 rot2=M2
-<<<<<<< HEAD
+
                 #print("M2_prev==0")
             #this is if you're at a certain number and want to move it back to home rotate it the the value of itself but in the opposite direction
             elif M2==0:
@@ -517,12 +517,19 @@ class BrainNode():
                 print()
                 print("Experiment trial number: ", expt_trial_num)
                 starting_step_neutral = self.steps
+                
                 #SEND MOTOR COMMAND HERE NEUTRAL
+                self.theta_deg = 10.0; self.alpha_deg = 180.0
+                
+                
                 print("5 Steps to turn around/walk in neutral")
                 while (self.steps-starting_step_neutral)<=5:
                     continue
                 
                 #SEND MOTOR COMMAND HERE ANGLED
+                self.theta_deg = current_location[0]; self.alpha_deg = current_location[1]
+                
+                
                 starting_step_exp = self.steps
                 random_step = random.randint(0,4)
                 print("Walk for ", 10+random_step, " for ", current_location)
