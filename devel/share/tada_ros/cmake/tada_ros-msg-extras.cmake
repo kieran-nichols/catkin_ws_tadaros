@@ -1,0 +1,2 @@
+set(tada_ros_MESSAGE_FILES "/home/pi/catkin_ws/src/tada-ros/msg/UserChoiceMsg.msg;/home/pi/catkin_ws/src/tada-ros/msg/KillConfirmationMsg.msg;/home/pi/catkin_ws/src/tada-ros/msg/ConfigMsg.msg;/home/pi/catkin_ws/src/tada-ros/msg/EuropaMsg.msg;/home/pi/catkin_ws/src/tada-ros/msg/IMUDataMsg.msg;/home/pi/catkin_ws/src/tada-ros/msg/MotorDataMsg.msg;/home/pi/catkin_ws/src/tada-ros/msg/MotorListenMsg.msg")
+set(tada_ros_SERVICE_FILES "")
