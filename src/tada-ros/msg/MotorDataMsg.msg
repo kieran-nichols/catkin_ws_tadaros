@@ -13,3 +13,4 @@ float32 CPU1
 float32 CPU2
 float32 CPU3
 float32 t
+float32 valid
