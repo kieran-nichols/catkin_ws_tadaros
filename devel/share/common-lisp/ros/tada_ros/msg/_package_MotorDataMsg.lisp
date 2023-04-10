@@ -29,4 +29,6 @@
           CPU3
           T-VAL
           T
+          VALID-VAL
+          VALID
 ))

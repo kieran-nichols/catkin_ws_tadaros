@@ -14,7 +14,7 @@
 
 (defclass tada_ros::MotorDataMsg
   :super ros::object
-  :slots (_mode _duration _motor1_move _motor2_move _motor1_torque _motor2_torque _PF_cmd _EV_cmd _PF_curr _EV_curr _CPU0 _CPU1 _CPU2 _CPU3 _t ))
+  :slots (_mode _duration _motor1_move _motor2_move _motor1_torque _motor2_torque _PF_cmd _EV_cmd _PF_curr _EV_curr _CPU0 _CPU1 _CPU2 _CPU3 _t _valid ))
 
 (defmethod tada_ros::MotorDataMsg
   (:init
@@ -34,6 +34,7 @@
     ((:CPU2 __CPU2) 0.0)
     ((:CPU3 __CPU3) 0.0)
     ((:t __t) 0.0)
+    ((:valid __valid) 0.0)
     )
    (send-super :init)
    (setq _mode (round __mode))
@@ -51,6 +52,7 @@
    (setq _CPU2 (float __CPU2))
    (setq _CPU3 (float __CPU3))
    (setq _t (float __t))
+   (setq _valid (float __valid))
    self)
   (:mode
    (&optional __mode)
@@ -97,6 +99,9 @@
   (:t
    (&optional __t)
    (if __t (setq _t __t)) _t)
+  (:valid
+   (&optional __valid)
+   (if __valid (setq _valid __valid)) _valid)
   (:serialization-length
    ()
    (+
@@ -129,6 +134,8 @@
     ;; float32 _CPU3
     4
     ;; float32 _t
+    4
+    ;; float32 _valid
     4
     ))
   (:serialize
@@ -165,6 +172,8 @@
        (sys::poke _CPU3 (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;; float32 _t
        (sys::poke _t (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+     ;; float32 _valid
+       (sys::poke _valid (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;;
      (if (null strm) (get-output-stream-string s))))
   (:deserialize
@@ -199,11 +208,13 @@
      (setq _CPU3 (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;; float32 _t
      (setq _t (sys::peek buf ptr- :float)) (incf ptr- 4)
+   ;; float32 _valid
+     (setq _valid (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;;
    self)
   )
 
-(setf (get tada_ros::MotorDataMsg :md5sum-) "81f4ae7b8853b19df4672cd6f30b2548")
+(setf (get tada_ros::MotorDataMsg :md5sum-) "93917f2a09b44c2be7f84accf38c246b")
 (setf (get tada_ros::MotorDataMsg :datatype-) "tada_ros/MotorDataMsg")
 (setf (get tada_ros::MotorDataMsg :definition-)
       "int32 mode
@@ -221,11 +232,12 @@ float32 CPU1
 float32 CPU2
 float32 CPU3
 float32 t
+float32 valid
 
 ")
 
 
 
-(provide :tada_ros/MotorDataMsg "81f4ae7b8853b19df4672cd6f30b2548")
+(provide :tada_ros/MotorDataMsg "93917f2a09b44c2be7f84accf38c246b")
 
 

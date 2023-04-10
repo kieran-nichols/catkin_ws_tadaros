@@ -38,7 +38,8 @@ struct MotorDataMsg_
     , CPU1(0.0)
     , CPU2(0.0)
     , CPU3(0.0)
-    , t(0.0)  {
+    , t(0.0)
+    , valid(0.0)  {
     }
   MotorDataMsg_(const ContainerAllocator& _alloc)
     : mode(0)
@@ -55,7 +56,8 @@ struct MotorDataMsg_
     , CPU1(0.0)
     , CPU2(0.0)
     , CPU3(0.0)
-    , t(0.0)  {
+    , t(0.0)
+    , valid(0.0)  {
   (void)_alloc;
     }
 
@@ -106,6 +108,9 @@ struct MotorDataMsg_
    typedef float _t_type;
   _t_type t;
 
+   typedef float _valid_type;
+  _valid_type valid;
+
 
 
 
@@ -149,7 +154,8 @@ bool operator==(const ::tada_ros::MotorDataMsg_<ContainerAllocator1> & lhs, cons
     lhs.CPU1 == rhs.CPU1 &&
     lhs.CPU2 == rhs.CPU2 &&
     lhs.CPU3 == rhs.CPU3 &&
-    lhs.t == rhs.t;
+    lhs.t == rhs.t &&
+    lhs.valid == rhs.valid;
 }
 
 template<typename ContainerAllocator1, typename ContainerAllocator2>
@@ -206,12 +212,12 @@ struct MD5Sum< ::tada_ros::MotorDataMsg_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "81f4ae7b8853b19df4672cd6f30b2548";
+    return "93917f2a09b44c2be7f84accf38c246b";
   }
 
   static const char* value(const ::tada_ros::MotorDataMsg_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x81f4ae7b8853b19dULL;
-  static const uint64_t static_value2 = 0xf4672cd6f30b2548ULL;
+  static const uint64_t static_value1 = 0x93917f2a09b44c2bULL;
+  static const uint64_t static_value2 = 0xe7f84accf38c246bULL;
 };
 
 template<class ContainerAllocator>
@@ -245,6 +251,7 @@ struct Definition< ::tada_ros::MotorDataMsg_<ContainerAllocator> >
 "float32 CPU2\n"
 "float32 CPU3\n"
 "float32 t\n"
+"float32 valid\n"
 ;
   }
 
@@ -278,6 +285,7 @@ namespace serialization
       stream.next(m.CPU2);
       stream.next(m.CPU3);
       stream.next(m.t);
+      stream.next(m.valid);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -326,6 +334,8 @@ struct Printer< ::tada_ros::MotorDataMsg_<ContainerAllocator> >
     Printer<float>::stream(s, indent + "  ", v.CPU3);
     s << indent << "t: ";
     Printer<float>::stream(s, indent + "  ", v.t);
+    s << indent << "valid: ";
+    Printer<float>::stream(s, indent + "  ", v.valid);
   }
 };
 

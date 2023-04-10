@@ -33,6 +33,7 @@ class MotorDataMsg {
       this.CPU2 = null;
       this.CPU3 = null;
       this.t = null;
+      this.valid = null;
     }
     else {
       if (initObj.hasOwnProperty('mode')) {
@@ -125,6 +126,12 @@ class MotorDataMsg {
       else {
         this.t = 0.0;
       }
+      if (initObj.hasOwnProperty('valid')) {
+        this.valid = initObj.valid
+      }
+      else {
+        this.valid = 0.0;
+      }
     }
   }
 
@@ -160,6 +167,8 @@ class MotorDataMsg {
     bufferOffset = _serializer.float32(obj.CPU3, buffer, bufferOffset);
     // Serialize message field [t]
     bufferOffset = _serializer.float32(obj.t, buffer, bufferOffset);
+    // Serialize message field [valid]
+    bufferOffset = _serializer.float32(obj.valid, buffer, bufferOffset);
     return bufferOffset;
   }
 
@@ -197,11 +206,13 @@ class MotorDataMsg {
     data.CPU3 = _deserializer.float32(buffer, bufferOffset);
     // Deserialize message field [t]
     data.t = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [valid]
+    data.valid = _deserializer.float32(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
-    return 60;
+    return 64;
   }
 
   static datatype() {
@@ -211,7 +222,7 @@ class MotorDataMsg {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '81f4ae7b8853b19df4672cd6f30b2548';
+    return '93917f2a09b44c2be7f84accf38c246b';
   }
 
   static messageDefinition() {
@@ -232,6 +243,7 @@ class MotorDataMsg {
     float32 CPU2
     float32 CPU3
     float32 t
+    float32 valid
     
     `;
   }
@@ -345,6 +357,13 @@ class MotorDataMsg {
     }
     else {
       resolved.t = 0.0
+    }
+
+    if (msg.valid !== undefined) {
+      resolved.valid = msg.valid;
+    }
+    else {
+      resolved.valid = 0.0
     }
 
     return resolved;

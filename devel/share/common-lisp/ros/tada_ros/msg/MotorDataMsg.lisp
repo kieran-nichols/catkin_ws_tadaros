@@ -81,6 +81,11 @@
     :reader t
     :initarg :t
     :type cl:float
+    :initform 0.0)
+   (valid
+    :reader valid
+    :initarg :valid
+    :type cl:float
     :initform 0.0))
 )
 
@@ -166,6 +171,11 @@
 (cl:defmethod t-val ((m <MotorDataMsg>))
   (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:t-val is deprecated.  Use tada_ros-msg:t instead.")
   (t m))
+
+(cl:ensure-generic-function 'valid-val :lambda-list '(m))
+(cl:defmethod valid-val ((m <MotorDataMsg>))
+  (roslisp-msg-protocol:msg-deprecation-warning "Using old-style slot reader tada_ros-msg:valid-val is deprecated.  Use tada_ros-msg:valid instead.")
+  (valid m))
 (cl:defmethod roslisp-msg-protocol:serialize ((msg <MotorDataMsg>) ostream)
   "Serializes a message object of type '<MotorDataMsg>"
   (cl:let* ((signed (cl:slot-value msg 'mode)) (unsigned (cl:if (cl:< signed 0) (cl:+ signed 4294967296) signed)))
@@ -245,6 +255,11 @@
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
   (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 't))))
+    (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
+    (cl:write-byte (cl:ldb (cl:byte 8 24) bits) ostream))
+  (cl:let ((bits (roslisp-utils:encode-single-float-bits (cl:slot-value msg 'valid))))
     (cl:write-byte (cl:ldb (cl:byte 8 0) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 8) bits) ostream)
     (cl:write-byte (cl:ldb (cl:byte 8 16) bits) ostream)
@@ -342,6 +357,12 @@
       (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
       (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
     (cl:setf (cl:slot-value msg 't) (roslisp-utils:decode-single-float-bits bits)))
+    (cl:let ((bits 0))
+      (cl:setf (cl:ldb (cl:byte 8 0) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 8) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 16) bits) (cl:read-byte istream))
+      (cl:setf (cl:ldb (cl:byte 8 24) bits) (cl:read-byte istream))
+    (cl:setf (cl:slot-value msg 'valid) (roslisp-utils:decode-single-float-bits bits)))
   msg
 )
 (cl:defmethod roslisp-msg-protocol:ros-datatype ((msg (cl:eql '<MotorDataMsg>)))
@@ -352,18 +373,19 @@
   "tada_ros/MotorDataMsg")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql '<MotorDataMsg>)))
   "Returns md5sum for a message object of type '<MotorDataMsg>"
-  "81f4ae7b8853b19df4672cd6f30b2548")
+  "93917f2a09b44c2be7f84accf38c246b")
 (cl:defmethod roslisp-msg-protocol:md5sum ((type (cl:eql 'MotorDataMsg)))
   "Returns md5sum for a message object of type 'MotorDataMsg"
-  "81f4ae7b8853b19df4672cd6f30b2548")
+  "93917f2a09b44c2be7f84accf38c246b")
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql '<MotorDataMsg>)))
   "Returns full string definition for message of type '<MotorDataMsg>"
-  (cl:format cl:nil "int32 mode~%int32 duration~%int32 motor1_move~%int32 motor2_move~%int32 motor1_torque~%int32 motor2_torque~%float32 PF_cmd~%float32 EV_cmd~%float32 PF_curr~%float32 EV_curr~%float32 CPU0~%float32 CPU1~%float32 CPU2~%float32 CPU3~%float32 t~%~%~%"))
+  (cl:format cl:nil "int32 mode~%int32 duration~%int32 motor1_move~%int32 motor2_move~%int32 motor1_torque~%int32 motor2_torque~%float32 PF_cmd~%float32 EV_cmd~%float32 PF_curr~%float32 EV_curr~%float32 CPU0~%float32 CPU1~%float32 CPU2~%float32 CPU3~%float32 t~%float32 valid~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:message-definition ((type (cl:eql 'MotorDataMsg)))
   "Returns full string definition for message of type 'MotorDataMsg"
-  (cl:format cl:nil "int32 mode~%int32 duration~%int32 motor1_move~%int32 motor2_move~%int32 motor1_torque~%int32 motor2_torque~%float32 PF_cmd~%float32 EV_cmd~%float32 PF_curr~%float32 EV_curr~%float32 CPU0~%float32 CPU1~%float32 CPU2~%float32 CPU3~%float32 t~%~%~%"))
+  (cl:format cl:nil "int32 mode~%int32 duration~%int32 motor1_move~%int32 motor2_move~%int32 motor1_torque~%int32 motor2_torque~%float32 PF_cmd~%float32 EV_cmd~%float32 PF_curr~%float32 EV_curr~%float32 CPU0~%float32 CPU1~%float32 CPU2~%float32 CPU3~%float32 t~%float32 valid~%~%~%"))
 (cl:defmethod roslisp-msg-protocol:serialization-length ((msg <MotorDataMsg>))
   (cl:+ 0
+     4
      4
      4
      4
@@ -398,4 +420,5 @@
     (cl:cons ':CPU2 (CPU2 msg))
     (cl:cons ':CPU3 (CPU3 msg))
     (cl:cons ':t (t msg))
+    (cl:cons ':valid (valid msg))
 ))
