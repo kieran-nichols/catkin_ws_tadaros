@@ -154,7 +154,7 @@ class BrainNode():
         # specify home when the motor is turned on to be the motor positions at start
         self.homed1 = self.curr_pos1; self.homed2 = self.curr_pos2
         self.global_M1 = 0; self.global_M2 = 0;
-        self.M1_prev = 0; self.M2_prev = 0
+        self.prev_M1 = 0; self.prev_M2 = 0
         self.homed1prev=0;self.homed2prev=0
         
         theta_array = [2.5, 5, 7.5, 10]
@@ -233,13 +233,32 @@ class BrainNode():
             q3 = 2*np.real((np.arccos(np.sin(theta/2)/np.sin(beta)))) # arccos in python always returns real values
 
             alpha = alpha_deg*math.pi/180
-            # clockwise is positive 
+            # counterlockwise is positive 
             M1 = 180/math.pi*(alpha - np.arctan2(np.tan(q3/2),np.cos(beta))) 
             M2 = 180/math.pi*(-(alpha + np.arctan2(np.tan(q3/2), np.cos(beta))))
+            
+            #this is the code to find the rotation 
+            #M1_prev is current position and can be any number
+            #M1_new is what we want
+            M1_new=M1; M2_new=M2
+            # ~ M1_prev = ((self.prev_var1-homed1)*360/self.cnts_per_rev)
+            # ~ M2_prev = ((self.prev_var2-homed2)*360/self.cnts_per_rev)
+            
+            temp1 = M1_new-self.prev_M1
+            rot1 = temp1%360
+            if rot1>180:
+                rot1=rot1-360
+                
+            temp2 = M2_new-self.prev_M2
+            rot2 = temp2%360
+            if rot2>180:
+                rot2=rot2-360
+            
+            self.prev_M1=M1; self.prev_M2=M2           
             # Wrapping function that ensures that the angle is between 180 and -180;
             ## need to finish verify
-            M1 = (M1 + 180)%360 - 180
-            M2 = (M2 + 180)%360 - 180
+            # ~ M1 = (M1 + 180)%360 - 180
+            # ~ M2 = (M2 + 180)%360 - 180
             
             q1 = M1*np.pi/180;
             q5 = M2*np.pi/180;
@@ -293,79 +312,79 @@ class BrainNode():
             #print("M1_prev +homed")
             #print(M1_prev)
             
-            rot1=0
-            rot2=0
-            print("M1_prev before conversion")
-            print(self.prev_var1)
-            #M1=new motor command we give it in deg, should be between -180 and 180
-            #M1_pre=previous motor command given in deg, should be between -180 and 180
-            #rot1/rot2= rotation in degrees that we want to move it. CW=positive, CCW=negative rotation should always be less than abs(180) if it isn't, that means there's wrapping issues
+            # ~ rot1=0
+            # ~ rot2=0
+            # ~ print("M1_prev before conversion")
+            # ~ print(self.prev_var1)
+            # ~ #M1=new motor command we give it in deg, should be between -180 and 180
+            # ~ #M1_pre=previous motor command given in deg, should be between -180 and 180
+            # ~ #rot1/rot2= rotation in degrees that we want to move it. CW=positive, CCW=negative rotation should always be less than abs(180) if it isn't, that means there's wrapping issues
             
-            #this is if crossing 0 to get to the new position makes it move more than 180 deg
-            #then it will rotate in the opposite direction
-            if ((abs(M1) + abs(self.M1_prev))>180) and (abs(M1 + self.M1_prev)<180):
-                rot1 = 360-(abs(self.M1_prev)+abs(M1))
-                #this makes it move in the right direction
-                if self.M1_prev>0 and M1<0:
-                    rot1=-rot1
-            #this is if the previous and the new value are on the same side of the motor
-            #eg both pos or both neg
-            elif (self.M1_prev>0 and M1>0) or (self.M1_prev<0 and M1<0):
-                rot1=self.M1_prev-M1
-            #this is if you tell it to move to the position it's in already it won't move
-            elif self.M1_prev==M1:
-                rot1=0
-            #edge case of if you're at 0, just rotate it to the number you want it to go
-            elif self.M1_prev==0:
-                rot1=M1*(-1)
-                #print("M1_prev==0")
-            #this is if you're at a certain number and want to move it back to home rotate it the the value of itself but in the opposite direction
-            elif M1==0:
-                rot1=self.M1_prev
-                #print("M1==0")
-            #this is just if the previous and new values are opposite signs, but less than 180, move it across 0 to get to the new value
-            else:
-                #print("opposite signs, rotation crosses 0 to get back to home M1")
+            # ~ #this is if crossing 0 to get to the new position makes it move more than 180 deg
+            # ~ #then it will rotate in the opposite direction
+            # ~ if ((abs(M1) + abs(self.M1_prev))>180) and (abs(M1 + self.M1_prev)<180):
+                # ~ rot1 = 360-(abs(self.M1_prev)+abs(M1))
+                # ~ #this makes it move in the right direction
+                # ~ if self.M1_prev>0 and M1<0:
+                    # ~ rot1=-rot1
+            # ~ #this is if the previous and the new value are on the same side of the motor
+            # ~ #eg both pos or both neg
+            # ~ elif (self.M1_prev>0 and M1>0) or (self.M1_prev<0 and M1<0):
+                # ~ rot1=self.M1_prev-M1
+            # ~ #this is if you tell it to move to the position it's in already it won't move
+            # ~ elif self.M1_prev==M1:
+                # ~ rot1=0
+            # ~ #edge case of if you're at 0, just rotate it to the number you want it to go
+            # ~ elif self.M1_prev==0:
+                # ~ rot1=M1*(-1)
+                # ~ #print("M1_prev==0")
+            # ~ #this is if you're at a certain number and want to move it back to home rotate it the the value of itself but in the opposite direction
+            # ~ elif M1==0:
+                # ~ rot1=self.M1_prev
+                # ~ #print("M1==0")
+            # ~ #this is just if the previous and new values are opposite signs, but less than 180, move it across 0 to get to the new value
+            # ~ else:
+                # ~ #print("opposite signs, rotation crosses 0 to get back to home M1")
 
-                rot1=abs(self.M1_prev)+abs(M1)
-                if self.M1_prev>0 and M1<0:
-                    rot1=-rot1
+                # ~ rot1=abs(self.M1_prev)+abs(M1)
+                # ~ if self.M1_prev>0 and M1<0:
+                    # ~ rot1=-rot1
                     
-            #M2 motor position
-            #this is if crossing 0 to get to the new position makes it move more than 180 deg
-            #then it will rotate in the opposite direction
-            if ((abs(M2) + abs(self.M2_prev))>180) and (abs(M2 + self.M2_prev)<180):
-                rot2 = 360-(abs(M2_prev)+abs(M2))
-                if self.M2_prev>0 and M2<0:
-                    rot2=-rot2
-            #this is if the previous and the new value are on the same side of the motor
-            #eg both pos or both neg
-            elif (self.M2_prev>0 and M2>0) or (self.M2_prev<0 and M2<0):
-                rot2=self.M2_prev-M2
-            elif self.M2_prev==M2:
-                rot2=0
-            #edge case of if you're at 0, just rotate it to the number you want it to go
-            elif self.M2_prev==0:
-                rot2=M2*(-1)
-                #print("M2_prev==0")
-            #this is if you're at a certain number and want to move it back to home rotate it the the value of itself but in the opposite direction
-            elif M2==0:
-                rot2=self.M2_prev
-                #print("M2==0")
-            #this is just if the previous and new values are opposite signs, but less than 180, move it across 0 to get to the new value
-            else:
-                rot2=abs(self.M2_prev)+abs(M2)
-                if self.M2_prev>0 and M2<0:
-                    rot2=-rot2
+            # ~ #M2 motor position
+            # ~ #this is if crossing 0 to get to the new position makes it move more than 180 deg
+            # ~ #then it will rotate in the opposite direction
+            # ~ if ((abs(M2) + abs(self.M2_prev))>180) and (abs(M2 + self.M2_prev)<180):
+                # ~ rot2 = 360-(abs(M2_prev)+abs(M2))
+                # ~ if self.M2_prev>0 and M2<0:
+                    # ~ rot2=-rot2
+            # ~ #this is if the previous and the new value are on the same side of the motor
+            # ~ #eg both pos or both neg
+            # ~ elif (self.M2_prev>0 and M2>0) or (self.M2_prev<0 and M2<0):
+                # ~ rot2=self.M2_prev-M2
+            # ~ elif self.M2_prev==M2:
+                # ~ rot2=0
+            # ~ #edge case of if you're at 0, just rotate it to the number you want it to go
+            # ~ elif self.M2_prev==0:
+                # ~ rot2=M2*(-1)
+                # ~ #print("M2_prev==0")
+            # ~ #this is if you're at a certain number and want to move it back to home rotate it the the value of itself but in the opposite direction
+            # ~ elif M2==0:
+                # ~ rot2=self.M2_prev
+                # ~ #print("M2==0")
+            # ~ #this is just if the previous and new values are opposite signs, but less than 180, move it across 0 to get to the new value
+            # ~ else:
+                # ~ rot2=abs(self.M2_prev)+abs(M2)
+                # ~ if self.M2_prev>0 and M2<0:
+                    # ~ rot2=-rot2
 
-            print("global M1, global M2:")
-            print(self.prev_var1,self.prev_var2)
-            print("M1 prev M2 prev:")
-            print(self.M1_prev, self.M2_prev) 
-            print("M1 new M2 new:")
-            print(M1, M2)  
-            print("rot1, rot2:")
-            print(rot1, rot2) 
+            # ~ print("global M1, global M2:")
+            # ~ print(self.prev_var1,self.prev_var2)
+            # ~ print("M1 prev M2 prev:")
+            # ~ print(self.M1_prev, self.M2_prev) 
+            # ~ print("M1 new M2 new:")
+            # ~ print(M1, M2)  
+            # ~ print("rot1, rot2:")
+            # ~ print(rot1, rot2) 
             
             
             # ~ elif M1<-180:
@@ -397,11 +416,11 @@ class BrainNode():
             # Create command for motors from user specified homed with a continous adjustment to ensure motor is close to a multiple of the homed value
             # ~ global_M1 = M1_counts + 0*self.home_multiple1*self.cnts_per_rev + homed1
             # ~ global_M2 = M2_counts + 0*self.home_multiple2*self.cnts_per_rev + homed2
-            self.prev_M1=M1;self.prev_M2=M2
+            # ~ self.prev_M1=M1;self.prev_M2=M2
             # global motor pos = shortest path + homed #last global cmd - prev homed + new homed
-            self.global_M1 = rot1_counts + homed1#+ 0*self.global_M1 - self.homed1prev  
-            self.global_M2 = rot2_counts + homed2#+ 0*self.global_M2 - self.homed2prev 
-            self.homed1prev=homed1;self.homed2prev=homed2
+            self.global_M1 = rot1_counts + self.global_M1#+ 0*self.global_M1 - self.homed1prev  
+            self.global_M2 = rot2_counts +self.global_M2#+ 0*self.global_M2 - self.homed2prev 
+            # ~ self.homed1prev=homed1;self.homed2prev=homed2
             return [self.global_M1, self.global_M2, self.PF, self.EV]
         
         # Test for sagittal only ankle movement from neutral to dorsiflexed and back to neutral
