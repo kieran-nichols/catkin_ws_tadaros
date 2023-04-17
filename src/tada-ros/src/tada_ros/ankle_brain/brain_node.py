@@ -289,8 +289,9 @@ class BrainNode():
             rot2_counts = rot2*self.cnts_per_rev/360
           
             print('global_m1, rot1: ', self.global_M1,rot1_counts)
-            self.global_M1 = rot1_counts + self.global_M1#+ 0*self.global_M1 - self.homed1prev  
-            self.global_M2 = rot2_counts +self.global_M2#+ 0*self.global_M2 - self.homed2prev 
+            self.global_M1 = rot1_counts + self.global_M1 + homed1#+ 0*self.global_M1 - self.homed1prev  
+            self.global_M2 = rot2_counts +self.global_M2 + homed2#+ 0*self.global_M2 - self.homed2prev 
+	    self.homed1 = 0; self.homed2 = 0 # reset homed values to 0
             # ~ self.homed1prev=homed1;self.homed2prev=homed2
 
             return [self.global_M1, self.global_M2, self.PF, self.EV]
