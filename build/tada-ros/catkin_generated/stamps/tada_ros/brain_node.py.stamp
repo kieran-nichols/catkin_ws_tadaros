@@ -166,14 +166,15 @@ class BrainNode():
         self.homed1prev=0;self.homed2prev=0
         
         theta_array = [2.5, 5, 7.5, 10]
-        alpha_array = [0, 180 , 0, 180, 0, 180, 0, 180] # only sagittal
+        # ~ alpha_array = [0, 180 , 0, 180, 0, 180, 0, 180] # only sagittal
         theta_array_v2 = [5, 10]
         alpha_array_v2 = [-90, 0, 90, 180] # only sagittal
         # ~ alpha_array = [-90, 90, -90, 90, -90, 90, -90, 90] # only frontal
-        # ~ alpha_array = [-135, -90, -45, 0, 45, 90, 135, 180] # mixture of frontal and sagiattal
+        alpha_array = [-135, -90, -45, 0, 45, 90, 135, 180] # mixture of frontal and sagiattal
+        # ~ alpha_array = [0, 180, 0, 180, 0, 180, 0, 180] 
         # ~ self.mode = 0
-        self.tada_v1_data = [[0,180]] # empty list that will hold the TADA_angle cmds
-        self.tada_v2_data = [[0,180]]
+        self.tada_v1_data = [[10,180]] # empty list that will hold the TADA_angle cmds
+        self.tada_v2_data = [[10,180]]
         self.itr_v1 = 0
         
         # create tada_v1 experiment theta, alpha command angles
@@ -288,9 +289,22 @@ class BrainNode():
             rot1_counts = rot1*self.cnts_per_rev/360
             rot2_counts = rot2*self.cnts_per_rev/360
           
-            self.global_M1 = rot1_counts + self.global_M1#+ 0*self.global_M1 - self.homed1prev  
-            self.global_M2 = rot2_counts +self.global_M2#+ 0*self.global_M2 - self.homed2prev 
+            # ~ print('global_m1, rot1: ', self.global_M1,rot1_counts)
+            
+            if homed1=='' and homed2=='':
+                self.global_M1 = rot1_counts + self.global_M1#+ 0*self.global_M1 - self.homed1prev  
+                self.global_M2 = rot2_counts +self.global_M2#+ 0*self.global_M2 - self.homed2prev 
+            elif homed1==0 and homed2==0:
+                self.global_M1 = rot1_counts #+ 0*self.global_M1 - self.homed1prev  
+                self.global_M2 = rot2_counts#+ 0*self.global_M2 - self.homed2prev
+                self.homed1 = ''; self.homed2 = ''; # reset homed values to empty string
+            else:
+                self.global_M1 = rot1_counts + homed1#+ 0*self.global_M1 - self.homed1prev  
+                self.global_M2 = rot2_counts + homed2#+ 0*self.global_M2 - self.homed2prev
+                self.homed1 = ''; self.homed2 = ''; # reset homed values to empty string
+                
             # ~ self.homed1prev=homed1;self.homed2prev=homed2
+            print('PF_cmd, EV_cmd: ', self.PF, self.EV)
 
             return [self.global_M1, self.global_M2, self.PF, self.EV]
         
@@ -376,7 +390,7 @@ class BrainNode():
                         self.theta_deg = cmd1[0]; self.alpha_deg = cmd1[1]
                 # mode 2
                 else:
-                    total_time = 1 # one second
+                    total_time = 5 # one second
                     self.theta_deg = cmd[0]
                     self.alpha_deg = cmd[1]                
                 
@@ -400,7 +414,7 @@ class BrainNode():
             var2 = motor[1]
             var3 = motor[2]
             var4 = motor[3]
-
+            
             return var1, var2, var3, var4
         
         # Sofya please add to this tada_v1 expt. You can use/adpat the code move_swing 
@@ -651,7 +665,7 @@ class BrainNode():
                 self.curr_PF, self.curr_EV = TADA_angle_read(self)
 
             elif self.mode == 4:
-                var1,var2, self.PF, self.EV = tada_v2_expt(self)
+                var1, var2, self.PF, self.EV = tada_v2_expt(self)
             else: 
                 self.mode = 0
                 
@@ -679,7 +693,7 @@ class BrainNode():
             [motor_command.CPU0, motor_command.CPU1, motor_command.CPU2, motor_command.CPU3] = self.CPU
             motor_command.t = current_time_value
             motor_command.valid = self.tada_v2_paused
-            
+                        
             self.prev_var1 = var1
             self.prev_var2 = var2
             self.prev_var3 = self.prev_stance_theta # be careful not to confuse var1 and var2, and var2 and var4

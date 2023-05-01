@@ -19,7 +19,7 @@ import os
 import threading
 
 #EUROPA_ADDR=u"06:11"
-EUROPA_ADDR=u"f5:ea" # 06:53 02:8D
+EUROPA_ADDR=u"06:53" #f5:ea" # 06:53 02:8D
 #europa_file_path="/home/pi/Desktop/europa/data/"
 class BleServer():
     def __init__(self):
@@ -29,7 +29,7 @@ class BleServer():
         #MPU_Init()
         dev = EuropaBLE.EuropaBLE()   
         dev.set_device_addr(EUROPA_ADDR)
-        dev.set_iface(0)
+        dev.set_iface(1)
         
         while dev.search_europa()==0 and not rospy.is_shutdown():
             

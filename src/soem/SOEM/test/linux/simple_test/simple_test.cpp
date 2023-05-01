@@ -455,17 +455,19 @@ OSAL_THREAD_FUNC_RT ecatthread(void *ptr)
                 cur_DCtime+=diff_dc32;
                 //~ if (cur_DCtime>max_DCtime) max_DCtime=cur_DCtime;
                 
-                /* set linux sync point 50000us later than DC sync, just as example I checked the raw ec_DCtime*/
-                delta = (cur_DCtime - 50000) % cycletime;
+                /* set linux sync point 50 us later than DC sync, just as example I checked the raw ec_DCtime*/
+                delta = (cur_DCtime - 50000) % cycletime; // 100000 didn't seem to help
                 if(delta> (cycletime / 2)) { delta= delta - cycletime; }
                 if(delta>0){ integral++; }
                 if(delta<0){ integral--; }
-                toff = -(delta / 10) - (integral / 1000); // Adjusted these values till toff was not too large or did not drift
+                // change P to 1, 10, 100 with I as 1000 and ctime as 50
+                // change I to 100, 1000, 10000 with P as 10 and ctime as 50
+                toff = -(delta / 10) - (integral / 10); // Adjusted these values till toff was not too large or did not drift
                 gl_delta = delta;
          }
-         pthread_mutex_unlock(&lock);
-         ec_send_processdata();
          //~ pthread_mutex_unlock(&lock);
+         ec_send_processdata();
+         pthread_mutex_unlock(&lock); // not sure if it works
       }
    }
 }
@@ -542,7 +544,7 @@ OSAL_THREAD_FUNC ecatcheck( void *ptr )
             if(!ec_group[currentgroup].docheckstate)
                printf("OK : all slaves resumed OPERATIONAL.\n");
         }
-        osal_usleep(20000); //usleep(250);
+        osal_usleep(10000); //20000 usleep(250);
     }
 }  
 
@@ -630,7 +632,7 @@ int main(int argc, char **argv)
     //~ {
         start_t = clock();
         dorun = 0;
-        int ctime = 50; //100 works better than 500
+        int ctime = 50; //50, 100, 500
         struct sched_param param;
         struct sched_param param1;
         int policy = SCHED_FIFO;
