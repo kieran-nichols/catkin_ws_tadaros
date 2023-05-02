@@ -219,7 +219,7 @@ class BrainNode():
             q2 = np.pi/36; q4 = q2;
             R01 = np.array([[np.cos(q1), -np.sin(q1), 0], [np.sin(q1), np.cos(q1), 0], [0, 0, 1]])
             R12 = np.array([[np.cos(q2), 0 , np.sin(q2)], [0, 1, 0], [-np.sin(q2), 0, np.cos(q2)]])
-            q3 = -q1 - q5;
+            # ~ q3 = -q1 - q5;
             R23 = np.array([[np.cos(q3), -np.sin(q3), 0], [np.sin(q3), np.cos(q3), 0], [0, 0, 1]])
             R34 = np.array([[np.cos(q4), 0, np.sin(q4)], [0, 1, 0], [-np.sin(q4), 0, np.cos(q4)]])
             R45 = np.array([[np.cos(q5), -np.sin(q5), 0], [np.sin(q5), np.cos(q5), 0], [0, 0, 1]])
@@ -272,7 +272,7 @@ class BrainNode():
             q2 = np.pi/36; q4 = q2;
             R01 = np.array([[np.cos(q1), -np.sin(q1), 0], [np.sin(q1), np.cos(q1), 0], [0, 0, 1]])
             R12 = np.array([[np.cos(q2), 0 , np.sin(q2)], [0, 1, 0], [-np.sin(q2), 0, np.cos(q2)]])
-            q3 = -q1 - q5;
+            # ~ q3 = -q1 - q5;
             R23 = np.array([[np.cos(q3), -np.sin(q3), 0], [np.sin(q3), np.cos(q3), 0], [0, 0, 1]])
             R34 = np.array([[np.cos(q4), 0, np.sin(q4)], [0, 1, 0], [-np.sin(q4), 0, np.cos(q4)]])
             R45 = np.array([[np.cos(q5), -np.sin(q5), 0], [np.sin(q5), np.cos(q5), 0], [0, 0, 1]])
@@ -282,8 +282,8 @@ class BrainNode():
             R04 = np.matmul(R03,R34)
             R05 = np.matmul(R04,R45)
             
-            self.PF = float(180/np.pi*R05[0,2])
-            self.EV = float(180/np.pi*R05[1,2])
+            self.PF = float(180/np.pi*np.arctan2(R05[0,2],R05[2,2])) #float(180/np.pi*R05[0,2])
+            self.EV = float(180/np.pi*np.arctan2(R05[1,2],R05[2,2]))
             
             # Convert rotation in deg to rotation we need to move it in counts
             rot1_counts = rot1*self.cnts_per_rev/360
@@ -304,7 +304,7 @@ class BrainNode():
                 self.homed1 = ''; self.homed2 = ''; # reset homed values to empty string
                 
             # ~ self.homed1prev=homed1;self.homed2prev=homed2
-            print('PF_cmd, EV_cmd: ', self.PF, self.EV)
+            print('PF_cmd, EV_cmd: ', round(self.PF,3), round(self.EV,3))
 
             return [self.global_M1, self.global_M2, self.PF, self.EV]
         
