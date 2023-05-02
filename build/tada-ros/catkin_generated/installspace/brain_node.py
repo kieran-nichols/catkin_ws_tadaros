@@ -390,7 +390,7 @@ class BrainNode():
                         self.theta_deg = cmd1[0]; self.alpha_deg = cmd1[1]
                 # mode 2
                 else:
-                    total_time = 5 # one second
+                    total_time = 1 # one second
                     self.theta_deg = cmd[0]
                     self.alpha_deg = cmd[1]                
                 

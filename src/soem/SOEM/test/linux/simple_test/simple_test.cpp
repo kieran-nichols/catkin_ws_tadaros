@@ -443,8 +443,9 @@ OSAL_THREAD_FUNC_RT ecatthread(void *ptr)
          /* if we have some digital output, cycle */
          if( digout ) *digout = (uint8) ((dorun / 16) & 0xff);
 
-         if (ec_slave[0].hasdc)
+         if (ec_slave[0].hasdc) 
          {
+         
             /* calulate toff to get linux time and DC synced */
                 cur_dc32= (uint32_t) (ec_DCtime & 0xffffffff); 	//use 32-bit only
                 if (cur_dc32>pre_dc32)							//normal case
@@ -453,21 +454,29 @@ OSAL_THREAD_FUNC_RT ecatthread(void *ptr)
                     diff_dc32=(0xffffffff-pre_dc32)+cur_dc32;
                 pre_dc32=cur_dc32;
                 cur_DCtime+=diff_dc32;
-                //~ if (cur_DCtime>max_DCtime) max_DCtime=cur_DCtime;
+                // //~ if (cur_DCtime>max_DCtime) max_DCtime=cur_DCtime;
                 
                 /* set linux sync point 50 us later than DC sync, just as example I checked the raw ec_DCtime*/
                 delta = (cur_DCtime - 50000) % cycletime; // 100000 didn't seem to help
+                //~ printf("%ld, ",cur_DCtime);
                 if(delta> (cycletime / 2)) { delta= delta - cycletime; }
                 if(delta>0){ integral++; }
                 if(delta<0){ integral--; }
+                //~ integral = delta*cycletime + integral;
+                
                 // change P to 1, 10, 100 with I as 1000 and ctime as 50
                 // change I to 100, 1000, 10000 with P as 10 and ctime as 50
-                toff = -(delta / 10) - (integral / 10); // Adjusted these values till toff was not too large or did not drift
+                toff = -(delta / 10) - (integral / 1000); // 10, 1000 Adjusted these values till toff was not too large or did not drift
+                //~ printf("%ld \n",toff);
                 gl_delta = delta;
          }
-         //~ pthread_mutex_unlock(&lock);
+         
+         pthread_mutex_unlock(&lock);
+         
+         pthread_mutex_lock(&lock); 
          ec_send_processdata();
          pthread_mutex_unlock(&lock); // not sure if it works
+         
       }
    }
 }
@@ -575,7 +584,9 @@ void extra_function(clock_t start_time) {
             tada_ros::MotorListenMsg motor_listen;
             motor_listen.curr_pos1 = curr_pos;
             motor_listen.curr_pos2 = curr_pos2;
-            motor_listen.toff = toff;
+            //~ float curr_dc_time = (float)cur_DCtime;
+            //~ printf("%lld \n",cur_DCtime);
+            motor_listen.toff = toff; //curr_dc_time; // toff
             motor_listen.t = final_time;
             
             pub_motor.publish(motor_listen);
