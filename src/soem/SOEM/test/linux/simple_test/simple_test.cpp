@@ -38,7 +38,7 @@
 #define NSEC_PER_SEC 1000000000
 #define stack64k (64 * 1024)
 float time_increment; 
-int timestep = 500; //500 
+int timestep = 1000; //500 
 clock_t start_t, end_t, start2, end2;
 double total_t = 0;
 int total_itr = 10000;
@@ -90,7 +90,7 @@ int initial_pos2 = 0;
 int brute_force = 0;
 int test_var = 0;
 int test_var2 = 0;
-int delay = 50; 
+int delay = 5000; 
 int iret1, iret2;
 struct timeval tv, t1, t2;
 int dorun = 0;
@@ -218,7 +218,7 @@ OSAL_THREAD_FUNC simpletest(int input[6])
             
             /* request OP state for all slaves */
             ec_writestate(0);
-            chk = 100;
+            chk = 50;
                    
             /* wait for all slaves to reach OP state */
             do
@@ -271,8 +271,9 @@ OSAL_THREAD_FUNC simpletest(int input[6])
         start2 = clock();
         
         // continuous loop to send commands to the motor
-        while(1) {
-            
+        //~ while(1) {
+        while(inOP){
+            //~ if(wkc >= expectedWKC){
             itr = itr + 1;
             //~ end_t = clock();
             //~ total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
@@ -285,6 +286,7 @@ OSAL_THREAD_FUNC simpletest(int input[6])
             target->torque = (int16) torque;
             target2->torque = (int16) torque2;
 
+            if(wkc >= expectedWKC){
                         /** if in fault or in the way to normal status, we update the state machine */
                         // slave 1
                         switch(target->status){
@@ -328,33 +330,45 @@ OSAL_THREAD_FUNC simpletest(int input[6])
                             }
                         }
             
-            if (mode == 1){
-                // motor not moving in this setting                    
-                    target->position = (int32) (final_pos);
-                    target2->position = (int32) (final_pos2);
+            if ((val->status & 0x0fff) == 0x0237) {
+                
+                if (mode == 1){
+                    // motor not moving in this setting                    
+                        target->position = (int32) (final_pos);
+                        target2->position = (int32) (final_pos2);
+                    }
+                    //~ else {
+                        //~ target->position = (int32) (initial_pos);
+                        //~ target2->position = (int32) (initial_pos2);
+                    //~ }
+                else {
+                    //~ if (itr <= total_itr) {
+                        target->position = (int32) (final_pos);
+                        target2->position = (int32) (final_pos2);
+                    //~ }
+                    }
                 }
-                //~ else {
-                    //~ target->position = (int32) (initial_pos);
-                    //~ target2->position = (int32) (initial_pos2);
-                //~ }
-            else {
-                //~ if (itr <= total_itr) {
-                    target->position = (int32) (final_pos);
-                    target2->position = (int32) (final_pos2);
-                //~ }
-            }
-            
+            else printf("."); //("status error\n"); 
 
             needlf = TRUE;
                 
-                if (abs(curr_pos - final_pos) == 0 && abs(curr_pos2 == final_pos2) == 0 && print_state == 1) {
-                //~ if (move_to_final == 0){
-                    end2 = clock();
-                    double motor_move_time = (double) (end2-start2)/CLOCKS_PER_SEC;
-                    printf("\nMovement took %f sec\n",motor_move_time); 
-                    print_state = 0;
-                } 
-                
+                //~ if (abs(curr_pos - final_pos) == 0 && abs(curr_pos2 == final_pos2) == 0 && print_state == 1) {
+                //if (move_to_final == 0){
+                    //~ end2 = clock();
+                    //~ double motor_move_time = (double) (end2-start2)/CLOCKS_PER_SEC;
+                    //~ printf("\nMovement took %f sec\n",motor_move_time); 
+                    //~ print_state = 0;
+                //~ } 
+            }
+            else printf("?"); //("wkc error\n");
+            
+            //~ printf("Itr %4d", itr); 
+            //~ printf("  Initial_pos: %d,", initial_pos);
+            //~ printf("  Actual_pos: %d,", val->position);  
+            //~ printf("  Target_pos: %d,", final_pos);
+            //~ printf(" move: %d", test_var);
+            //~ printf("\r"); 
+            
             osal_usleep(timestep);
             }
             
@@ -471,9 +485,9 @@ OSAL_THREAD_FUNC_RT ecatthread(void *ptr)
                 gl_delta = delta;
          }
          
-         pthread_mutex_unlock(&lock);
+         //~ pthread_mutex_unlock(&lock);
          
-         pthread_mutex_lock(&lock); 
+         //~ pthread_mutex_lock(&lock); 
          ec_send_processdata();
          pthread_mutex_unlock(&lock); // not sure if it works
          
@@ -553,13 +567,13 @@ OSAL_THREAD_FUNC ecatcheck( void *ptr )
             if(!ec_group[currentgroup].docheckstate)
                printf("OK : all slaves resumed OPERATIONAL.\n");
         }
-        osal_usleep(10000); //20000 usleep(250);
+        osal_usleep(250); //20000 usleep(250);
     }
 }  
 
 // Extra thread to handle ROS publishing and subscribing
 void extra_function(clock_t start_time) {
-    sleep(3);
+    sleep(2);
     ros::NodeHandle m;
     ros::Subscriber sub_motor = m.subscribe("motor_command", 10, motor_commandCallback);
     ros::Publisher pub_motor = m.advertise<tada_ros::MotorListenMsg>("motor_listen", 10);
@@ -643,7 +657,7 @@ int main(int argc, char **argv)
     //~ {
         start_t = clock();
         dorun = 0;
-        int ctime = 50; //50, 100, 500
+        int ctime = 1000; //50, 100, 500
         struct sched_param param;
         struct sched_param param1;
         int policy = SCHED_FIFO;
