@@ -8,15 +8,16 @@ import struct
 
 
 class MotorListenMsg(genpy.Message):
-  _md5sum = "458821757342d0f4a30215b0ee1690f8"
+  _md5sum = "16758636abd34f69fe5a976e7e2a04ca"
   _type = "tada_ros/MotorListenMsg"
   _has_header = False  # flag to mark the presence of a Header object
   _full_text = """int32 curr_pos1
 int32 curr_pos2
 int64 toff
+int32 motor_fail
 float32 t"""
-  __slots__ = ['curr_pos1','curr_pos2','toff','t']
-  _slot_types = ['int32','int32','int64','float32']
+  __slots__ = ['curr_pos1','curr_pos2','toff','motor_fail','t']
+  _slot_types = ['int32','int32','int64','int32','float32']
 
   def __init__(self, *args, **kwds):
     """
@@ -26,7 +27,7 @@ float32 t"""
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       curr_pos1,curr_pos2,toff,t
+       curr_pos1,curr_pos2,toff,motor_fail,t
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -41,12 +42,15 @@ float32 t"""
         self.curr_pos2 = 0
       if self.toff is None:
         self.toff = 0
+      if self.motor_fail is None:
+        self.motor_fail = 0
       if self.t is None:
         self.t = 0.
     else:
       self.curr_pos1 = 0
       self.curr_pos2 = 0
       self.toff = 0
+      self.motor_fail = 0
       self.t = 0.
 
   def _get_types(self):
@@ -62,7 +66,7 @@ float32 t"""
     """
     try:
       _x = self
-      buff.write(_get_struct_2iqf().pack(_x.curr_pos1, _x.curr_pos2, _x.toff, _x.t))
+      buff.write(_get_struct_2iqif().pack(_x.curr_pos1, _x.curr_pos2, _x.toff, _x.motor_fail, _x.t))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -77,8 +81,8 @@ float32 t"""
       end = 0
       _x = self
       start = end
-      end += 20
-      (_x.curr_pos1, _x.curr_pos2, _x.toff, _x.t,) = _get_struct_2iqf().unpack(str[start:end])
+      end += 24
+      (_x.curr_pos1, _x.curr_pos2, _x.toff, _x.motor_fail, _x.t,) = _get_struct_2iqif().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -92,7 +96,7 @@ float32 t"""
     """
     try:
       _x = self
-      buff.write(_get_struct_2iqf().pack(_x.curr_pos1, _x.curr_pos2, _x.toff, _x.t))
+      buff.write(_get_struct_2iqif().pack(_x.curr_pos1, _x.curr_pos2, _x.toff, _x.motor_fail, _x.t))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -108,8 +112,8 @@ float32 t"""
       end = 0
       _x = self
       start = end
-      end += 20
-      (_x.curr_pos1, _x.curr_pos2, _x.toff, _x.t,) = _get_struct_2iqf().unpack(str[start:end])
+      end += 24
+      (_x.curr_pos1, _x.curr_pos2, _x.toff, _x.motor_fail, _x.t,) = _get_struct_2iqif().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -118,9 +122,9 @@ _struct_I = genpy.struct_I
 def _get_struct_I():
     global _struct_I
     return _struct_I
-_struct_2iqf = None
-def _get_struct_2iqf():
-    global _struct_2iqf
-    if _struct_2iqf is None:
-        _struct_2iqf = struct.Struct("<2iqf")
-    return _struct_2iqf
+_struct_2iqif = None
+def _get_struct_2iqif():
+    global _struct_2iqif
+    if _struct_2iqif is None:
+        _struct_2iqif = struct.Struct("<2iqif")
+    return _struct_2iqif

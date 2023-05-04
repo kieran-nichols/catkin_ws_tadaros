@@ -14,7 +14,7 @@
 
 (defclass tada_ros::MotorListenMsg
   :super ros::object
-  :slots (_curr_pos1 _curr_pos2 _toff _t ))
+  :slots (_curr_pos1 _curr_pos2 _toff _motor_fail _t ))
 
 (defmethod tada_ros::MotorListenMsg
   (:init
@@ -22,12 +22,14 @@
     ((:curr_pos1 __curr_pos1) 0)
     ((:curr_pos2 __curr_pos2) 0)
     ((:toff __toff) 0)
+    ((:motor_fail __motor_fail) 0)
     ((:t __t) 0.0)
     )
    (send-super :init)
    (setq _curr_pos1 (round __curr_pos1))
    (setq _curr_pos2 (round __curr_pos2))
    (setq _toff (round __toff))
+   (setq _motor_fail (round __motor_fail))
    (setq _t (float __t))
    self)
   (:curr_pos1
@@ -39,6 +41,9 @@
   (:toff
    (&optional __toff)
    (if __toff (setq _toff __toff)) _toff)
+  (:motor_fail
+   (&optional __motor_fail)
+   (if __motor_fail (setq _motor_fail __motor_fail)) _motor_fail)
   (:t
    (&optional __t)
    (if __t (setq _t __t)) _t)
@@ -51,6 +56,8 @@
     4
     ;; int64 _toff
     8
+    ;; int32 _motor_fail
+    4
     ;; float32 _t
     4
     ))
@@ -74,6 +81,8 @@
               (write-long (if (>= _toff 0) 0 #xffffffff) s))
              (t                                         ;; integer
               (write-long _toff s)(write-long (if (>= _toff 0) 0 #xffffffff) s)))
+     ;; int32 _motor_fail
+       (write-long _motor_fail s)
      ;; float32 _t
        (sys::poke _t (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;;
@@ -96,23 +105,26 @@
                       b0)
                     ((= b1  0) (make-instance bignum :size 1 :bv (integer-vector b0)))
                     (t (make-instance bignum :size 2 :bv (integer-vector b0 (ash b1 1)))))))
+   ;; int32 _motor_fail
+     (setq _motor_fail (sys::peek buf ptr- :integer)) (incf ptr- 4)
    ;; float32 _t
      (setq _t (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;;
    self)
   )
 
-(setf (get tada_ros::MotorListenMsg :md5sum-) "458821757342d0f4a30215b0ee1690f8")
+(setf (get tada_ros::MotorListenMsg :md5sum-) "16758636abd34f69fe5a976e7e2a04ca")
 (setf (get tada_ros::MotorListenMsg :datatype-) "tada_ros/MotorListenMsg")
 (setf (get tada_ros::MotorListenMsg :definition-)
       "int32 curr_pos1
 int32 curr_pos2
 int64 toff
+int32 motor_fail
 float32 t
 ")
 
 
 
-(provide :tada_ros/MotorListenMsg "458821757342d0f4a30215b0ee1690f8")
+(provide :tada_ros/MotorListenMsg "16758636abd34f69fe5a976e7e2a04ca")
 
 

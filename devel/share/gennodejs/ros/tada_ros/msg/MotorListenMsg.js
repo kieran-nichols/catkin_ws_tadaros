@@ -21,6 +21,7 @@ class MotorListenMsg {
       this.curr_pos1 = null;
       this.curr_pos2 = null;
       this.toff = null;
+      this.motor_fail = null;
       this.t = null;
     }
     else {
@@ -42,6 +43,12 @@ class MotorListenMsg {
       else {
         this.toff = 0;
       }
+      if (initObj.hasOwnProperty('motor_fail')) {
+        this.motor_fail = initObj.motor_fail
+      }
+      else {
+        this.motor_fail = 0;
+      }
       if (initObj.hasOwnProperty('t')) {
         this.t = initObj.t
       }
@@ -59,6 +66,8 @@ class MotorListenMsg {
     bufferOffset = _serializer.int32(obj.curr_pos2, buffer, bufferOffset);
     // Serialize message field [toff]
     bufferOffset = _serializer.int64(obj.toff, buffer, bufferOffset);
+    // Serialize message field [motor_fail]
+    bufferOffset = _serializer.int32(obj.motor_fail, buffer, bufferOffset);
     // Serialize message field [t]
     bufferOffset = _serializer.float32(obj.t, buffer, bufferOffset);
     return bufferOffset;
@@ -74,13 +83,15 @@ class MotorListenMsg {
     data.curr_pos2 = _deserializer.int32(buffer, bufferOffset);
     // Deserialize message field [toff]
     data.toff = _deserializer.int64(buffer, bufferOffset);
+    // Deserialize message field [motor_fail]
+    data.motor_fail = _deserializer.int32(buffer, bufferOffset);
     // Deserialize message field [t]
     data.t = _deserializer.float32(buffer, bufferOffset);
     return data;
   }
 
   static getMessageSize(object) {
-    return 20;
+    return 24;
   }
 
   static datatype() {
@@ -90,7 +101,7 @@ class MotorListenMsg {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '458821757342d0f4a30215b0ee1690f8';
+    return '16758636abd34f69fe5a976e7e2a04ca';
   }
 
   static messageDefinition() {
@@ -99,6 +110,7 @@ class MotorListenMsg {
     int32 curr_pos1
     int32 curr_pos2
     int64 toff
+    int32 motor_fail
     float32 t
     `;
   }
@@ -128,6 +140,13 @@ class MotorListenMsg {
     }
     else {
       resolved.toff = 0
+    }
+
+    if (msg.motor_fail !== undefined) {
+      resolved.motor_fail = msg.motor_fail;
+    }
+    else {
+      resolved.motor_fail = 0
     }
 
     if (msg.t !== undefined) {

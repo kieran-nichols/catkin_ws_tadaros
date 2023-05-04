@@ -38,12 +38,13 @@
 #define NSEC_PER_SEC 1000000000
 #define stack64k (64 * 1024)
 float time_increment; 
-int timestep = 1000; //500 
+int timestep = 1000; //250, 500, 1000
 clock_t start_t, end_t, start2, end2;
 double total_t = 0;
 int total_itr = 10000;
 int dummy, dummy2 = 0;
 int num;
+int itr_fail = 0;
 FILE *fptr;
 pthread_mutex_t lock;
 int move_to_final = 0;
@@ -51,7 +52,8 @@ int counts_per_rev = 567;
 long long cur_DCtime=0, max_DCtime=0;
 unsigned long long  cur_dc32=0, pre_dc32=0;
 long long  diff_dc32;
-static int64 integral = 0;
+//~ static int64 integral = 0;
+int64 integral = 0;
 int64 delta;
 int motor_command_received[6];
 //~ void motor_commandCallback(const std_msgs::Int32MultiArray::ConstPtr& motor_command);
@@ -348,8 +350,11 @@ OSAL_THREAD_FUNC simpletest(int input[6])
                     //~ }
                     }
                 }
-            else printf("."); //("status error\n"); 
-
+            else 
+            {   
+                printf("."); //("status error\n"); 
+                itr_fail += 1;
+            }
             needlf = TRUE;
                 
                 //~ if (abs(curr_pos - final_pos) == 0 && abs(curr_pos2 == final_pos2) == 0 && print_state == 1) {
@@ -360,7 +365,14 @@ OSAL_THREAD_FUNC simpletest(int input[6])
                     //~ print_state = 0;
                 //~ } 
             }
-            else printf("?"); //("wkc error\n");
+            else {                
+                //~ end2 = clock();
+                //~ double wkc_err_time = (double) (end2-start2)/CLOCKS_PER_SEC;
+                //~ printf("\nwkc error after %f sec\n",wkc_err_time);
+                printf("?"); //("wkc error\n");
+                itr_fail += 1;
+                //~ start2 = clock();
+            }
             
             //~ printf("Itr %4d", itr); 
             //~ printf("  Initial_pos: %d,", initial_pos);
@@ -481,6 +493,7 @@ OSAL_THREAD_FUNC_RT ecatthread(void *ptr)
                 // change P to 1, 10, 100 with I as 1000 and ctime as 50
                 // change I to 100, 1000, 10000 with P as 10 and ctime as 50
                 toff = -(delta / 10) - (integral / 1000); // 10, 1000 Adjusted these values till toff was not too large or did not drift
+                //~ toff = -(delta / 10) - (integral / 100); //
                 //~ printf("%ld \n",toff);
                 gl_delta = delta;
          }
@@ -489,7 +502,7 @@ OSAL_THREAD_FUNC_RT ecatthread(void *ptr)
          
          //~ pthread_mutex_lock(&lock); 
          ec_send_processdata();
-         pthread_mutex_unlock(&lock); // not sure if it works
+         pthread_mutex_unlock(&lock); 
          
       }
    }
@@ -564,16 +577,18 @@ OSAL_THREAD_FUNC ecatcheck( void *ptr )
                   }
                }
             }
-            if(!ec_group[currentgroup].docheckstate)
+            if(!ec_group[currentgroup].docheckstate){
                printf("OK : all slaves resumed OPERATIONAL.\n");
+               itr_fail = 0;
+           }
         }
-        osal_usleep(250); //20000 usleep(250);
+        osal_usleep(100); //20000 usleep(250);
     }
 }  
 
 // Extra thread to handle ROS publishing and subscribing
 void extra_function(clock_t start_time) {
-    sleep(2);
+    sleep(1);
     ros::NodeHandle m;
     ros::Subscriber sub_motor = m.subscribe("motor_command", 10, motor_commandCallback);
     ros::Publisher pub_motor = m.advertise<tada_ros::MotorListenMsg>("motor_listen", 10);
@@ -598,6 +613,11 @@ void extra_function(clock_t start_time) {
             tada_ros::MotorListenMsg motor_listen;
             motor_listen.curr_pos1 = curr_pos;
             motor_listen.curr_pos2 = curr_pos2;
+            
+            // if the CoE errors are persistent, the connected brain node will restart the motor node
+            if (itr_fail > 3000) motor_listen.motor_fail = 1;
+            else motor_listen.motor_fail = 0;
+            
             //~ float curr_dc_time = (float)cur_DCtime;
             //~ printf("%lld \n",cur_DCtime);
             motor_listen.toff = toff; //curr_dc_time; // toff
@@ -657,7 +677,7 @@ int main(int argc, char **argv)
     //~ {
         start_t = clock();
         dorun = 0;
-        int ctime = 1000; //50, 100, 500
+        int ctime = 1000; //250, 500, 1000
         struct sched_param param;
         struct sched_param param1;
         int policy = SCHED_FIFO;

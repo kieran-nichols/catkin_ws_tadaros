@@ -34,12 +34,12 @@ class BrainNode():
         rospy.Subscriber('europa_topic', EuropaMsg, self.handle_europa_input)
         rospy.Subscriber('sensing_topic', IMUDataMsg, self.handle_sensor_input)
         rospy.Subscriber('gui_topic', String, self.GUI_input)
+        self.sub = rospy.Subscriber('motor_listen', MotorListenMsg, self.listener)
 
         self.pub = rospy.Publisher('motor_command', MotorDataMsg, queue_size=10)
                 
         self.motor_command = MotorDataMsg()
         # Subscribers: motors, IMU, Europa; subscribe command with it necessary variables that will be attached to self
-        self.sub = rospy.Subscriber('motor_listen', MotorListenMsg, self.listener)
         self.curr_pos1 = 0; self.curr_pos2 = 0
         #rospy.spin() # keeps python from exiting until this node is stopped
         ## Add rospy.Subscriber with self, its necessary global-like variables, and appropiate listeners (aka callback functions)
@@ -133,6 +133,8 @@ class BrainNode():
     def listener(self,data):
         self.curr_pos1 = data.curr_pos1
         self.curr_pos2 = data.curr_pos2
+        self.toff = data.toff
+        self.motor_fail = data.motor_fail
     
     # Main function that will continuous iterate; it will have a mixture of publishing and subscribing
     def action(self):
@@ -145,12 +147,15 @@ class BrainNode():
         self.mode = 0
         self.steps = 0
         self.prev_steps = 0
+        self.motor_fail = 0
         self.start_time = time.perf_counter()
         self.swing_test = [0, 0]
         self.stance_tracker = 0
         self.prev_stance_tracker = 0
         self.initial_itr = 0
         self.initial_itr1 = 0
+        self.restart_itr = 0
+        self.toff = 0
         self.PF = 0
         self.EV = 0
         self.curr_PF = 0
@@ -304,7 +309,7 @@ class BrainNode():
                 self.homed1 = ''; self.homed2 = ''; # reset homed values to empty string
                 
             # ~ self.homed1prev=homed1;self.homed2prev=homed2
-            print('PF_cmd, EV_cmd: ', round(self.PF,3), round(self.EV,3))
+            # ~ print('PF_cmd, EV_cmd: ', round(self.PF,3), round(self.EV,3))
 
             return [self.global_M1, self.global_M2, self.PF, self.EV]
         
@@ -678,6 +683,13 @@ class BrainNode():
             # need to create int of motor commands
             var1 = int(round(var1))
             var2 = int(round(var2))
+            
+            # if motor has continous errors, the brain node will restart it
+            # also if toff is too large; it should mostly be less than 20000 magnitude (20 us)
+            if self.motor_fail == 1 or abs(self.toff) > 45000:
+                os.system("rosnode kill /motor")
+                self.restart_itr += 1
+                print("motor node will restart, it has restarted times", self.restart_itr, "times\n")
             
             # set up object to publish to motor node
             motor_command.mode = 0

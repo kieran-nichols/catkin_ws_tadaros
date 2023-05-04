@@ -27,12 +27,14 @@ struct MotorListenMsg_
     : curr_pos1(0)
     , curr_pos2(0)
     , toff(0)
+    , motor_fail(0)
     , t(0.0)  {
     }
   MotorListenMsg_(const ContainerAllocator& _alloc)
     : curr_pos1(0)
     , curr_pos2(0)
     , toff(0)
+    , motor_fail(0)
     , t(0.0)  {
   (void)_alloc;
     }
@@ -47,6 +49,9 @@ struct MotorListenMsg_
 
    typedef int64_t _toff_type;
   _toff_type toff;
+
+   typedef int32_t _motor_fail_type;
+  _motor_fail_type motor_fail;
 
    typedef float _t_type;
   _t_type t;
@@ -83,6 +88,7 @@ bool operator==(const ::tada_ros::MotorListenMsg_<ContainerAllocator1> & lhs, co
   return lhs.curr_pos1 == rhs.curr_pos1 &&
     lhs.curr_pos2 == rhs.curr_pos2 &&
     lhs.toff == rhs.toff &&
+    lhs.motor_fail == rhs.motor_fail &&
     lhs.t == rhs.t;
 }
 
@@ -140,12 +146,12 @@ struct MD5Sum< ::tada_ros::MotorListenMsg_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "458821757342d0f4a30215b0ee1690f8";
+    return "16758636abd34f69fe5a976e7e2a04ca";
   }
 
   static const char* value(const ::tada_ros::MotorListenMsg_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x458821757342d0f4ULL;
-  static const uint64_t static_value2 = 0xa30215b0ee1690f8ULL;
+  static const uint64_t static_value1 = 0x16758636abd34f69ULL;
+  static const uint64_t static_value2 = 0xfe5a976e7e2a04caULL;
 };
 
 template<class ContainerAllocator>
@@ -167,6 +173,7 @@ struct Definition< ::tada_ros::MotorListenMsg_<ContainerAllocator> >
     return "int32 curr_pos1\n"
 "int32 curr_pos2\n"
 "int64 toff\n"
+"int32 motor_fail\n"
 "float32 t\n"
 ;
   }
@@ -189,6 +196,7 @@ namespace serialization
       stream.next(m.curr_pos1);
       stream.next(m.curr_pos2);
       stream.next(m.toff);
+      stream.next(m.motor_fail);
       stream.next(m.t);
     }
 
@@ -214,6 +222,8 @@ struct Printer< ::tada_ros::MotorListenMsg_<ContainerAllocator> >
     Printer<int32_t>::stream(s, indent + "  ", v.curr_pos2);
     s << indent << "toff: ";
     Printer<int64_t>::stream(s, indent + "  ", v.toff);
+    s << indent << "motor_fail: ";
+    Printer<int32_t>::stream(s, indent + "  ", v.motor_fail);
     s << indent << "t: ";
     Printer<float>::stream(s, indent + "  ", v.t);
   }
