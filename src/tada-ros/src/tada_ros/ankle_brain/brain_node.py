@@ -34,12 +34,12 @@ class BrainNode():
         rospy.Subscriber('europa_topic', EuropaMsg, self.handle_europa_input)
         rospy.Subscriber('sensing_topic', IMUDataMsg, self.handle_sensor_input)
         rospy.Subscriber('gui_topic', String, self.GUI_input)
-        self.sub = rospy.Subscriber('motor_listen', MotorListenMsg, self.listener)
 
         self.pub = rospy.Publisher('motor_command', MotorDataMsg, queue_size=10)
                 
         self.motor_command = MotorDataMsg()
         # Subscribers: motors, IMU, Europa; subscribe command with it necessary variables that will be attached to self
+        self.sub = rospy.Subscriber('motor_listen', MotorListenMsg, self.listener)
         self.curr_pos1 = 0; self.curr_pos2 = 0
         #rospy.spin() # keeps python from exiting until this node is stopped
         ## Add rospy.Subscriber with self, its necessary global-like variables, and appropiate listeners (aka callback functions)
@@ -133,8 +133,6 @@ class BrainNode():
     def listener(self,data):
         self.curr_pos1 = data.curr_pos1
         self.curr_pos2 = data.curr_pos2
-        self.toff = data.toff
-        self.motor_fail = data.motor_fail
     
     # Main function that will continuous iterate; it will have a mixture of publishing and subscribing
     def action(self):
@@ -145,17 +143,15 @@ class BrainNode():
         self.prev_var3 = 0; self.prev_var4 = 0
         var = []
         self.mode = 0
+        self.mode_prev = 0
         self.steps = 0
         self.prev_steps = 0
-        self.motor_fail = 0
         self.start_time = time.perf_counter()
         self.swing_test = [0, 0]
         self.stance_tracker = 0
         self.prev_stance_tracker = 0
         self.initial_itr = 0
         self.initial_itr1 = 0
-        self.restart_itr = 0
-        self.toff = 0
         self.PF = 0
         self.EV = 0
         self.curr_PF = 0
@@ -179,7 +175,8 @@ class BrainNode():
         # ~ alpha_array = [0, 180, 0, 180, 0, 180, 0, 180] 
         # ~ self.mode = 0
         self.tada_v1_data = [[10,180]] # empty list that will hold the TADA_angle cmds
-        self.tada_v2_data = [[10,180]]
+        self.tada_v2_data = []
+        self.tada_v2_data_mini = [[5, 0],[5, 180], [5, 90], [5, -90]] 
         self.itr_v1 = 0
         
         # create tada_v1 experiment theta, alpha command angles
@@ -309,7 +306,7 @@ class BrainNode():
                 self.homed1 = ''; self.homed2 = ''; # reset homed values to empty string
                 
             # ~ self.homed1prev=homed1;self.homed2prev=homed2
-            # ~ print('PF_cmd, EV_cmd: ', round(self.PF,3), round(self.EV,3))
+            #print('PF_cmd, EV_cmd: ', round(self.PF,3), round(self.EV,3))
 
             return [self.global_M1, self.global_M2, self.PF, self.EV]
         
@@ -395,7 +392,7 @@ class BrainNode():
                         self.theta_deg = cmd1[0]; self.alpha_deg = cmd1[1]
                 # mode 2
                 else:
-                    total_time = 1 # one second
+                    total_time = 5 # one second
                     self.theta_deg = cmd[0]
                     self.alpha_deg = cmd[1]                
                 
@@ -427,13 +424,15 @@ class BrainNode():
         
         # input: self
         # output: var1, var2, var3, var4 which are motor1_cmd, motor2_cmd, PF, EV
-        def tada_v2_expt(self):
+        def tada_v2_expt(self, input_angles):
             if self.first_run:
                 self.first_run= False
                 print("Experiment trial number: ", self.tada_v2_expt_num)
                 print("5 Steps to turn around/walk in neutral")
+                random_index = random.randint(0, len(input_angles)-1)
+                self.tada_v2_current_rotation = input_angles[random_index]
                 
-            if len(self.tada_v2_taken_angles)>len(self.tada_v2_data):
+            if len(self.tada_v2_taken_angles)>=len(input_angles):
                 self.mode = 0
                 self.tada_v2_taken_angles = []
                 self.tada_v2_paused = 1
@@ -465,6 +464,7 @@ class BrainNode():
             else:
                 
                 if (self.steps-self.starting_step)<=(10+self.random_step):
+                    
                     motor = TADA_angle(self)
                     var1 = round(motor[0]) 
                     var2 = round(motor[1])
@@ -478,13 +478,14 @@ class BrainNode():
                 self.tada_v2_expt_num+=1
 
                 #Getting the next random rotation
-                random_index = random.randint(0, len(self.tada_v2_data)-1)
-                while (self.tada_v2_data[random_index] in self.tada_v2_taken_angles):
+                random_index = random.randint(0, len(input_angles)-1)
+                while (input_angles[random_index] in self.tada_v2_taken_angles):
                     #this means that we are done
-                    if len(self.tada_v2_taken_angles)>=len(self.tada_v2_data):
+                    if len(self.tada_v2_taken_angles)>=len(input_angles):
                         return 0, 0, 0, 0
-                    random_index = random.randint(0, len(self.tada_v2_data)-1)
-                self.tada_v2_current_rotation = self.tada_v2_data[random_index]
+                    random_index = random.randint(0, len(input_angles)-1)
+                print("exit from random")
+                self.tada_v2_current_rotation = input_angles[random_index]
                 #pause after 
                 if(self.tada_v2_expt_num%2==0)&(self.tada_v2_expt_num/2>0):
                     self.print_once = True
@@ -493,7 +494,6 @@ class BrainNode():
                     print("Experiment trial number: ", self.tada_v2_expt_num)
                     print("5 Steps to turn around/walk in neutral")
                 #SET ANGLE FOR NEUTRAL
-                
                 self.starting_step = self.steps
                 self.theta_deg = 0
                 self.alpha_deg = 0
@@ -559,7 +559,7 @@ class BrainNode():
                     self.starting_step = self.steps
                     print("Experiment trial number: ", self.tada_v2_expt_num)
                     print("5 Steps to turn around/walk in neutral")
-                    self.mode = 4
+                    self.mode = self.mode_prev
                 if var[0]=="help":                
                     print("\nTo command motor movement: 'm num num' (num is motor ticks where 567 for full rev)")
                     print("To command ankle angles: 'theta(0 to 10 deg) alpha(-180 to 180 deg)'")
@@ -628,6 +628,13 @@ class BrainNode():
                     print("Starting TADA_v2")
                     self.starting_step = self.steps
                     self.mode = 4
+                    self.mode_prev = 4
+                    
+                elif var[0]=="expt3mini":
+                    print("Starting TADA_v2")
+                    self.starting_step = self.steps
+                    self.mode = 5
+                    self.mode_prev = 5
                     
                 # do nothing
                 else:
@@ -670,7 +677,12 @@ class BrainNode():
                 self.curr_PF, self.curr_EV = TADA_angle_read(self)
 
             elif self.mode == 4:
-                var1, var2, self.PF, self.EV = tada_v2_expt(self)
+                var1, var2, self.PF, self.EV = tada_v2_expt(self, self.tada_v2_data)
+                self.mode_prev = 4
+                
+            elif self.mode == 5:
+                var1, var2, self.PF, self.EV = tada_v2_expt(self, self.tada_v2_data_mini)
+                self.mode_prev = 5
             else: 
                 self.mode = 0
                 
@@ -683,13 +695,6 @@ class BrainNode():
             # need to create int of motor commands
             var1 = int(round(var1))
             var2 = int(round(var2))
-            
-            # if motor has continous errors, the brain node will restart it
-            # also if toff is too large; it should mostly be less than 20000 magnitude (20 us)
-            if self.motor_fail == 1 or abs(self.toff) > 45000:
-                os.system("rosnode kill /motor")
-                self.restart_itr += 1
-                print("motor node will restart, it has restarted times", self.restart_itr, "times\n")
             
             # set up object to publish to motor node
             motor_command.mode = 0
@@ -720,3 +725,4 @@ if __name__ == '__main__':
         pass
     except rospy.ROSInterruptException: # ensures stopping if node is shut down
         pass
+
