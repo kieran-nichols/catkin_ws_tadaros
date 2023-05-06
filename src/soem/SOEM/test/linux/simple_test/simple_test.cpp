@@ -582,7 +582,7 @@ OSAL_THREAD_FUNC ecatcheck( void *ptr )
                itr_fail = 0;
            }
         }
-        osal_usleep(100); //20000 usleep(250);
+        osal_usleep(1000); //20000 usleep(250);
     }
 }  
 
@@ -615,7 +615,7 @@ void extra_function(clock_t start_time) {
             motor_listen.curr_pos2 = curr_pos2;
             
             // if the CoE errors are persistent, the connected brain node will restart the motor node
-            if (itr_fail > 3000) motor_listen.motor_fail = 1;
+            if (itr_fail > 2000) motor_listen.motor_fail = 1;
             else motor_listen.motor_fail = 0;
             
             //~ float curr_dc_time = (float)cur_DCtime;
