@@ -29,7 +29,7 @@ class BleServer():
         #MPU_Init()
         dev = EuropaBLE.EuropaBLE()   
         dev.set_device_addr(EUROPA_ADDR)
-        dev.set_iface(1)
+        dev.set_iface(0)
         
         while dev.search_europa()==0 and not rospy.is_shutdown():
             

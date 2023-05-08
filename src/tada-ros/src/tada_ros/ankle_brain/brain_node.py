@@ -56,6 +56,8 @@ class BrainNode():
         self.gyro_z = 0
         self.state = 0
         self.swing_time = 0
+        self.toff = 0
+        self.motor_fail = 0
         self.t = 0
         self.mx = 0
         self.my = 0
@@ -133,6 +135,8 @@ class BrainNode():
     def listener(self,data):
         self.curr_pos1 = data.curr_pos1
         self.curr_pos2 = data.curr_pos2
+        self.toff = data.toff
+        self.motor_fail = data.motor_fail
     
     # Main function that will continuous iterate; it will have a mixture of publishing and subscribing
     def action(self):
@@ -152,6 +156,7 @@ class BrainNode():
         self.prev_stance_tracker = 0
         self.initial_itr = 0
         self.initial_itr1 = 0
+        self.restart_itr = 0
         self.PF = 0
         self.EV = 0
         self.curr_PF = 0
@@ -169,28 +174,28 @@ class BrainNode():
         theta_array = [2.5, 5, 7.5, 10]
         # ~ alpha_array = [0, 180 , 0, 180, 0, 180, 0, 180] # only sagittal
         theta_array_v2 = [5, 10]
-        alpha_array_v2 = [-90, 0, 90, 180] # only sagittal
+        alpha_array_v2 = [-135, -90, -45, 0, 45, 90, 135, 180] # 
         # ~ alpha_array = [-90, 90, -90, 90, -90, 90, -90, 90] # only frontal
         alpha_array = [-135, -90, -45, 0, 45, 90, 135, 180] # mixture of frontal and sagiattal
         # ~ alpha_array = [0, 180, 0, 180, 0, 180, 0, 180] 
         # ~ self.mode = 0
-        self.tada_v1_data = [[10,180]] # empty list that will hold the TADA_angle cmds
-        self.tada_v2_data = []
-        self.tada_v2_data_mini = [[5, 0],[5, 180], [5, 90], [5, -90]] 
+        self.tada_v1_data = [[0,0]] # empty list that will hold the TADA_angle cmds
+        self.tada_v2_data = [[0, 0]]
+        self.tada_v2_data_mini = [[0, 0], [5, 0], [5, 180], [5, 90], [5, -90]] 
         self.itr_v1 = 0
         
         # create tada_v1 experiment theta, alpha command angles
         for i in range(1): # five sets of movements
-            self.tada_v1_data.append([0.0, 180.0])
+            self.tada_v1_data.append([0, 0])
             for x in theta_array:
                 for y in alpha_array:
                     self.tada_v1_data.append([x,y])
-        self.tada_v1_data.append([0.0, 180.0])
+        self.tada_v1_data.append([0, 0])
         # end with 0,0 giving a total of 34 unique combinations
         
         # create tada_v2 experiment theta, alpha command angles
         # ~ for i in range(1): # five sets of movements
-        for x in theta_array:
+        for x in theta_array_v2:
             for y in alpha_array_v2:
                 # ~ print(x,y)
                 self.tada_v2_data.append([x,y])
@@ -392,7 +397,7 @@ class BrainNode():
                         self.theta_deg = cmd1[0]; self.alpha_deg = cmd1[1]
                 # mode 2
                 else:
-                    total_time = 5 # one second
+                    total_time = 1 # one second
                     self.theta_deg = cmd[0]
                     self.alpha_deg = cmd[1]                
                 
@@ -425,6 +430,7 @@ class BrainNode():
         # input: self
         # output: var1, var2, var3, var4 which are motor1_cmd, motor2_cmd, PF, EV
         def tada_v2_expt(self, input_angles):
+            step_count = 6
             if self.first_run:
                 self.first_run= False
                 print("Experiment trial number: ", self.tada_v2_expt_num)
@@ -459,11 +465,11 @@ class BrainNode():
                 self.theta_deg = self.tada_v2_current_rotation[0]
                 self.alpha_deg = self.tada_v2_current_rotation[1]
                 self.random_step = random.randint(0,4)
-                print("Walk for ", 10+self.random_step, " for ", self.tada_v2_current_rotation)
+                print("Walk for ", step_count+self.random_step, " for ", self.tada_v2_current_rotation)
                 self.starting_step = self.steps
             else:
                 
-                if (self.steps-self.starting_step)<=(10+self.random_step):
+                if (self.steps-self.starting_step)<=(step_count+self.random_step):
                     
                     motor = TADA_angle(self)
                     var1 = round(motor[0]) 
@@ -526,8 +532,12 @@ class BrainNode():
             if len(var)== 2:
                 if var[0]=="kill":
                     if var[1]=="m":
-                        os.system("rosnode kill /motor")
-                        print("motor node will restart\n")
+                        os.system("rosnode kill /motor")   
+                        print("motor node will restart\n")  
+                        # ~ time.sleep(0.1)
+                        # ~ print(self.prev_var1, self.prev_var1)
+                        # ~ motor_restart_command = f"sudo lxterminal -e taskset -c 0,1,2 rosrun x_soem simple_test {self.prev_var1} {self.prev_var1} 0 0 1000 1000 __name:=motor"
+                        # ~ os.system(motor_restart_command)                    
     #                     os.system("roslaunch ~/catkin_ws/src/motor_node.launch") # does not work as intended
                     elif var[1]=="a":
                         os.system("rosnode kill -a")
@@ -695,6 +705,16 @@ class BrainNode():
             # need to create int of motor commands
             var1 = int(round(var1))
             var2 = int(round(var2))
+            
+            # if motor has continous errors, the brain node will restart it
+            # also if toff is too large; it should mostly be less than 20000 magnitude (20 us)
+            if self.motor_fail == 1: #or abs(self.toff) > 45000:
+                os.system("rosnode kill /motor")
+                # ~ time.sleep(0.1)
+                # ~ motor_restart_command = f"sudo lxterminal -e taskset -c 0,1,2 rosrun x_soem simple_test {self.prev_var1} {self.prev_var1} 0 0 1000 1000 __name:=motor"
+                # ~ os.system(motor_restart_command)                
+                self.restart_itr += 1
+                print("motor node will restart, it has restarted times", self.restart_itr, "times\n")
             
             # set up object to publish to motor node
             motor_command.mode = 0

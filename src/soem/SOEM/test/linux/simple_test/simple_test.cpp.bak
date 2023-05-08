@@ -221,16 +221,12 @@ OSAL_THREAD_FUNC simpletest(int input[6])
             /* request OP state for all slaves */
             ec_writestate(0);
             chk = 50;
-            
-            // Start the sychronization process
-            printf("Start\n"); 
-            
                    
             /* wait for all slaves to reach OP state */
             do
             {
-                //~ ec_send_processdata();
-                //~ ec_receive_processdata(EC_TIMEOUTRET);
+                ec_send_processdata();
+                ec_receive_processdata(EC_TIMEOUTRET);
                 ec_statecheck(0, EC_STATE_OPERATIONAL, 50000);                 
             }
             
@@ -255,7 +251,7 @@ OSAL_THREAD_FUNC simpletest(int input[6])
                     CHECKERROR(i);
                 }
                 
-            dorun = 1; 
+          
             target = (struct TorqueOut *)(ec_slave[1].outputs);
             val = (struct TorqueIn *)(ec_slave[1].inputs);
             //~ ec_receive_processdata(EC_TIMEOUTRET);
@@ -268,24 +264,26 @@ OSAL_THREAD_FUNC simpletest(int input[6])
             final_pos = test_var + initial_pos;
             initial_pos2 = (val2 -> position);
             final_pos2 = test_var2 + initial_pos2;
-            //~ target->velocity = (int32) (0);
-            //~ target2->velocity = (int32) (0);
-            //~ target->torque = (int16) 0;
-            //~ target2->torque = (int16) 0;
+            target->velocity = (int32) (0);
+            target2->velocity = (int32) (0);
+            target->torque = (int16) 0;
+            target2->torque = (int16) 0;
         
         //~ sleep(1);
         /* cyclic loop for two slaves*/
-        //~ ec_send_processdata();
-        //~ ec_receive_processdata(EC_TIMEOUTRET);
+        ec_send_processdata();
+        ec_receive_processdata(EC_TIMEOUTRET);
         
-        
-        //~ sleep(1);        
+        // Start the sychronization process
+        printf("Start\n"); 
+        dorun = 1; 
+        sleep(1);        
         start2 = clock();
         
         // continuous loop to send commands to the motor
         //~ while(1) {
-        while(inOP){
-            //~ if(wkc >= expectedWKC){
+        while(1){
+            if(wkc >= expectedWKC){
             itr = itr + 1;
             //~ end_t = clock();
             //~ total_t = (double)(end_t - start_t) / CLOCKS_PER_SEC;
@@ -298,7 +296,7 @@ OSAL_THREAD_FUNC simpletest(int input[6])
             target->torque = (int16) torque;
             target2->torque = (int16) torque2;
 
-            if(wkc >= expectedWKC){
+            //~ if(wkc >= expectedWKC){
                 /** if in fault or in the way to normal status, we update the state machine */
                 // slave 1
                 switch(target->status){
@@ -344,18 +342,31 @@ OSAL_THREAD_FUNC simpletest(int input[6])
                     //~ }                                 
                     
             //~ if(wkc >= expectedWKC){ // need to verify if this should go before
-            if ((val->status & 0x0fff) == 0x0237 and (val2->status & 0x0fff) == 0x0237) {                
+            //~ if ((val->status & 0x0fff) == 0x0237 and (val2->status & 0x0fff) == 0x0237) {
+                
+                if (mode == 1){
+                    // motor not moving in this setting                    
+                        target->position = (int32) (final_pos);
+                        target2->position = (int32) (final_pos2);
+                    }
+                    //~ else {
+                        //~ target->position = (int32) (initial_pos);
+                        //~ target2->position = (int32) (initial_pos2);
+                    //~ }
+                    else {
+                        //~ if (itr <= total_itr) {
                             target->position = (int32) (final_pos);
                             target2->position = (int32) (final_pos2);
+                        //~ }
                         }
-                //~ if ((val->status & 0x0fff) == 0x0237 and (val2->status & 0x0fff) == 0x0237) {}
+                    //~ }
+                if ((val->status & 0x0fff) == 0x0237 and (val2->status & 0x0fff) == 0x0237) {}
                 else 
                 {   
                     printf("."); //("status error\n"); 
                     itr_fail += 1;
                 }
-                //~ needlf = TRUE;
-                //~ if(wkc >= expectedWKC){
+                needlf = TRUE;
             }
                 else {                
                 //~ end2 = clock();
@@ -485,7 +496,7 @@ OSAL_THREAD_FUNC_RT ecatthread(void *ptr)
                 
                 // change P to 1, 10, 100 with I as 1000 and ctime as 50
                 // change I to 100, 1000, 10000 with P as 10 and ctime as 50
-                toff = -(delta / 10) - (integral / 100); // 10, 1000 Adjusted these values till toff was not too large or did not drift
+                toff = -(delta / 10) - (integral / 1000); // 10, 1000 Adjusted these values till toff was not too large or did not drift
                 //~ toff = -(delta / 10) - (integral / 100); //
                 //~ printf("%ld \n",toff);
                 gl_delta = delta;
@@ -575,7 +586,7 @@ OSAL_THREAD_FUNC ecatcheck( void *ptr )
                itr_fail = 0;
            }
         }
-        osal_usleep(1000); //20000 usleep(250);
+        osal_usleep(100); //20000 usleep(250);
     }
 }  
 
@@ -687,12 +698,12 @@ int main(int argc, char **argv)
         osal_thread_create(&thread2, stack64k * 4, (void*) &ecatcheck, NULL); 
         
         int input[6] = {0, 0, 0, 0, 0, 0};
-        input[0] = (int)strtol(argv[1], NULL, 10);
-        input[1] = (int)strtol(argv[2], NULL, 10);
-        input[2] = (int)strtol(argv[3], NULL, 10);
-        input[3] = (int)strtol(argv[4], NULL, 10);
-        input[4] = (int)strtol(argv[5], NULL, 10);
-        input[5] = (int)strtol(argv[6], NULL, 10);
+        //~ input[0] = (int)strtol(argv[1], NULL, 10);
+        //~ input[1] = (int)strtol(argv[2], NULL, 10);
+        //~ input[2] = (int)strtol(argv[3], NULL, 10);
+        //~ input[3] = (int)strtol(argv[4], NULL, 10);
+        //~ input[4] = (int)strtol(argv[5], NULL, 10);
+        //~ input[5] = (int)strtol(argv[6], NULL, 10);
         
         osal_thread_create(&thread4, NULL, (void*) &extra_function, &start_t); 
         
@@ -702,12 +713,12 @@ int main(int argc, char **argv)
         //Isolate core 3 from the CPU scheduler. Append " isolcpus=3" to the end of /boot/cmdline.txt (note the space).
         cpu_set_t CPU3;
         CPU_ZERO(&CPU3);
-        CPU_SET(2, &CPU3);
+        CPU_SET(3, &CPU3);
         pthread_setaffinity_np(thread1, sizeof(CPU3), &CPU3);
         
         cpu_set_t CPU2;
         CPU_ZERO(&CPU2);
-        CPU_SET(3, &CPU2);
+        CPU_SET(2, &CPU2);
         pthread_setaffinity_np(thread3, sizeof(CPU2), &CPU2);
         
         /* Scheduler */
