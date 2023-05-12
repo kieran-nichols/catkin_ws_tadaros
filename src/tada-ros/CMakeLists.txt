@@ -13,6 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
   message_generation
+  cpp_common
+  roscpp_serialization
 )
 
 ## System dependencies are found with CMake's conventions
@@ -111,7 +113,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
     INCLUDE_DIRS
-    CATKIN_DEPENDS roscpp
+    CATKIN_DEPENDS roscpp std_msgs
   )
 
 ###########
@@ -160,7 +162,7 @@ include_directories(
 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
-catkin_package()
+#catkin_package()
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS

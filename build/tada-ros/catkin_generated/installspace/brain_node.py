@@ -11,6 +11,7 @@ from tada_ros.msg import MotorDataMsg
 from tada_ros.msg import MotorListenMsg
 from tada_ros.msg import IMUDataMsg
 from tada_ros.msg import EuropaMsg
+import pickle
 
 import numpy as np
 import math
@@ -172,34 +173,62 @@ class BrainNode():
         self.homed1prev=0;self.homed2prev=0
         
         theta_array = [2.5, 5, 7.5, 10]
+        theta_45_length = math.sqrt(50)
+        theta_45_array_v1 = [theta_45_length/4, theta_45_length/2, 3*theta_45_length/4, theta_45_length]
         # ~ alpha_array = [0, 180 , 0, 180, 0, 180, 0, 180] # only sagittal
         theta_array_v2 = [5, 10]
-        alpha_array_v2 = [-135, -90, -45, 0, 45, 90, 135, 180] # 
+        theta_45_array_v2 = [theta_45_length/2, theta_45_length]
         # ~ alpha_array = [-90, 90, -90, 90, -90, 90, -90, 90] # only frontal
         alpha_array = [-135, -90, -45, 0, 45, 90, 135, 180] # mixture of frontal and sagiattal
         # ~ alpha_array = [0, 180, 0, 180, 0, 180, 0, 180] 
         # ~ self.mode = 0
-        self.tada_v1_data = [[0,0]] # empty list that will hold the TADA_angle cmds
+        self.tada_v1_data = [[0, 0]] # empty list that will hold the TADA_angle cmds
         self.tada_v2_data = [[0, 0]]
-        self.tada_v2_data_mini = [[0, 0], [5, 0], [5, 180], [5, 90], [5, -90]] 
+        self.tada_v2_data_mini = [[0, 0], [10, 0], [10, 180], [10, 90], [10, -90]] 
         self.itr_v1 = 0
         
         # create tada_v1 experiment theta, alpha command angles
-        for i in range(1): # five sets of movements
+        load_data = 1
+        if load_data == 0:
+            for i in range(9): # five sets of movements
+                self.tada_v1_data.append([0, 0])
+                for x,z in zip(theta_array, theta_45_array_v1):
+                    for y in alpha_array:
+                        if int(y)/45!=0: self.tada_v1_data.append([x,y])
+                        else: self.tada_v1_data.append([z,y])
+            
+            # print(self.tada_v1_data)
+            # shuffle the data
+            random.shuffle(self.tada_v1_data)
+            # check if consecutive elements exist and swap if necessary
+            for i in range(len(self.tada_v1_data)-1):
+                if abs(self.tada_v1_data[i][0] - self.tada_v1_data[i+1][0]) < 1.5:
+                    # if consecutive elements exist, swap them
+                    temp = self.tada_v1_data[i]
+                    self.tada_v1_data[i] = self.tada_v1_data[i+1]
+                    self.tada_v1_data[i+1] = temp
+            # start and end with 0,0 giving a total of 34 unique combinations and add back last item
+            self.tada_v1_data.insert(0, [0, 0])
+            self.tada_v1_data.append(self.tada_v1_data[-1])
             self.tada_v1_data.append([0, 0])
-            for x in theta_array:
-                for y in alpha_array:
-                    self.tada_v1_data.append([x,y])
-        self.tada_v1_data.append([0, 0])
-        # end with 0,0 giving a total of 34 unique combinations
+            # ~ print(self.tada_v1_data)
+            
+            # save to pickle for reuse        
+            with open("/home/pi/catkin_ws/src/tada-ros/src/tada_ros/ankle_brain/shuffled_tada_v1_data.pickle", "wb") as handle:
+                pickle.dump(self.tada_v1_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            with open("/home/pi/catkin_ws/src/tada-ros/src/tada_ros/ankle_brain/shuffled_tada_v1_data.pickle", "rb") as handle:
+                self.tada_v1_data =pickle.load(handle)    
+                # ~ print(self.tada_v1_data)          
         
         # create tada_v2 experiment theta, alpha command angles
         # ~ for i in range(1): # five sets of movements
-        for x in theta_array_v2:
-            for y in alpha_array_v2:
+        for x,z in (theta_array_v2, theta_45_array_v2):
+            for y in alpha_array:
+                if int(y)%45!=0: self.tada_v2_data.append([x,y])
+                else: self.tada_v2_data.append([z,y])
                 # ~ print(x,y)
-                self.tada_v2_data.append([x,y])
-
+        
         # end with 0,0 giving a total of 34 unique combinations
                 
         def limit(num, minimum, maximum):
@@ -311,7 +340,7 @@ class BrainNode():
                 self.homed1 = ''; self.homed2 = ''; # reset homed values to empty string
                 
             # ~ self.homed1prev=homed1;self.homed2prev=homed2
-            #print('PF_cmd, EV_cmd: ', round(self.PF,3), round(self.EV,3))
+            # ~ print('PF_cmd, EV_cmd: ', round(self.PF,3), round(self.EV,3))
 
             return [self.global_M1, self.global_M2, self.PF, self.EV]
         
@@ -369,12 +398,14 @@ class BrainNode():
             var1,var2 = 0,0
             cmd = []
             now = time.perf_counter()
-            toe_lift_time = 0.3
+            # ~ toe_lift_time = 0.3
+            # ~ print(len(self.tada_v1_data))
 
-            if self.itr_v1 < 34*1 and self.mode != 0: # number of total itr
+            if self.itr_v1 < len(self.tada_v1_data) and self.mode != 0: # number of total itr
                 cmd = self.tada_v1_data[self.itr_v1]
                 now = time.perf_counter()
                 self.elapsed_time = now - self.start_time 
+                # ~ print(self.itr_v1)
                     
                 # mode 3 
                 # move the motor to 10 DF for 0.15 s and return back to original position for the
@@ -405,6 +436,7 @@ class BrainNode():
                 if self.elapsed_time >= total_time: # time to wait
                     self.itr_v1 += 1
                     self.start_time = time.perf_counter()
+                    print('PF, EV: (', round(self.PF,3), round(self.EV,3), "), movement num", self.itr_v1,"of", len(self.tada_v1_data))
 	
             # stop movement, return TADA to neutral, and return to default mode
             else:
