@@ -38,7 +38,7 @@
 #define NSEC_PER_SEC 1000000000
 #define stack64k (64 * 1024)
 float time_increment; 
-int timestep = 1000; //250, 500, 1000
+int timestep = 500; //250, 500, 1000
 clock_t start_t, end_t, start2, end2;
 double total_t = 0;
 int total_itr = 10000;
@@ -293,8 +293,8 @@ OSAL_THREAD_FUNC simpletest(int input[6])
             curr_pos2 = (val2 -> position);
             /** PDO I/O refresh */
 		    //~ wkc = ec_receive_processdata(EC_TIMEOUTRET);
-            target->velocity = (int32) (500); // 500
-            target2->velocity = (int32) (500); //500
+            target->velocity = (int32) (1000); // 500
+            target2->velocity = (int32) (1000); //500
             target->torque = (int16) torque;
             target2->torque = (int16) torque2;
 
@@ -575,7 +575,7 @@ OSAL_THREAD_FUNC ecatcheck( void *ptr )
                itr_fail = 0;
            }
         }
-        osal_usleep(1000); //20000 usleep(250);
+        osal_usleep(timestep); //20000 usleep(250);
     }
 }  
 
@@ -670,7 +670,7 @@ int main(int argc, char **argv)
     //~ {
         start_t = clock();
         dorun = 0;
-        int ctime = 1000; //250, 500, 1000
+        int ctime = timestep; //250, 500, 1000
         struct sched_param param;
         struct sched_param param1;
         int policy = SCHED_FIFO;

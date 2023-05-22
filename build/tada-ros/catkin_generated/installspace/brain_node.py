@@ -188,30 +188,30 @@ class BrainNode():
         self.itr_v1 = 0
         
         # create tada_v1 experiment theta, alpha command angles
-        load_data = 1
+        load_data = 0
         if load_data == 0:
-            for i in range(9): # five sets of movements
-                self.tada_v1_data.append([0, 0])
+            for i in range(1): # nine sets of movements
+                # ~ self.tada_v1_data.append([0, 0])
                 for x,z in zip(theta_array, theta_45_array_v1):
                     for y in alpha_array:
                         if int(y)/45!=0: self.tada_v1_data.append([x,y])
                         else: self.tada_v1_data.append([z,y])
+                random.shuffle(self.tada_v1_data)
+                self.tada_v1_data.append([0, 0])
             
             # print(self.tada_v1_data)
             # shuffle the data
-            random.shuffle(self.tada_v1_data)
-            # check if consecutive elements exist and swap if necessary
-            for i in range(len(self.tada_v1_data)-1):
-                if abs(self.tada_v1_data[i][0] - self.tada_v1_data[i+1][0]) < 1.5:
-                    # if consecutive elements exist, swap them
-                    temp = self.tada_v1_data[i]
-                    self.tada_v1_data[i] = self.tada_v1_data[i+1]
-                    self.tada_v1_data[i+1] = temp
-            # start and end with 0,0 giving a total of 34 unique combinations and add back last item
-            self.tada_v1_data.insert(0, [0, 0])
-            self.tada_v1_data.append(self.tada_v1_data[-1])
-            self.tada_v1_data.append([0, 0])
-            # ~ print(self.tada_v1_data)
+            # ~ random.shuffle(self.tada_v1_data)
+            # ~ # check if consecutive elements exist and swap if necessary
+            # ~ for i in range(len(self.tada_v1_data)-2):
+                # ~ if self.tada_v1_data[i][0] == self.tada_v1_data[i+2][0] and self.tada_v1_data[i][1] == self.tada_v1_data[i+2][1]:
+                    # ~ # if consecutive elements exist, swap them
+                    # ~ self.tada_v1_data[i], self.tada_v1_data[i+2] = self.tada_v1_data[i+2], self.tada_v1_data[i]
+            # ~ # start and end with 0,0 giving a total of 34 unique combinations and add back last item
+            # ~ self.tada_v1_data.insert(0, [0, 0])
+            # self.tada_v1_data.append(self.tada_v1_data[-1])
+            # ~ self.tada_v1_data.append([0, 0])
+            print(self.tada_v1_data)
             
             # save to pickle for reuse        
             with open("/home/pi/catkin_ws/src/tada-ros/src/tada_ros/ankle_brain/shuffled_tada_v1_data.pickle", "wb") as handle:
@@ -525,7 +525,7 @@ class BrainNode():
                 print("exit from random")
                 self.tada_v2_current_rotation = input_angles[random_index]
                 #pause after 
-                if(self.tada_v2_expt_num%2==0)&(self.tada_v2_expt_num/2>0):
+                if(self.tada_v2_expt_num%3==0)&(self.tada_v2_expt_num/2>0):
                     self.print_once = True
                     self.tada_v2_paused = 0
                 else:
@@ -753,8 +753,8 @@ class BrainNode():
             motor_command.duration = 0
             motor_command.motor1_move = var1 # round the value then make it into an int
             motor_command.motor2_move = var2
-            motor_command.motor1_torque = 1500 # be careful with torque values, max torque is dependent on the motor loads
-            motor_command.motor2_torque = 1500 # 1000 for no load, above 1500 for assembled TADA
+            motor_command.motor1_torque = 1200 # be careful with torque values, max torque is dependent on the motor loads
+            motor_command.motor2_torque = 1200 # 1000 for no load, above 1500 for assembled TADA
             motor_command.PF_cmd = self.PF
             motor_command.EV_cmd = self.EV
             motor_command.PF_curr = self.curr_PF

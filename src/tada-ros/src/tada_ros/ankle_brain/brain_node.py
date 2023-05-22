@@ -188,9 +188,9 @@ class BrainNode():
         self.itr_v1 = 0
         
         # create tada_v1 experiment theta, alpha command angles
-        load_data = 1
+        load_data = 0
         if load_data == 0:
-            for i in range(9): # nine sets of movements
+            for i in range(1): # nine sets of movements
                 # ~ self.tada_v1_data.append([0, 0])
                 for x,z in zip(theta_array, theta_45_array_v1):
                     for y in alpha_array:
@@ -525,7 +525,7 @@ class BrainNode():
                 print("exit from random")
                 self.tada_v2_current_rotation = input_angles[random_index]
                 #pause after 
-                if(self.tada_v2_expt_num%2==0)&(self.tada_v2_expt_num/2>0):
+                if(self.tada_v2_expt_num%3==0)&(self.tada_v2_expt_num/2>0):
                     self.print_once = True
                     self.tada_v2_paused = 0
                 else:
@@ -753,8 +753,8 @@ class BrainNode():
             motor_command.duration = 0
             motor_command.motor1_move = var1 # round the value then make it into an int
             motor_command.motor2_move = var2
-            motor_command.motor1_torque = 1500 # be careful with torque values, max torque is dependent on the motor loads
-            motor_command.motor2_torque = 1500 # 1000 for no load, above 1500 for assembled TADA
+            motor_command.motor1_torque = 1200 # be careful with torque values, max torque is dependent on the motor loads
+            motor_command.motor2_torque = 1200 # 1000 for no load, above 1500 for assembled TADA
             motor_command.PF_cmd = self.PF
             motor_command.EV_cmd = self.EV
             motor_command.PF_curr = self.curr_PF
