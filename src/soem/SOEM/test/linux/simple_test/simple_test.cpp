@@ -38,7 +38,7 @@
 #define NSEC_PER_SEC 1000000000
 #define stack64k (64 * 1024)
 float time_increment; 
-int timestep = 500; //250, 500, 1000
+int timestep = 250; //250, 500, 1000
 clock_t start_t, end_t, start2, end2;
 double total_t = 0;
 int total_itr = 10000;
@@ -293,8 +293,8 @@ OSAL_THREAD_FUNC simpletest(int input[6])
             curr_pos2 = (val2 -> position);
             /** PDO I/O refresh */
 		    //~ wkc = ec_receive_processdata(EC_TIMEOUTRET);
-            target->velocity = (int32) (1000); // 500
-            target2->velocity = (int32) (1000); //500
+            target->velocity = (int32) (5000); // 500
+            target2->velocity = (int32) (5000); //500
             target->torque = (int16) torque;
             target2->torque = (int16) torque2;
 

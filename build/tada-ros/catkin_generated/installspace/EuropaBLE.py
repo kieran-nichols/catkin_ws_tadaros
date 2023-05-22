@@ -323,7 +323,7 @@ class EuropaBLE(object):
 
             
             while self.isConnect==True and self.isStream==True:
-                time.sleep(0.01)             
+                             
                 while len(self.buffer)>13: 
                     while not self.check_opener(self.buffer) and len(self.buffer)>1:
                         self.buffer=self.buffer[1:]
@@ -353,6 +353,7 @@ class EuropaBLE(object):
                         #print(current_time_value)
                         self.europa_command.t = float(current_time_value)
                         self.europa_sensing.publish(self.europa_command)
+                        time.sleep(0.01) # this works instead of ROS sleep as ROS multi-threading seems to break this multi-threaded code
                         #self.rate.sleep()
 
                             

@@ -192,10 +192,10 @@ class BrainNode():
         if load_data == 0:
             for i in range(1): # nine sets of movements
                 # ~ self.tada_v1_data.append([0, 0])
-                for x,z in zip(theta_array, theta_45_array_v1):
+                for (x,z) in zip(theta_array, theta_45_array_v1):
                     for y in alpha_array:
-                        if int(y)/45!=0: self.tada_v1_data.append([x,y])
-                        else: self.tada_v1_data.append([z,y])
+                        if abs(y)/45!=0 and abs(y)%90!=0: self.tada_v1_data.append([z,y])
+                        else: self.tada_v1_data.append([x,y])
                 random.shuffle(self.tada_v1_data)
                 self.tada_v1_data.append([0, 0])
             
@@ -211,7 +211,8 @@ class BrainNode():
             # ~ self.tada_v1_data.insert(0, [0, 0])
             # self.tada_v1_data.append(self.tada_v1_data[-1])
             # ~ self.tada_v1_data.append([0, 0])
-            print(self.tada_v1_data)
+            
+            print("\nTADA_v1 data", self.tada_v1_data)
             
             # save to pickle for reuse        
             with open("/home/pi/catkin_ws/src/tada-ros/src/tada_ros/ankle_brain/shuffled_tada_v1_data.pickle", "wb") as handle:
@@ -223,12 +224,12 @@ class BrainNode():
         
         # create tada_v2 experiment theta, alpha command angles
         # ~ for i in range(1): # five sets of movements
-        for x,z in (theta_array_v2, theta_45_array_v2):
+        for (x,z) in zip(theta_array_v2, theta_45_array_v2):
             for y in alpha_array:
-                if int(y)%45!=0: self.tada_v2_data.append([x,y])
-                else: self.tada_v2_data.append([z,y])
+                if abs(y)%45==0 and abs(y)%90!=0: self.tada_v2_data.append([z,y])
+                else: self.tada_v2_data.append([x,y])
                 # ~ print(x,y)
-        
+        print("\nTADA_v2 data", self.tada_v2_data)
         # end with 0,0 giving a total of 34 unique combinations
                 
         def limit(num, minimum, maximum):
@@ -491,7 +492,7 @@ class BrainNode():
             
             if self.tada_v2_neutral:
                 if (self.steps-self.starting_step)<=5:
-                    return 0, 0, 0,0
+                    return 0, 0, 0, 0
                 self.tada_v2_neutral = False
                 #SET ANGLE FOR ANGLED
                 self.theta_deg = self.tada_v2_current_rotation[0]
@@ -499,17 +500,15 @@ class BrainNode():
                 self.random_step = random.randint(0,4)
                 print("Walk for ", step_count+self.random_step, " for ", self.tada_v2_current_rotation)
                 self.starting_step = self.steps
-            else:
-                
-                if (self.steps-self.starting_step)<=(step_count+self.random_step):
-                    
+            else:                
+                if (self.steps-self.starting_step)<=(step_count+self.random_step):                    
                     motor = TADA_angle(self)
                     var1 = round(motor[0]) 
                     var2 = round(motor[1])
-
                     var3 = float(motor[2])
                     var4 = float(motor[3])
                     return var1, var2, var3, var4
+                    
                 #exeriment for that rotation finished so change
                 self.tada_v2_neutral = True
                 self.tada_v2_taken_angles.append(self.tada_v2_current_rotation)
@@ -524,8 +523,10 @@ class BrainNode():
                     random_index = random.randint(0, len(input_angles)-1)
                 print("exit from random")
                 self.tada_v2_current_rotation = input_angles[random_index]
-                #pause after 
-                if(self.tada_v2_expt_num%3==0)&(self.tada_v2_expt_num/2>0):
+                
+                #pause after the TADA changes non-neutral angles 3 times and neutral angles 4 times
+                # ~ if(self.tada_v2_expt_num%3==0)&(self.tada_v2_expt_num/3>0):
+                if(self.tada_v2_expt_num%3==0):
                     self.print_once = True
                     self.tada_v2_paused = 0
                 else:
@@ -539,7 +540,6 @@ class BrainNode():
             motor = TADA_angle(self)
             var1 = round(motor[0]) 
             var2 = round(motor[1])
-
             var3 = float(motor[2])
             var4 = float(motor[3])
             return var1, var2, var3, var4
@@ -753,8 +753,8 @@ class BrainNode():
             motor_command.duration = 0
             motor_command.motor1_move = var1 # round the value then make it into an int
             motor_command.motor2_move = var2
-            motor_command.motor1_torque = 1200 # be careful with torque values, max torque is dependent on the motor loads
-            motor_command.motor2_torque = 1200 # 1000 for no load, above 1500 for assembled TADA
+            motor_command.motor1_torque = 1500 # be careful with torque values, max torque is dependent on the motor loads
+            motor_command.motor2_torque = 1500 # 1000 for no load, above 1500 for assembled TADA
             motor_command.PF_cmd = self.PF
             motor_command.EV_cmd = self.EV
             motor_command.PF_curr = self.curr_PF
