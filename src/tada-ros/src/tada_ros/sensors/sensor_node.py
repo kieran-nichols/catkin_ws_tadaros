@@ -8,7 +8,7 @@ from std_msgs.msg import Bool
 from time import sleep
 from std_msgs.msg import String
 from tada_ros.sensors import IMU_controller
-from IMU_controller import *
+from IMU_controller import * #importinf out IMU_controller file
 
 
 import smbus # SMBus module of I2C
@@ -42,11 +42,13 @@ ACCEL_ZOUT_H = 0x3F
 GYRO_XOUT_H  = 0x43
 GYRO_YOUT_H  = 0x45
 GYRO_ZOUT_H  = 0x47
+
 class SensorNode():
     bus = smbus.SMBus(1)  # or bus = smbus.SMBus(0) for older version boards
     Device_Address = 0x68   # MPU6050 device address
     m1_pos = 0
     m2_pos = 0
+    
     # Initial variables
     state = 0
     start = time.time()
@@ -68,14 +70,13 @@ class SensorNode():
 
     def __init__(self):
         
-        #rospy.Subscriber('kill_all_topic', Bool, handle_kill_command)
         print("initialized IN SENSOR")
-        #MPU_Init()
-        pub_sensing = rospy.Publisher('sensing_topic', IMUDataMsg, queue_size=100)
-        self.imu_msg = IMUDataMsg()
-        rospy.init_node('sensor_node', anonymous=True)
+        pub_sensing = rospy.Publisher('sensing_topic', IMUDataMsg, queue_size=100) #initializing publisher
+        self.imu_msg = IMUDataMsg() #getting the message
+        rospy.init_node('sensor_node', anonymous=True) #initializing the node
         rate = rospy.Rate(100)#100 hz
-        imu = IMU_controller.IMUController()
+        imu = IMU_controller.IMUController() #getting the imu 
+        #this is the main functions where we get the data (using IMU_controller functions) and publish it to ROS.
         while not rospy.is_shutdown():
             imu_data = imu.get_data()
             msg_imu = imu_data.to_ROS_message()
@@ -119,10 +120,7 @@ class SensorNode():
          
 
     def kill_sensors():
-        # TODO: sensor-specific code
         print("Killing Sensor Node")
+        
 if __name__ == '__main__':
     SensorNode()
-#def Publishing_Sensor(void):
-   # print("in sensor")
-   # return SensorNode.talker()
