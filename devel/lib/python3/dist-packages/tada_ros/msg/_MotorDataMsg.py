@@ -8,7 +8,7 @@ import struct
 
 
 class MotorDataMsg(genpy.Message):
-  _md5sum = "93917f2a09b44c2be7f84accf38c246b"
+  _md5sum = "5a25d71eeb893c75765db5f0795e4d73"
   _type = "tada_ros/MotorDataMsg"
   _has_header = False  # flag to mark the presence of a Header object
   _full_text = """int32 mode
@@ -19,6 +19,8 @@ int32 motor1_torque
 int32 motor2_torque
 float32 PF_cmd
 float32 EV_cmd
+float32 theta_cmd
+float32 alpha_cmd
 float32 PF_curr
 float32 EV_curr
 float32 CPU0
@@ -28,8 +30,8 @@ float32 CPU3
 float32 t
 float32 valid
 """
-  __slots__ = ['mode','duration','motor1_move','motor2_move','motor1_torque','motor2_torque','PF_cmd','EV_cmd','PF_curr','EV_curr','CPU0','CPU1','CPU2','CPU3','t','valid']
-  _slot_types = ['int32','int32','int32','int32','int32','int32','float32','float32','float32','float32','float32','float32','float32','float32','float32','float32']
+  __slots__ = ['mode','duration','motor1_move','motor2_move','motor1_torque','motor2_torque','PF_cmd','EV_cmd','theta_cmd','alpha_cmd','PF_curr','EV_curr','CPU0','CPU1','CPU2','CPU3','t','valid']
+  _slot_types = ['int32','int32','int32','int32','int32','int32','float32','float32','float32','float32','float32','float32','float32','float32','float32','float32','float32','float32']
 
   def __init__(self, *args, **kwds):
     """
@@ -39,7 +41,7 @@ float32 valid
     changes.  You cannot mix in-order arguments and keyword arguments.
 
     The available fields are:
-       mode,duration,motor1_move,motor2_move,motor1_torque,motor2_torque,PF_cmd,EV_cmd,PF_curr,EV_curr,CPU0,CPU1,CPU2,CPU3,t,valid
+       mode,duration,motor1_move,motor2_move,motor1_torque,motor2_torque,PF_cmd,EV_cmd,theta_cmd,alpha_cmd,PF_curr,EV_curr,CPU0,CPU1,CPU2,CPU3,t,valid
 
     :param args: complete set of field values, in .msg order
     :param kwds: use keyword arguments corresponding to message field names
@@ -64,6 +66,10 @@ float32 valid
         self.PF_cmd = 0.
       if self.EV_cmd is None:
         self.EV_cmd = 0.
+      if self.theta_cmd is None:
+        self.theta_cmd = 0.
+      if self.alpha_cmd is None:
+        self.alpha_cmd = 0.
       if self.PF_curr is None:
         self.PF_curr = 0.
       if self.EV_curr is None:
@@ -89,6 +95,8 @@ float32 valid
       self.motor2_torque = 0
       self.PF_cmd = 0.
       self.EV_cmd = 0.
+      self.theta_cmd = 0.
+      self.alpha_cmd = 0.
       self.PF_curr = 0.
       self.EV_curr = 0.
       self.CPU0 = 0.
@@ -111,7 +119,7 @@ float32 valid
     """
     try:
       _x = self
-      buff.write(_get_struct_6i10f().pack(_x.mode, _x.duration, _x.motor1_move, _x.motor2_move, _x.motor1_torque, _x.motor2_torque, _x.PF_cmd, _x.EV_cmd, _x.PF_curr, _x.EV_curr, _x.CPU0, _x.CPU1, _x.CPU2, _x.CPU3, _x.t, _x.valid))
+      buff.write(_get_struct_6i12f().pack(_x.mode, _x.duration, _x.motor1_move, _x.motor2_move, _x.motor1_torque, _x.motor2_torque, _x.PF_cmd, _x.EV_cmd, _x.theta_cmd, _x.alpha_cmd, _x.PF_curr, _x.EV_curr, _x.CPU0, _x.CPU1, _x.CPU2, _x.CPU3, _x.t, _x.valid))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -126,8 +134,8 @@ float32 valid
       end = 0
       _x = self
       start = end
-      end += 64
-      (_x.mode, _x.duration, _x.motor1_move, _x.motor2_move, _x.motor1_torque, _x.motor2_torque, _x.PF_cmd, _x.EV_cmd, _x.PF_curr, _x.EV_curr, _x.CPU0, _x.CPU1, _x.CPU2, _x.CPU3, _x.t, _x.valid,) = _get_struct_6i10f().unpack(str[start:end])
+      end += 72
+      (_x.mode, _x.duration, _x.motor1_move, _x.motor2_move, _x.motor1_torque, _x.motor2_torque, _x.PF_cmd, _x.EV_cmd, _x.theta_cmd, _x.alpha_cmd, _x.PF_curr, _x.EV_curr, _x.CPU0, _x.CPU1, _x.CPU2, _x.CPU3, _x.t, _x.valid,) = _get_struct_6i12f().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -141,7 +149,7 @@ float32 valid
     """
     try:
       _x = self
-      buff.write(_get_struct_6i10f().pack(_x.mode, _x.duration, _x.motor1_move, _x.motor2_move, _x.motor1_torque, _x.motor2_torque, _x.PF_cmd, _x.EV_cmd, _x.PF_curr, _x.EV_curr, _x.CPU0, _x.CPU1, _x.CPU2, _x.CPU3, _x.t, _x.valid))
+      buff.write(_get_struct_6i12f().pack(_x.mode, _x.duration, _x.motor1_move, _x.motor2_move, _x.motor1_torque, _x.motor2_torque, _x.PF_cmd, _x.EV_cmd, _x.theta_cmd, _x.alpha_cmd, _x.PF_curr, _x.EV_curr, _x.CPU0, _x.CPU1, _x.CPU2, _x.CPU3, _x.t, _x.valid))
     except struct.error as se: self._check_types(struct.error("%s: '%s' when writing '%s'" % (type(se), str(se), str(locals().get('_x', self)))))
     except TypeError as te: self._check_types(ValueError("%s: '%s' when writing '%s'" % (type(te), str(te), str(locals().get('_x', self)))))
 
@@ -157,8 +165,8 @@ float32 valid
       end = 0
       _x = self
       start = end
-      end += 64
-      (_x.mode, _x.duration, _x.motor1_move, _x.motor2_move, _x.motor1_torque, _x.motor2_torque, _x.PF_cmd, _x.EV_cmd, _x.PF_curr, _x.EV_curr, _x.CPU0, _x.CPU1, _x.CPU2, _x.CPU3, _x.t, _x.valid,) = _get_struct_6i10f().unpack(str[start:end])
+      end += 72
+      (_x.mode, _x.duration, _x.motor1_move, _x.motor2_move, _x.motor1_torque, _x.motor2_torque, _x.PF_cmd, _x.EV_cmd, _x.theta_cmd, _x.alpha_cmd, _x.PF_curr, _x.EV_curr, _x.CPU0, _x.CPU1, _x.CPU2, _x.CPU3, _x.t, _x.valid,) = _get_struct_6i12f().unpack(str[start:end])
       return self
     except struct.error as e:
       raise genpy.DeserializationError(e)  # most likely buffer underfill
@@ -167,9 +175,9 @@ _struct_I = genpy.struct_I
 def _get_struct_I():
     global _struct_I
     return _struct_I
-_struct_6i10f = None
-def _get_struct_6i10f():
-    global _struct_6i10f
-    if _struct_6i10f is None:
-        _struct_6i10f = struct.Struct("<6i10f")
-    return _struct_6i10f
+_struct_6i12f = None
+def _get_struct_6i12f():
+    global _struct_6i12f
+    if _struct_6i12f is None:
+        _struct_6i12f = struct.Struct("<6i12f")
+    return _struct_6i12f

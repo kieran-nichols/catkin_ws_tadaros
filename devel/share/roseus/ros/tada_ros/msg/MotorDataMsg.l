@@ -14,7 +14,7 @@
 
 (defclass tada_ros::MotorDataMsg
   :super ros::object
-  :slots (_mode _duration _motor1_move _motor2_move _motor1_torque _motor2_torque _PF_cmd _EV_cmd _PF_curr _EV_curr _CPU0 _CPU1 _CPU2 _CPU3 _t _valid ))
+  :slots (_mode _duration _motor1_move _motor2_move _motor1_torque _motor2_torque _PF_cmd _EV_cmd _theta_cmd _alpha_cmd _PF_curr _EV_curr _CPU0 _CPU1 _CPU2 _CPU3 _t _valid ))
 
 (defmethod tada_ros::MotorDataMsg
   (:init
@@ -27,6 +27,8 @@
     ((:motor2_torque __motor2_torque) 0)
     ((:PF_cmd __PF_cmd) 0.0)
     ((:EV_cmd __EV_cmd) 0.0)
+    ((:theta_cmd __theta_cmd) 0.0)
+    ((:alpha_cmd __alpha_cmd) 0.0)
     ((:PF_curr __PF_curr) 0.0)
     ((:EV_curr __EV_curr) 0.0)
     ((:CPU0 __CPU0) 0.0)
@@ -45,6 +47,8 @@
    (setq _motor2_torque (round __motor2_torque))
    (setq _PF_cmd (float __PF_cmd))
    (setq _EV_cmd (float __EV_cmd))
+   (setq _theta_cmd (float __theta_cmd))
+   (setq _alpha_cmd (float __alpha_cmd))
    (setq _PF_curr (float __PF_curr))
    (setq _EV_curr (float __EV_curr))
    (setq _CPU0 (float __CPU0))
@@ -78,6 +82,12 @@
   (:EV_cmd
    (&optional __EV_cmd)
    (if __EV_cmd (setq _EV_cmd __EV_cmd)) _EV_cmd)
+  (:theta_cmd
+   (&optional __theta_cmd)
+   (if __theta_cmd (setq _theta_cmd __theta_cmd)) _theta_cmd)
+  (:alpha_cmd
+   (&optional __alpha_cmd)
+   (if __alpha_cmd (setq _alpha_cmd __alpha_cmd)) _alpha_cmd)
   (:PF_curr
    (&optional __PF_curr)
    (if __PF_curr (setq _PF_curr __PF_curr)) _PF_curr)
@@ -121,6 +131,10 @@
     4
     ;; float32 _EV_cmd
     4
+    ;; float32 _theta_cmd
+    4
+    ;; float32 _alpha_cmd
+    4
     ;; float32 _PF_curr
     4
     ;; float32 _EV_curr
@@ -158,6 +172,10 @@
        (sys::poke _PF_cmd (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;; float32 _EV_cmd
        (sys::poke _EV_cmd (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+     ;; float32 _theta_cmd
+       (sys::poke _theta_cmd (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
+     ;; float32 _alpha_cmd
+       (sys::poke _alpha_cmd (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;; float32 _PF_curr
        (sys::poke _PF_curr (send s :buffer) (send s :count) :float) (incf (stream-count s) 4)
      ;; float32 _EV_curr
@@ -194,6 +212,10 @@
      (setq _PF_cmd (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;; float32 _EV_cmd
      (setq _EV_cmd (sys::peek buf ptr- :float)) (incf ptr- 4)
+   ;; float32 _theta_cmd
+     (setq _theta_cmd (sys::peek buf ptr- :float)) (incf ptr- 4)
+   ;; float32 _alpha_cmd
+     (setq _alpha_cmd (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;; float32 _PF_curr
      (setq _PF_curr (sys::peek buf ptr- :float)) (incf ptr- 4)
    ;; float32 _EV_curr
@@ -214,7 +236,7 @@
    self)
   )
 
-(setf (get tada_ros::MotorDataMsg :md5sum-) "93917f2a09b44c2be7f84accf38c246b")
+(setf (get tada_ros::MotorDataMsg :md5sum-) "5a25d71eeb893c75765db5f0795e4d73")
 (setf (get tada_ros::MotorDataMsg :datatype-) "tada_ros/MotorDataMsg")
 (setf (get tada_ros::MotorDataMsg :definition-)
       "int32 mode
@@ -225,6 +247,8 @@ int32 motor1_torque
 int32 motor2_torque
 float32 PF_cmd
 float32 EV_cmd
+float32 theta_cmd
+float32 alpha_cmd
 float32 PF_curr
 float32 EV_curr
 float32 CPU0
@@ -238,6 +262,6 @@ float32 valid
 
 
 
-(provide :tada_ros/MotorDataMsg "93917f2a09b44c2be7f84accf38c246b")
+(provide :tada_ros/MotorDataMsg "5a25d71eeb893c75765db5f0795e4d73")
 
 

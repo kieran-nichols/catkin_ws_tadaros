@@ -15,6 +15,10 @@
           PF_CMD
           EV_CMD-VAL
           EV_CMD
+          THETA_CMD-VAL
+          THETA_CMD
+          ALPHA_CMD-VAL
+          ALPHA_CMD
           PF_CURR-VAL
           PF_CURR
           EV_CURR-VAL

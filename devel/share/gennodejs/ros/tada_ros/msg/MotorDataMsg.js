@@ -26,6 +26,8 @@ class MotorDataMsg {
       this.motor2_torque = null;
       this.PF_cmd = null;
       this.EV_cmd = null;
+      this.theta_cmd = null;
+      this.alpha_cmd = null;
       this.PF_curr = null;
       this.EV_curr = null;
       this.CPU0 = null;
@@ -83,6 +85,18 @@ class MotorDataMsg {
       }
       else {
         this.EV_cmd = 0.0;
+      }
+      if (initObj.hasOwnProperty('theta_cmd')) {
+        this.theta_cmd = initObj.theta_cmd
+      }
+      else {
+        this.theta_cmd = 0.0;
+      }
+      if (initObj.hasOwnProperty('alpha_cmd')) {
+        this.alpha_cmd = initObj.alpha_cmd
+      }
+      else {
+        this.alpha_cmd = 0.0;
       }
       if (initObj.hasOwnProperty('PF_curr')) {
         this.PF_curr = initObj.PF_curr
@@ -153,6 +167,10 @@ class MotorDataMsg {
     bufferOffset = _serializer.float32(obj.PF_cmd, buffer, bufferOffset);
     // Serialize message field [EV_cmd]
     bufferOffset = _serializer.float32(obj.EV_cmd, buffer, bufferOffset);
+    // Serialize message field [theta_cmd]
+    bufferOffset = _serializer.float32(obj.theta_cmd, buffer, bufferOffset);
+    // Serialize message field [alpha_cmd]
+    bufferOffset = _serializer.float32(obj.alpha_cmd, buffer, bufferOffset);
     // Serialize message field [PF_curr]
     bufferOffset = _serializer.float32(obj.PF_curr, buffer, bufferOffset);
     // Serialize message field [EV_curr]
@@ -192,6 +210,10 @@ class MotorDataMsg {
     data.PF_cmd = _deserializer.float32(buffer, bufferOffset);
     // Deserialize message field [EV_cmd]
     data.EV_cmd = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [theta_cmd]
+    data.theta_cmd = _deserializer.float32(buffer, bufferOffset);
+    // Deserialize message field [alpha_cmd]
+    data.alpha_cmd = _deserializer.float32(buffer, bufferOffset);
     // Deserialize message field [PF_curr]
     data.PF_curr = _deserializer.float32(buffer, bufferOffset);
     // Deserialize message field [EV_curr]
@@ -212,7 +234,7 @@ class MotorDataMsg {
   }
 
   static getMessageSize(object) {
-    return 64;
+    return 72;
   }
 
   static datatype() {
@@ -222,7 +244,7 @@ class MotorDataMsg {
 
   static md5sum() {
     //Returns md5sum for a message object
-    return '93917f2a09b44c2be7f84accf38c246b';
+    return '5a25d71eeb893c75765db5f0795e4d73';
   }
 
   static messageDefinition() {
@@ -236,6 +258,8 @@ class MotorDataMsg {
     int32 motor2_torque
     float32 PF_cmd
     float32 EV_cmd
+    float32 theta_cmd
+    float32 alpha_cmd
     float32 PF_curr
     float32 EV_curr
     float32 CPU0
@@ -308,6 +332,20 @@ class MotorDataMsg {
     }
     else {
       resolved.EV_cmd = 0.0
+    }
+
+    if (msg.theta_cmd !== undefined) {
+      resolved.theta_cmd = msg.theta_cmd;
+    }
+    else {
+      resolved.theta_cmd = 0.0
+    }
+
+    if (msg.alpha_cmd !== undefined) {
+      resolved.alpha_cmd = msg.alpha_cmd;
+    }
+    else {
+      resolved.alpha_cmd = 0.0
     }
 
     if (msg.PF_curr !== undefined) {

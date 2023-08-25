@@ -49,7 +49,7 @@ FILE *fptr;
 pthread_mutex_t lock;
 int move_to_final = 0;
 int counts_per_rev = 567;
-long long cur_DCtime=0, max_DCtime=0;
+long long cur_DCtime=0, max_DCtime=0, time_diff = 0, prev_time = 0;
 unsigned long long  cur_dc32=0, pre_dc32=0;
 long long  diff_dc32;
 //~ static int64 integral = 0;
@@ -422,6 +422,7 @@ OSAL_THREAD_FUNC_RT ecatthread(void *ptr)
    struct timespec   ts, tleft;
    int ht;
    int64 cycletime;
+   gl_delta = 0;
 
    //~ sleep(3);
    clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -476,7 +477,7 @@ OSAL_THREAD_FUNC_RT ecatthread(void *ptr)
                 // //~ if (cur_DCtime>max_DCtime) max_DCtime=cur_DCtime;
                 
                 /* set linux sync point 50 us later than DC sync, just as example I checked the raw ec_DCtime*/
-                delta = (cur_DCtime - 50000) % cycletime; // 100000 didn't seem to help
+                delta = (cur_DCtime - 0) % cycletime; // 50000, 100000 didn't seem to help
                 //~ printf("%ld, ",cur_DCtime);
                 if(delta> (cycletime / 2)) { delta= delta - cycletime; }
                 if(delta>0){ integral++; }
@@ -487,8 +488,11 @@ OSAL_THREAD_FUNC_RT ecatthread(void *ptr)
                 // change I to 100, 1000, 10000 with P as 10 and ctime as 50
                 toff = -(delta / 10) - (integral / 100); // 10, 1000 Adjusted these values till toff was not too large or did not drift
                 //~ toff = -(delta / 10) - (integral / 100); //
-                //~ printf("%ld \n",toff);
+                //~ printf("%lld \n",cur_DCtime); //ld toff
                 gl_delta = delta;
+                
+                time_diff = cur_DCtime - prev_time;
+                prev_time = cur_DCtime;
          }
          
          //~ pthread_mutex_unlock(&lock);
@@ -613,7 +617,7 @@ void extra_function(clock_t start_time) {
             
             //~ float curr_dc_time = (float)cur_DCtime;
             //~ printf("%lld \n",cur_DCtime);
-            motor_listen.toff = toff; //curr_dc_time; // toff
+            motor_listen.toff = time_diff; //gl_delta; //cur_DCtime; // toff
             motor_listen.t = final_time;
             
             pub_motor.publish(motor_listen);

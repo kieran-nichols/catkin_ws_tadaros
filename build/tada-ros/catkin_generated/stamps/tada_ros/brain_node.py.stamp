@@ -162,6 +162,8 @@ class BrainNode():
         self.EV = 0
         self.curr_PF = 0
         self.curr_EV = 0
+        self.theta_deg = 0
+        self.alpha_deg = 0
         self.load_threshold = 200
         self.elapsed_time = 0
         self.prev_stance_theta, self.prev_stance_alpha = 0,0
@@ -172,7 +174,7 @@ class BrainNode():
         self.prev_M1 = 0; self.prev_M2 = 0
         self.homed1prev=0;self.homed2prev=0
         
-        theta_array = [2.5, 5, 7.5, 10]
+        theta_array = [2.5, 5, 7.5, 10] #[5, 10]
         theta_45_length = math.sqrt(50)
         theta_45_array_v1 = [theta_45_length/4, theta_45_length/2, 3*theta_45_length/4, theta_45_length]
         # ~ alpha_array = [0, 180 , 0, 180, 0, 180, 0, 180] # only sagittal
@@ -185,6 +187,7 @@ class BrainNode():
         self.tada_v1_data = [[0, 0]] # empty list that will hold the TADA_angle cmds
         self.tada_v2_data = [[0, 0]]
         self.tada_v2_data_mini = [[0, 0], [10, 0], [10, 180], [10, 90], [10, -90]] 
+        # ~ self.tada_v2_data_mini = [[math.sqrt(50)/2, -135]] #[math.sqrt(50)/2, 45], [math.sqrt(50)/2, 45], [5, -90], [math.sqrt(50), -135]]
         self.itr_v1 = 0
         
         # create tada_v1 experiment theta, alpha command angles
@@ -192,33 +195,25 @@ class BrainNode():
         if load_data == 0:
             for i in range(1): # nine sets of movements
                 # ~ self.tada_v1_data.append([0, 0])
+                array = []
                 for (x,z) in zip(theta_array, theta_45_array_v1):
                     for y in alpha_array:
-                        if abs(y)/45!=0 and abs(y)%90!=0: self.tada_v1_data.append([z,y])
-                        else: self.tada_v1_data.append([x,y])
-                random.shuffle(self.tada_v1_data)
+                        # ~ if abs(y)%45==0 and abs(y)%90!=0: array.append([z,y])
+                        # ~ else: array.append([x,y])
+                        array.append([x,y])
+                # ~ random.shuffle(array)
+                self.tada_v1_data = self.tada_v1_data+array
                 self.tada_v1_data.append([0, 0])
-            
-            # print(self.tada_v1_data)
-            # shuffle the data
-            # ~ random.shuffle(self.tada_v1_data)
-            # ~ # check if consecutive elements exist and swap if necessary
-            # ~ for i in range(len(self.tada_v1_data)-2):
-                # ~ if self.tada_v1_data[i][0] == self.tada_v1_data[i+2][0] and self.tada_v1_data[i][1] == self.tada_v1_data[i+2][1]:
-                    # ~ # if consecutive elements exist, swap them
-                    # ~ self.tada_v1_data[i], self.tada_v1_data[i+2] = self.tada_v1_data[i+2], self.tada_v1_data[i]
-            # ~ # start and end with 0,0 giving a total of 34 unique combinations and add back last item
-            # ~ self.tada_v1_data.insert(0, [0, 0])
-            # self.tada_v1_data.append(self.tada_v1_data[-1])
-            # ~ self.tada_v1_data.append([0, 0])
-            
+            # ~ self.tada_v1_data = [[10, 0], [9, 0], [8, 0], [7, 0], [6, 0], [5, 0], [4, 0], [3, 0], [2, 0], [1, 0], [0, 0],[1, 0], [2, 0],[3, 0],[4, 0],[5, 0],[6, 0],[7, 0],[8, 0],[9, 0]]*10
+            # ~ self.tada_v1_data = [[10, 45], [9, 45], [8, 45], [7, 45], [6, 45], [5, 45], [4, 45], [3, 45], [2, 45], [1, 45], [0, 45],[1, 45], [2, 45],[3, 45],[4, 45],[5, 45],[6, 45],[7, 45],[8, 45],[9, 45]]*10
+            # ~ self.tada_v1_data = [[10, 90], [5, 90], [0, 0], [5, -90], [10, -90], [5, -90], [0, 0], [5, 90]]*10
             print("\nTADA_v1 data", self.tada_v1_data)
             
             # save to pickle for reuse        
-            with open("/home/pi/catkin_ws/src/tada-ros/src/tada_ros/ankle_brain/shuffled_tada_v1_data.pickle", "wb") as handle:
-                pickle.dump(self.tada_v1_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+            # ~ with open("/home/pi/catkin_ws/src/tada-ros/src/tada_ros/ankle_brain/shuffled_tada_v1_data_short.pickle", "wb") as handle:
+                # ~ pickle.dump(self.tada_v1_data, handle, protocol=pickle.HIGHEST_PROTOCOL)
         else:
-            with open("/home/pi/catkin_ws/src/tada-ros/src/tada_ros/ankle_brain/shuffled_tada_v1_data.pickle", "rb") as handle:
+            with open("/home/pi/catkin_ws/src/tada-ros/src/tada_ros/ankle_brain/shuffled_tada_v1_data_short.pickle", "rb") as handle:
                 self.tada_v1_data =pickle.load(handle)    
                 # ~ print(self.tada_v1_data)          
         
@@ -229,6 +224,7 @@ class BrainNode():
                 if abs(y)%45==0 and abs(y)%90!=0: self.tada_v2_data.append([z,y])
                 else: self.tada_v2_data.append([x,y])
                 # ~ print(x,y)
+        self.tada_v2_data.append([0, 0])
         print("\nTADA_v2 data", self.tada_v2_data)
         # end with 0,0 giving a total of 34 unique combinations
                 
@@ -429,7 +425,7 @@ class BrainNode():
                         self.theta_deg = cmd1[0]; self.alpha_deg = cmd1[1]
                 # mode 2
                 else:
-                    total_time = 1 # one second
+                    total_time = 0.1#1 # one second
                     self.theta_deg = cmd[0]
                     self.alpha_deg = cmd[1]                
                 
@@ -753,10 +749,12 @@ class BrainNode():
             motor_command.duration = 0
             motor_command.motor1_move = var1 # round the value then make it into an int
             motor_command.motor2_move = var2
-            motor_command.motor1_torque = 1500 # be careful with torque values, max torque is dependent on the motor loads
-            motor_command.motor2_torque = 1500 # 1000 for no load, above 1500 for assembled TADA
+            motor_command.motor1_torque = 3000 # be careful with torque values, max torque is dependent on the motor loads
+            motor_command.motor2_torque = 3000 # 1000 for no load, above 1500 for assembled TADA
             motor_command.PF_cmd = self.PF
             motor_command.EV_cmd = self.EV
+            motor_command.theta_cmd = 0#self.theta_deg
+            motor_command.alpha_cmd = 0#self.alpha_deg
             motor_command.PF_curr = self.curr_PF
             motor_command.EV_curr = self.curr_EV
             [motor_command.CPU0, motor_command.CPU1, motor_command.CPU2, motor_command.CPU3] = self.CPU

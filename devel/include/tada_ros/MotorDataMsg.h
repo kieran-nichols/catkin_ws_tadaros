@@ -32,6 +32,8 @@ struct MotorDataMsg_
     , motor2_torque(0)
     , PF_cmd(0.0)
     , EV_cmd(0.0)
+    , theta_cmd(0.0)
+    , alpha_cmd(0.0)
     , PF_curr(0.0)
     , EV_curr(0.0)
     , CPU0(0.0)
@@ -50,6 +52,8 @@ struct MotorDataMsg_
     , motor2_torque(0)
     , PF_cmd(0.0)
     , EV_cmd(0.0)
+    , theta_cmd(0.0)
+    , alpha_cmd(0.0)
     , PF_curr(0.0)
     , EV_curr(0.0)
     , CPU0(0.0)
@@ -86,6 +90,12 @@ struct MotorDataMsg_
 
    typedef float _EV_cmd_type;
   _EV_cmd_type EV_cmd;
+
+   typedef float _theta_cmd_type;
+  _theta_cmd_type theta_cmd;
+
+   typedef float _alpha_cmd_type;
+  _alpha_cmd_type alpha_cmd;
 
    typedef float _PF_curr_type;
   _PF_curr_type PF_curr;
@@ -148,6 +158,8 @@ bool operator==(const ::tada_ros::MotorDataMsg_<ContainerAllocator1> & lhs, cons
     lhs.motor2_torque == rhs.motor2_torque &&
     lhs.PF_cmd == rhs.PF_cmd &&
     lhs.EV_cmd == rhs.EV_cmd &&
+    lhs.theta_cmd == rhs.theta_cmd &&
+    lhs.alpha_cmd == rhs.alpha_cmd &&
     lhs.PF_curr == rhs.PF_curr &&
     lhs.EV_curr == rhs.EV_curr &&
     lhs.CPU0 == rhs.CPU0 &&
@@ -212,12 +224,12 @@ struct MD5Sum< ::tada_ros::MotorDataMsg_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "93917f2a09b44c2be7f84accf38c246b";
+    return "5a25d71eeb893c75765db5f0795e4d73";
   }
 
   static const char* value(const ::tada_ros::MotorDataMsg_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x93917f2a09b44c2bULL;
-  static const uint64_t static_value2 = 0xe7f84accf38c246bULL;
+  static const uint64_t static_value1 = 0x5a25d71eeb893c75ULL;
+  static const uint64_t static_value2 = 0x765db5f0795e4d73ULL;
 };
 
 template<class ContainerAllocator>
@@ -244,6 +256,8 @@ struct Definition< ::tada_ros::MotorDataMsg_<ContainerAllocator> >
 "int32 motor2_torque\n"
 "float32 PF_cmd\n"
 "float32 EV_cmd\n"
+"float32 theta_cmd\n"
+"float32 alpha_cmd\n"
 "float32 PF_curr\n"
 "float32 EV_curr\n"
 "float32 CPU0\n"
@@ -278,6 +292,8 @@ namespace serialization
       stream.next(m.motor2_torque);
       stream.next(m.PF_cmd);
       stream.next(m.EV_cmd);
+      stream.next(m.theta_cmd);
+      stream.next(m.alpha_cmd);
       stream.next(m.PF_curr);
       stream.next(m.EV_curr);
       stream.next(m.CPU0);
@@ -320,6 +336,10 @@ struct Printer< ::tada_ros::MotorDataMsg_<ContainerAllocator> >
     Printer<float>::stream(s, indent + "  ", v.PF_cmd);
     s << indent << "EV_cmd: ";
     Printer<float>::stream(s, indent + "  ", v.EV_cmd);
+    s << indent << "theta_cmd: ";
+    Printer<float>::stream(s, indent + "  ", v.theta_cmd);
+    s << indent << "alpha_cmd: ";
+    Printer<float>::stream(s, indent + "  ", v.alpha_cmd);
     s << indent << "PF_curr: ";
     Printer<float>::stream(s, indent + "  ", v.PF_curr);
     s << indent << "EV_curr: ";
