@@ -1,122 +1,88 @@
-# SOEM for ROS
+# SOEM for TADA ROS
 
-**Table of Contents**
+## Motor node (ROS)
+* Position control of two brushless DC motors 
+* Faulhaber info (need to add)
+* Multi-threaded C/C++ program
+* To compile program, run catkin_make in main directory (catkin_ws_tadaros)
+* Input: Brain messages (first 6 indices)
+* Output: Motor information 
+* Functions: to set up and execute motor position control over CANopen over EtherCAT
 
-- [A Note On The Version Number](#A-Note-On-The-Version-Number)
-- [Package Description](#Package-Description)
-- [Installation](#Installation)
-- [Usage](#Usage)
-- [Development](#Development)
+## Resources: this code was edited using files from 
+1) SOEM 
+2) ROS wrapper for SOEM
+3) Some help from mgruler, others
 
-## A Note On The Version Number
-This package tracks the upstream Open Ethercat Master Repo and thus should
-directly reference the respective version number of the upstream.
-As this does not allow for intermediate releases that only change ROS specific
-parts, like the CMake plumbing, it has been decided to deviate from the upstream
-version by adding an arbitrary number (`100`) to the patch part of the version,
-and then multiplying by ten (i.e. `(patch of upstream + 100) * 10`).
-This allows for intermediate releases in between integrations of upstream releases.
+CPU usage
+1) Linux scheduling, Kernel operations
+2) ROS, TADA programs, error tracking (100Hz), movement thread (100Hz)
+3) ROS, TADA programs, error tracking (100Hz), movement thread (100Hz)
+4) synch thread (1000 Hz)
 
-Thus, the version numbers relate to each other as follows:
+## Motor communication Description
+### Main thread
+	Variables initialization
+	Macro functions for SDO/PDO reading and writing
+	Initialize threads for general communication, error tracking, ROS messaging, Synchronization
 
-```
-1.4.1000 -> upstream 1.4.0
-1.4.1010 -> upstream 1.4.1
-1.4.1011 -> upstream 1.4.1 + ROS specific changes 1
-```
+### General communication thread
+	Initial ethernet connection and initialize Master
+	Move from init mode t
+	Pre-Operational mode
+	Set SDO and PDO mapping for slaves (set CSP mode and specify the correct addresses for the read and write of position, velocity, and torque)
+	Move to Safe Operational mode
+	Move to Operational mode and ensure the state machine is ready
+	Operational mode: Position control
+		While loop
+		i++
+		Send movement data from previous iteration
+		If i == 1: set initial and final positions
+		If else move mode is true: 
+			read current position, 
+			set target position (send info to synch thread)
+			and check if movement is finished
+		Else: stay at initial position
+		Sleep for 500 microseconds (0.5 ms)
+	Move to Pre-Operational mode
+	Move to Init mode
+	Close ethernet connection
+	Exit program
 
-The idea for this approach was taken from the [cartographer_ros package](https://github.com/ros2/cartographer_ros).
+### Error tracking
+	More to add
 
-## Package Description
+### ROS messaging
+	More to add
 
-SOEM is an open source EtherCAT master library written in C.
-Its primary target is Linux but can be adapted to other OS and embedded systems.
-
-SOEM has originally been hosted at http://developer.berlios.de/projects/soem/
-but has been moved to [GitHub and the OpenEtherCATsociety organisation](
-https://github.com/OpenEtherCATsociety/SOEM).
-
-This package contains the upstream SOEM repository as a git subtree and wraps it to be easily used within ROS.
-
-**Disclaimer**:
-This package is not a development package for SOEM, but rather a wrapper to provide SOEM to ROS.
-In the end, this just provides the CMake quirks that allows releasing SOEM as a ROS package.
-
-All bug reports regarding the original SOEM source code should go to the bugtracker at
-https://github.com/OpenEtherCATsociety/SOEM/issues.
-
-All ROS related issues should target the [bug tracker on GitHub](https://github.com/mgruhler/soem/issues)
-(but might be redirected ;-)).
-
-Obviously, any support, being it bug reports or pull requests (obviously preferred) are highly welcome!
-
-## Installation
-
-If `soem` has been released for your respective ROS distribution, you can simply install it using
-
-```bash
-sudo apt install ros-<DISTRO>-soem
-```
-
-Currently, `soem` has been released for ROS `indigo`, `kinetic` and `melodic`.
-If you want to use `soem` from source, please check out the section about [Development](#Development).
-
-## Usage
-
-To use `soem` in your ROS package add the following to your `package.xml`and `CMakeLists.txt`, respectively.
-
-In your `package.xml` add:
-
-```xml
-  <build_depend>soem</build_depend>
-  <exec_depend>soem</exec_depend>
-```
-
-and in your `CMakeLists.txt`, add it to `find_package` and adapt the `include_directories` as shown:
-
-```CMake
-find_package(catkin REQUIRED COMPONENTS
-  ...
-  soem
-  ...
-)
-
-include_directories(
-  ...
-  ${catkin_INCLUDE_DIRS}
-)
-```
-
-### Running without sudo/root
-SOEM requires access to certain network capabilities as it is using raw sockets, and as such any executable linking
-against SOEM needs to be run with certain privileges.
-Typically, you run any SOEM executables with `sudo` or as `root`.
-Tis is impractical for any ROS system, and as such there exists a tool called
-[`ethercat_grant`](https://github.com/shadow-robot/ethercat_grant) that helps with that.
-
-Install with
-```bash
-sudo apt install ros-<DISTRO>-ethercat-ethercat_grant
-```
-and add the following to your your `node` tag in your launchfile
-```xml
-launch-prefix="ethercat_grant
-```
-
-## Development
-
-With the integration of the upstream SOEM repo as a git subtree, and a major overhaul of the build system,
-it is now possible to use the soem ROS package easily from your regular ROS workspace.
-
-Simply clone this repository into your workspace
-```bash
-git clone git@github.com:mgruhler/soem.git
-```
-
-Note that if you want to update or patch the subtree which includes the SOEM upstream repository, you need to be sure
-to do this properly.
-When creating this, I followed the instructions in
-[this Atlassian blog post](https://www.atlassian.com/blog/git/alternatives-to-git-submodule-git-subtree).
-This covers all the things you need.
-
-This package has been tested using both, `catkin_make` and `catkin build`.
+### Synch thread
+	get current time to nearest millisecond
+	convert to nanoseconds
+	initialize variables, toff, cycletime, dorun
+	toff: time to wait to start next cycle
+	cycletime: sampling period
+	dorun: conditional statement that states if the system is in operational mode
+	send initial ethercat data
+	
+	enter infinite while loop
+	calculate time to start next cycle (addtime) based on cycletime and toff
+	wait function to start next cycle
+	if system is in operational mode
+	  start mutex lock
+	  send ethercat data
+	  if first client has distribute clock value?
+	    find curr_dc time with some accommodation from either 32 or 64 bit values (SOEM takes in 64 bit clock values but some drivers give 32 bit)
+	    find delta which is time difference from 50 us sampling period continuously offset 50 us
+	      Trying to ensure that linux clock is 50 us offset from ethercat clock
+	    if delta is more than sampling period/2 then subtract sampling period from delta (it is closer to start of next period)
+	    
+	    if delta is positive, add one to the integral gain
+	    if delta is negative, minus one to the integral gain
+	    calculate toff to get linux time and DC synced
+	      toff = -0.1(delta+integral)
+	      toff = -0.1*(25+5)=-3  
+	      
+	Send process data to ethercat system
+	Unlock the mutex
+	
+	
