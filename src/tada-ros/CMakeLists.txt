@@ -172,7 +172,7 @@ catkin_install_python(PROGRAMS
   src/tada_ros/sensors/sensor_node.py
   src/tada_ros/europa/ble_server.py
   src/tada_ros/europa/EuropaBLE.py
-  src/tada_ros/motors/motor_node.py
+  src/tada_ros/DynamixelSDK2/motor_pub.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

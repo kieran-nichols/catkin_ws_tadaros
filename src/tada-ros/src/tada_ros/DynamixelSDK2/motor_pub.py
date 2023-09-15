@@ -34,6 +34,8 @@
 
 from __future__ import print_function
 import os
+import rospy
+from std_msgs.msg import String, MotorDataMsg
 
 if os.name == 'nt':
     import msvcrt
@@ -167,64 +169,73 @@ elif dxl_error != 0:
 else:
     print("Dynamixel has been successfully connected")
 
-while 1:
-    print("\nPress any key to continue! (or press ESC to quit!)")
-    if getch() == chr(ESC_ASCII_VALUE):
-        break
-    print("  Press SPACE key to clear multi-turn information! (or press ESC to stop!)")
-
-    #BECCA put in lines 177-180
-    goal_position_deg=input("Enter goal position in deg:") # this gets input from the command line !!!!
-    goal_position_counts=int(goal_position_deg/0.087891) #this converts degrees to the location in counts !!!!
-    print("Goal deg %s"% goal_position_deg) # !!!!
-    print("Goal counts %s"% goal_position_counts) # !!!!
+def talker():
     
-    # Write goal position
-    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, goal_position_counts) #changed MAX... to goal_position_counts !!!!
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
+    #seting up the publisher
+    pub = rospy.Publisher('motor_pos', MotorDataMsg, queue_size=100)
+    rospy.init_node('motor_pub', anonymous=True)
+    rate = rospy.Rate(10) # 10hz
+    
+    while not rospy.is_shutdown():
+        print("\nPress any key to continue! (or press ESC to quit!)")
+        if getch() == chr(ESC_ASCII_VALUE):
+            break
+        print("  Press SPACE key to clear multi-turn information! (or press ESC to stop!)")
 
-    while 1:
-        # Read present position
-        dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
+        #BECCA put in lines 177-180
+        goal_position_deg=input("Enter goal position in deg:") # this gets input from the command line !!!!
+        goal_position_counts=int(goal_position_deg/0.087891) #this converts degrees to the location in counts !!!!
+        print("Goal deg %s"% goal_position_deg) # !!!!
+        print("Goal counts %s"% goal_position_counts) # !!!!
+        
+        # Write goal position
+        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, goal_position_counts) #changed MAX... to goal_position_counts !!!!
         if dxl_comm_result != COMM_SUCCESS:
             print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
         elif dxl_error != 0:
             print("%s" % packetHandler.getRxPacketError(dxl_error))
 
-        print("   [ID:%03d] GoalPos:%03d  PresPos:%03d" %(DXL_ID, goal_position_counts, dxl_present_position), end = "\r") # changed MAX... to goal_position_counts !!!!
-        if kbhit():
-            c = getch()
-            if c == chr(SPACE_ASCII_VALUE):
-                print("\n  Stop & Clear Multi-Turn Information! ")
-                # Write the present position to the goal position to stop moving
-                dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, dxl_present_position)
-                if dxl_comm_result != COMM_SUCCESS:
-                    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-                elif dxl_error != 0:
-                    print("%s" % packetHandler.getRxPacketError(dxl_error))
+        while True:
+            # Read present position
+            dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
+            if dxl_comm_result != COMM_SUCCESS:
+                print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+            elif dxl_error != 0:
+                print("%s" % packetHandler.getRxPacketError(dxl_error))
 
-                time.sleep(0.3)
+            print("   [ID:%03d] GoalPos:%03d  PresPos:%03d" %(DXL_ID, goal_position_counts, dxl_present_position), end = "\r") # changed MAX... to goal_position_counts !!!!
+            if kbhit():
+                c = getch()
+                if c == chr(SPACE_ASCII_VALUE):
+                    print("\n  Stop & Clear Multi-Turn Information! ")
+                    # Write the present position to the goal position to stop moving
+                    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, dxl_present_position)
+                    if dxl_comm_result != COMM_SUCCESS:
+                        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+                    elif dxl_error != 0:
+                        print("%s" % packetHandler.getRxPacketError(dxl_error))
 
-                # Clear Multi-Turn Information
-                dxl_comm_result, dxl_error = packetHandler.clearMultiTurn(portHandler, DXL_ID)
-                if dxl_comm_result != COMM_SUCCESS:
-                    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-                elif dxl_error != 0:
-                    print("%s" % packetHandler.getRxPacketError(dxl_error))
+                    time.sleep(0.3)
 
-                # Read present position
-                dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
-                if dxl_comm_result != COMM_SUCCESS:
-                    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-                elif dxl_error != 0:
-                    print("%s" % packetHandler.getRxPacketError(dxl_error))
+                    # Clear Multi-Turn Information
+                    dxl_comm_result, dxl_error = packetHandler.clearMultiTurn(portHandler, DXL_ID)
+                    if dxl_comm_result != COMM_SUCCESS:
+                        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+                    elif dxl_error != 0:
+                        print("%s" % packetHandler.getRxPacketError(dxl_error))
 
-                print("  Present Position has been reset. : %03d" % dxl_present_position)
+                    # Read present position
+                    dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
+                    if dxl_comm_result != COMM_SUCCESS:
+                        position = packetHandler.getTxRxResult(dxl_comm_result)
+                        print("%s" % position)
+                    elif dxl_error != 0:
+                        print("%s" % packetHandler.getRxPacketError(dxl_error))
 
-                break
+                    print("  Present Position has been reset. : %03d" % dxl_present_position)
+
+                    break
+            
 
             elif c == chr(ESC_ASCII_VALUE):
                 print("\n  Stopped!!")
@@ -235,16 +246,23 @@ while 1:
                 elif dxl_error != 0:
                     print("%s" % packetHandler.getRxPacketError(dxl_error))
                 break
+            pub.publish(position)
+            rate.sleep()
 
         if not abs(goal_position_counts - dxl_present_position) > DXL_MOVING_STATUS_THRESHOLD: # changed MAX_... to goal_position_counts !!!!
             break
 
 # Disable Dynamixel Torque
-dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
-if dxl_comm_result != COMM_SUCCESS:
-    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-elif dxl_error != 0:
-    print("%s" % packetHandler.getRxPacketError(dxl_error))
+#dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_DISABLE)
+#if dxl_comm_result != COMM_SUCCESS:
+#    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+#elif dxl_error != 0:
+#    print("%s" % packetHandler.getRxPacketError(dxl_error))
 
 # Close port
-portHandler.closePort()
+#portHandler.closePort()
+if __name__ == '__main__':
+    try:
+        talker()
+    except rospy.ROSInterruptException:
+        pass
