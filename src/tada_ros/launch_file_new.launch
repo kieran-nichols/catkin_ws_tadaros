@@ -1,0 +1,7 @@
+<launch>
+<!--
+<node pkg="tada_ros" type="brain_node.py" name="brain" args= "" output="screen" launch-prefix="taskset -c 1,2"/> 
+-->
+<node name="EuropaServer_node" pkg="tada_ros" type="ble_server.py" output="screen" launch-prefix="taskset -c 1,2"/> 
+
+</launch>
