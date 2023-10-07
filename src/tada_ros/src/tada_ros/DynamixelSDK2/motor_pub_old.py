@@ -86,21 +86,20 @@ DXL_ID                      = 1
 
 portHandler = PortHandler(DEVICENAME)
 packetHandler = PacketHandler(PROTOCOL_VERSION)
-old_goal = 0
+#old_goal = 0
 
 def set_goal_pos_callback(MotorDataMsg):
-    global old_goal
+    #global old_goal
     moving_counts = int(MotorDataMsg.motor1_move/0.087891)
-    #too many message sening, so only send if new dir
-    if old_goal != moving_counts:
-        print("Set Goal Position  %s = %s" % (moving_counts, MotorDataMsg.motor1_move))
-        dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, moving_counts)
-        old_goal = moving_counts
+    #if old_goal != moving_counts:
+    #print("Set Goal Position  %s = %s" % (moving_counts, MotorDataMsg.motor1_move))
+    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, moving_counts)
+    #old_goal = moving_counts
     #time.sleep(0.1)
         
 def get_present_pos(req):
     dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
-    #print("Present Position of ID %s = %s" % (DXL_ID, dxl_present_position))
+    print("Present Position of ID %s = %s" % (DXL_ID, dxl_present_position))
     return dxl_present_position
 
 def read_write_py_node():
@@ -110,7 +109,6 @@ def read_write_py_node():
     rospy.init_node('motor_pub', anonymous=True)
     pub = rospy.Publisher('motor_listen', MotorListenMsg, queue_size=100)
     sub = rospy.Subscriber('motor_command', MotorDataMsg, set_goal_pos_callback)
-    #rospy.Service('get_position', GetPosition, get_present_pos)
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
         motor_msg = MotorListenMsg()
@@ -118,7 +116,7 @@ def read_write_py_node():
         dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
         motor_msg.curr_pos1 = dxl_present_position
         motor_msg.motor_fail = False
-        motor_msg.toff = 0
+        #motor_msg.toff = 0
         pub.publish(motor_msg)
         rate.sleep()
     rospy.spin()
