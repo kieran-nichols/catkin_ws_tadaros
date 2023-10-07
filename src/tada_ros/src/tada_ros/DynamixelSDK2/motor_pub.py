@@ -116,7 +116,7 @@ def read_write_py_node():
         motor_msg = MotorListenMsg()
         motor_msg.curr_pos2 = 0
         dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
-        motor_msg.curr_pos1 = dxl_present_position
+        motor_msg.curr_pos1 = dxl_present_position*0.087891
         motor_msg.motor_fail = False
         motor_msg.toff = 0
         pub.publish(motor_msg)
