@@ -40,6 +40,7 @@ import signal
 from tada_ros.msg import KillConfirmationMsg, MotorListenMsg, MotorDataMsg
 from time import sleep
 from std_msgs.msg import String, Bool
+import math
 
 from dynamixel_sdk import *
 #from dynamixel_sdk_examples.srv import *
@@ -79,7 +80,7 @@ TORQUE_ENABLE               = 1                 # Value for enabling the torque
 TORQUE_DISABLE              = 0                 # Value for disabling the torque
 DXL_MINIMUM_POSITION_VALUE  = 0               # Dynamixel will rotate between this value
 DXL_MAXIMUM_POSITION_VALUE  = 1000            # and this value (note that the Dynamixel would not move when the position value is out of movable range. Check e-manual about the range of the Dynamixel you use.)
-DXL_MOVING_STATUS_THRESHOLD = 20                # Dynamixel moving status threshold
+DXL_MOVING_STATUS_THRESHOLD = 1                # Dynamixel moving status threshold
 
 # Factory default ID of all DYNAMIXEL is 1
 DXL_ID                      = 1
@@ -90,10 +91,17 @@ old_goal = 0
 
 def set_goal_pos_callback(MotorDataMsg):
     global old_goal
+    #ERROR: does not move to 360 or 0 but does go to 1 or 359
+    #Increase in degrees CCW and Decrease CW
+    # full rotation if over 360 move
     moving_counts = int(MotorDataMsg.motor1_move/0.087891)
     #too many message sening, so only send if new dir
     if old_goal != moving_counts:
-        print("Set Goal Position  %s = %s" % (moving_counts, MotorDataMsg.motor1_move))
+        if abs(old_goal-moving_counts)<360:
+            input_motor_rotation= moving_counts
+        else:    
+            input_motor_rotation = moving_counts%360+math.floor(old_goal/360)
+        print("Set Goal Position  %s = %s from %s" % (input_motor_rotation, MotorDataMsg.motor1_move, old_goal))
         dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, moving_counts)
         old_goal = moving_counts
     #time.sleep(0.1)
@@ -116,7 +124,7 @@ def read_write_py_node():
         motor_msg = MotorListenMsg()
         motor_msg.curr_pos2 = 0
         dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
-        motor_msg.curr_pos1 = dxl_present_position*0.087891
+        motor_msg.curr_pos1 = int(dxl_present_position*0.087891%360)
         motor_msg.motor_fail = False
         motor_msg.toff = 0
         pub.publish(motor_msg)
@@ -147,11 +155,13 @@ def main():
     # Enable Dynamixel Torque
     dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
     if dxl_comm_result != COMM_SUCCESS:
+        print("error1")
         print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
         print("Press any key to terminate...")
         getch()
         quit()
     elif dxl_error != 0:
+        print("error2")
         print("%s" % packetHandler.getRxPacketError(dxl_error))
         print("Press any key to terminate...")
         getch()
