@@ -41,6 +41,7 @@ from tada_ros.msg import KillConfirmationMsg, MotorListenMsg, MotorDataMsg
 from time import sleep
 from std_msgs.msg import String, Bool
 import math
+import numpy as np
 
 from dynamixel_sdk import *
 #from dynamixel_sdk_examples.srv import *
@@ -107,9 +108,10 @@ def set_goal_pos_callback(MotorDataMsg):
         if abs(curr_pos-moving_counts)<=180:
             input_motor_rotation= moving_counts
         else:
+            cur_sign = np.sign(curr_pos-moving_counts) #if pos we add to 360*x, if negetive we then subtract
             print("Algo Triggered ", abs(curr_pos-moving_counts), curr_pos, moving_counts )
             #+5 for noise and error
-            input_motor_rotation = moving_counts%360+math.floor((curr_pos+5)/360)*360
+            input_motor_rotation = moving_counts%360+math.floor((curr_pos+5)/360)*360*cur_sign
             print("Math: ", input_motor_rotation, moving_counts%360, math.floor((curr_pos+5)/360)*360)
         print("Set Goal Position  %s = %s from %s" % (input_motor_rotation, MotorDataMsg.motor1_move, curr_pos))
         #we rransfor from angle into cunts right before wrighting
