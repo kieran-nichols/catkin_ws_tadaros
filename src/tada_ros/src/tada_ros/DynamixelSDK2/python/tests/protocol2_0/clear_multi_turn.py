@@ -190,7 +190,7 @@ while 1:
     elif dxl_error != 0:
         print("%s" % packetHandler.getRxPacketError(dxl_error))
 
-    while 1:
+    while 0:
         # Read present position
         dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
         if dxl_comm_result != COMM_SUCCESS:
