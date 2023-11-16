@@ -100,11 +100,11 @@ ADDR_OPERATING_MODE         = 11
 PROTOCOL_VERSION            = 2.0            # See which protocol version is used in the Dynamixel
 
 # Factory default ID of all DYNAMIXEL is 1
-DXL_ID                      = 1
+DXL_ID                      = 2
 
 # Use the actual port assigned to the U2D2.
 # ex) Windows: "COM*", Linux: "/dev/ttyUSB*", Mac: "/dev/tty.usbserial-*"
-DEVICENAME                  = '/dev/ttyUSB0'
+DEVICENAME                  = '/dev/ttyUSB1'
 
 BAUDRATE                    = 57600
 EXT_POSITION_CONTROL_MODE   = 4                 # The value of Extended Position Control Mode that can be set through the Operating Mode (11)

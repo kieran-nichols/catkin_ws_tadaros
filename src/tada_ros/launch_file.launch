@@ -1,9 +1,10 @@
 <launch>
 
 <node pkg="tada_ros" type="brain_node.py" name="brain" args= "" output="screen" launch-prefix="taskset -c 1,2"/> 
-<node name="sensor_node" pkg="tada_ros" type="sensor_node.py" output="screen" launch-prefix="taskset -c 1"></node>
 <node name="motor_pub" pkg="tada_ros" type="motor_pub.py" output="screen" launch-prefix="taskset -c 1"></node>
 <!--
 <node name="EuropaServer_node" pkg="tada_ros" type="ble_server.py" output="screen" launch-prefix="taskset -c 1"></node>
+<node name="sensor_node" pkg="tada_ros" type="sensor_node.py" output="screen" launch-prefix="taskset -c 1"></node>
+
 -->
 </launch>
