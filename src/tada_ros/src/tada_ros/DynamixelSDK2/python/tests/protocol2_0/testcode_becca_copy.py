@@ -34,7 +34,6 @@
 
 from __future__ import print_function
 import os
-import math
 
 if os.name == 'nt':
     import msvcrt
@@ -127,8 +126,6 @@ portHandler = PortHandler(DEVICENAME)
 # Get methods and members of Protocol1PacketHandler or Protocol2PacketHandler
 packetHandler = PacketHandler(PROTOCOL_VERSION)
 
-#packetHandler.reboot(portHandler,DXL_ID)
-
 # Open port
 if portHandler.openPort():
     print("Succeeded to open the port")
@@ -152,10 +149,8 @@ else:
 dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, DXL_ID, ADDR_OPERATING_MODE, EXT_POSITION_CONTROL_MODE)
 if dxl_comm_result != COMM_SUCCESS:
     print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    print("result error")
 elif dxl_error != 0:
     print("%s" % packetHandler.getRxPacketError(dxl_error))
-    print("Packer error")
 else:
     print("Operating mode changed to extended position control mode.")
 
@@ -168,84 +163,78 @@ elif dxl_error != 0:
 else:
     print("Dynamixel has been successfully connected")
 
- 
-while 1:
-    print("\nPress any key to continue! (or press ESC to quit!)")
-    if getch() == chr(ESC_ASCII_VALUE):
-        break
-    print("  Press SPACE key to clear multi-turn information! (or press ESC to stop!)")
-
-    
-    # Write goal position
-    var=input("\n Please enter position in counts: ")
-    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, int(var))
-    
-#     var=input("\n Please enter position in degrees: ")
-#     variable=var*int(4096/360)
-#     print(var*int(4096/360)
-#     dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, int(variable))
-#     
-
-    if dxl_comm_result != COMM_SUCCESS:
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-    elif dxl_error != 0:
-        print("%s" % packetHandler.getRxPacketError(dxl_error))
-         
-        
+torque=1
+while torque==1:        
     while 1:
+        print("\nPress any key to continue! (or press ESC to quit!)")
+        if getch() == chr(ESC_ASCII_VALUE):
+            break
+        print("  Press SPACE key to clear multi-turn information! (or press ESC to stop!)")
+
+        var=input("Please enter position in counts: ")
+        if var!=-1000:
+            dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, int(var))
+        variable=var
+        var=-1000
         
-        # Read present position
-        dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
+        torque=input("If you want to keep torque on press 1, else press 0: ")
+        
+        # Write goal position
+        #dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, MAX_POSITION_VALUE)
         if dxl_comm_result != COMM_SUCCESS:
             print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
         elif dxl_error != 0:
             print("%s" % packetHandler.getRxPacketError(dxl_error))
-        #print("   [ID:%03d] GoalPos:%03d  PresPos:%03d" %(DXL_ID, MAX_POSITION_VALUE, dxl_present_position), end = "\r")
-        print("   [ID:%03d] GoalPos:%03d  PresPos:%03d" %(DXL_ID, int(var), dxl_present_position), end = "\r")
-        
 
-        
-        if kbhit():
-            c = getch()
-            if c == chr(SPACE_ASCII_VALUE):
-                print("\n  Stop & Clear Multi-Turn Information! ")
-                
-                # Write the present position to the goal position to stop moving
-                dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, dxl_present_position)
-                if dxl_comm_result != COMM_SUCCESS:
-                    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-                elif dxl_error != 0:
-                    print("%s" % packetHandler.getRxPacketError(dxl_error))
+        while 1:
+            # Read present position
+            dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
+            if dxl_comm_result != COMM_SUCCESS:
+                print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+            elif dxl_error != 0:
+                print("%s" % packetHandler.getRxPacketError(dxl_error))
+            #print("   [ID:%03d] GoalPos:%03d  PresPos:%03d" %(DXL_ID, MAX_POSITION_VALUE, dxl_present_position), end = "\r")
+            print("   [ID:%03d] GoalPos:%03d  PresPos:%03d" %(DXL_ID, int(variable), dxl_present_position), end = "\r")
+            if kbhit():
+                c = getch()
+                if c == chr(SPACE_ASCII_VALUE):
+                    print("\n  Stop & Clear Multi-Turn Information! ")
+                    # Write the present position to the goal position to stop moving
+                    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, dxl_present_position)
+                    if dxl_comm_result != COMM_SUCCESS:
+                        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+                    elif dxl_error != 0:
+                        print("%s" % packetHandler.getRxPacketError(dxl_error))
 
-                time.sleep(0.3)
+                    time.sleep(0.3)
 
-                # Clear Multi-Turn Information
-                dxl_comm_result, dxl_error = packetHandler.clearMultiTurn(portHandler, DXL_ID)
-                if dxl_comm_result != COMM_SUCCESS:
-                    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-                elif dxl_error != 0:
-                    print("%s" % packetHandler.getRxPacketError(dxl_error))
+                    # Clear Multi-Turn Information
+                    dxl_comm_result, dxl_error = packetHandler.clearMultiTurn(portHandler, DXL_ID)
+                    if dxl_comm_result != COMM_SUCCESS:
+                        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+                    elif dxl_error != 0:
+                        print("%s" % packetHandler.getRxPacketError(dxl_error))
 
-                # Read present position
-                dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
-                if dxl_comm_result != COMM_SUCCESS:
-                    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-                elif dxl_error != 0:
-                    print("%s" % packetHandler.getRxPacketError(dxl_error))
+                    # Read present position
+                    dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, DXL_ID, ADDR_PRESENT_POSITION)
+                    if dxl_comm_result != COMM_SUCCESS:
+                        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+                    elif dxl_error != 0:
+                        print("%s" % packetHandler.getRxPacketError(dxl_error))
 
-                print("  Present Position has been reset. : %03d" % dxl_present_position)
+                    print("  Present Position has been reset. : %03d" % dxl_present_position)
 
-                break
+                    break
 
-            elif c == chr(ESC_ASCII_VALUE):
-                print("\n  Stopped!!")
-                # Write the present position to the goal position to stop moving
-                dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, dxl_present_position)
-                if dxl_comm_result != COMM_SUCCESS:
-                    print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
-                elif dxl_error != 0:
-                    print("%s" % packetHandler.getRxPacketError(dxl_error))
-                break
+                elif c == chr(ESC_ASCII_VALUE):
+                    print("\n  Stopped!!")
+                    # Write the present position to the goal position to stop moving
+                    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, DXL_ID, ADDR_GOAL_POSITION, dxl_present_position)
+                    if dxl_comm_result != COMM_SUCCESS:
+                        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+                    elif dxl_error != 0:
+                        print("%s" % packetHandler.getRxPacketError(dxl_error))
+                    break
 
         if not abs(MAX_POSITION_VALUE - dxl_present_position) > DXL_MOVING_STATUS_THRESHOLD:
             break

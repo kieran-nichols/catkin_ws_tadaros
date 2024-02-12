@@ -67,15 +67,15 @@ else:
 ADDR_TORQUE_ENABLE      = 64               # Control table address is different in Dynamixel model
 ADDR_GOAL_POSITION      = 116
 ADDR_PRESENT_POSITION   = 132
-ADDR_POSITION_P_GAIN    = 84              #we're setting this to 2760 for now  !!!
-ADDR_HOMING_OFFSET      = 1024             #adjust this as needed to make "home" plantarflexion !!!
+ADDR_HOMING_OFFSET     =1024
+ADDR_POSITION_P_GAIN    =84
 
 # Protocol version
 PROTOCOL_VERSION            = 2.0               # See which protocol version is used in the Dynamixel
 
 # Default setting
-BAUDRATE                    = 57600             # Dynamixel default baudrate : 57600
-DEVICENAME                  = '/dev/ttyUSB1'    # Check which port is being used on your controller
+BAUDRATE                    = 1000000 #57600      # Dynamixel default baudrate : 57600
+DEVICENAME                  = '/dev/ttyUSB0'    # Check which port is being used on your controller
 EXT_POSITION_CONTROL_MODE   = 4                 # The value of Extended Position Control Mode that can be set through the Operating Mode (11)
 MAX_POSITION_VALUE          = 1048575     #currently isn't called anywhere      # Of MX with firmware 2.0 and X-Series the revolution on Extended Position Control Mode is 256 rev
 DXL_MOVING_STATUS_THRESHOLD = 20             #CHANGE this to adjust accuracy!!!!   # Dynamixel will rotate between this value
@@ -88,7 +88,7 @@ TORQUE_ENABLE               = 1                 # Value for enabling the torque
 TORQUE_DISABLE              = 0                 # Value for disabling the torque
 DXL_MINIMUM_POSITION_VALUE  = 0               # Dynamixel will rotate between this value
 DXL_MAXIMUM_POSITION_VALUE  = 1000            # and this value (note that the Dynamixel would not move when the position value is out of movable range. Check e-manual about the range of the Dynamixel you use.)
-DXL_MOVING_STATUS_THRESHOLD = 1                # Dynamixel moving status threshold
+#DXL_MOVING_STATUS_THRESHOLD = 1                # Dynamixel moving status threshold
 
 portHandler = PortHandler(DEVICENAME)
 packetHandler = PacketHandler(PROTOCOL_VERSION)
@@ -96,55 +96,64 @@ curr_pos1 = 0
 old_pos1 = 10000000000000000000000
 curr_pos2 = 0
 old_pos2 = 10000000000000000000000
-
-# when implementing a reboot command, try this somewhere
-# reboot(int port_num, int protocol_version, uint8_t id)
-# reboot(portHandler, PROTOCOL_VERSION, 1 or 2)
 def set_goal_pos_callback(MotorDataMsg):
     global curr_pos1
     global old_pos1
     global curr_pos2
     global old_pos2
+    #max reading is 377488800? and that is at 180 position
     #ERROR: does not move to 360 or 0 but does go to 1 or 359
     #Increase in degrees CCW and Decrease CW
     # full rotation if over 360 move
     moving_counts2 = int(MotorDataMsg.motor2_move)
     #too many message sening, so only send if new dir
     if old_pos2 != moving_counts2:
-        if abs(curr_pos2-moving_counts2)<=180:
-            input_motor_rotation2= moving_counts2
-        else:
-            cur_sign2 = np.sign(curr_pos2-moving_counts2) #if pos we add to 360*x, if negetive we then subtract
-            print("Algo Triggered ", abs(curr_pos2-moving_counts2), curr_pos2, moving_counts2 )
-            #+5 for noise and error
-            input_motor_rotation2 = moving_counts2%180*cur_sign2+math.floor((curr_pos2+5)/360)*360
-            if input_motor_rotation2<0:
-                print("Error! The angle is going into 0 and will wrap around and mess up the motor location! Enter a new angle!")
+        input_motor_rotation2= moving_counts2
+        #if abs(curr_pos2-moving_counts2)<=180:
+            #input_motor_rotation2= moving_counts2
+        #else:
+            #cur_sign2 = np.sign(curr_pos2-moving_counts2) #if pos we add to 360*x, if negetive we then subtract
+           # print("Algo Triggered ", abs(curr_pos2-moving_counts2), curr_pos2, moving_counts2 )
+            #+3 for noise and error
+            #input_motor_rotation2= moving_counts2
+            #Equation to where to move
+            #input_motor_rotation2 = moving_counts2%180*cur_sign2+math.floor((curr_pos2+3)/360)*360
+            #if input_motor_rotation2<0:
+                #print("Error! The angle is going into 0 and will wrap around and mess up the motor location! Enter a new angle!")
                 #return
-            print("Math: ", input_motor_rotation2, moving_counts2%360, math.floor((curr_pos2+3)/360)*360)
+            #print("Math2 (where rotating, new angle, old pos add-on): ", input_motor_rotation2, moving_counts2%360, math.floor((curr_pos2+3)/360)*360)
+        print("m2 data (curr_pos, curr_angle, next_count, next_angle): ", int(curr_pos2/0.087891), curr_pos2, int(input_motor_rotation2/0.087891), input_motor_rotation2)
         print("Set Goal Position  %s = %s from %s" % (input_motor_rotation2, MotorDataMsg.motor2_move, curr_pos2))
         #we rransfor from angle into cunts right before wrighting
-        dxl_comm_result2, dxl_error2 = packetHandler.write4ByteTxRx(portHandler, PROTOCOL_VERSION,2, ADDR_GOAL_POSITION, int(input_motor_rotation2/0.087891)) # added PROTOCOL_VERSION!!!
+        #write4ByteTxOnly(port, dxl_id, address, data)
+        dxl_comm_result2, dxl_error2 = packetHandler.write4ByteTxRx(portHandler,2, ADDR_GOAL_POSITION, int(input_motor_rotation2/0.087891))
+        #Try reading ADDR_GOAL_POSITION and check with position if can read check whether the command in recivied
+        #cont brain commands fix?
         old_pos2 = moving_counts2
     #motor11
     moving_counts1 = int(MotorDataMsg.motor1_move)
     #too many message sening, so only send if new dir
     if old_pos1 != moving_counts1:
-        if abs(curr_pos1-moving_counts1)<=180:
-            input_motor_rotation1= moving_counts1
-        else:
-            cur_sign1 = np.sign(curr_pos1-moving_counts1) #if pos we add to 360*x, if negetive we then subtract
-            print("Algo Triggered ", abs(curr_pos1-moving_counts1), curr_pos1, moving_counts1 )
-            #+5 for noise and error
-            input_motor_rotation1 = moving_counts1%180*cur_sign1+math.floor((curr_pos1+5)/360)*360
-            if input_motor_rotation1<0:
-                print("Error! The angle is going into 0 and will wrap around and mess up the motor location! Enter a new angle!")
+        input_motor_rotation1= moving_counts1
+        #if abs(int(curr_pos1*0.087891)-moving_counts1)<=180:
+            #input_motor_rotation1= moving_counts1
+        #else:
+            #cur_sign1 = np.sign(curr_pos1-moving_counts1) #if pos we add to 360*x, if negetive we then subtract
+            #print("Algo Triggered ", abs(curr_pos1-moving_counts1), curr_pos1, moving_counts1 )
+            #+3 for noise and error
+            #input_motor_rotation1= moving_counts1
+            #Equation to where to move
+            #input_motor_rotation1 = moving_counts1%180*cur_sign1+math.floor((curr_pos1+5)/360)*360
+            #if input_motor_rotation1<0:
+                #print("Error! The angle is going into 0 and will wrap around and mess up the motor location! Enter a new angle!")
                 #return
-            print("Math: ", input_motor_rotation1, moving_counts1%360, math.floor((curr_pos1+3)/360)*360)
+            #print("Math1 (where rotating, new angle, old pos add-on): ", input_motor_rotation1, moving_counts1%360, math.floor((curr_pos1+3)/360)*360)
+        print("m1 data (curr_pos, curr_angle, next_count, next_angle): ", curr_pos1, int(curr_pos1*0.087891), int(input_motor_rotation1/0.087891), input_motor_rotation1)
         print("Set Goal Position  %s = %s from %s" % (input_motor_rotation1, MotorDataMsg.motor1_move, curr_pos1))
         #we rransfor from angle into cunts right before wrighting
-        dxl_comm_result1, dxl_error1 = packetHandler.write4ByteTxRx(portHandler, PROTOCOL_VERSION,1, ADDR_GOAL_POSITION, int(input_motor_rotation1/0.087891)) # added PROTOCOL_VERSION !!!
+        dxl_comm_result1, dxl_error1 = packetHandler.write4ByteTxRx(portHandler, 1, ADDR_GOAL_POSITION, int(input_motor_rotation1/0.087891))
         old_pos1 = moving_counts1
+        packetHandler.getRxPacketError(dxl_error1)
     
     #motor2
    
@@ -163,13 +172,12 @@ def read_write_py_node():
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
         motor_msg = MotorListenMsg()
-        #read4ByteTxRx(int port_num, int protocol_version, UIN8_T id, uint16_t address) #little confused that we put in 3 values, and this command has 4, do we need to put in the protocol version????
-        dxl_present_position1, dxl_comm_result1, dxl_error = packetHandler.read4ByteTxRx(portHandler, PROTOCOL_VERSION, 1, ADDR_PRESENT_POSITION) # added PROTOCOL_VERSION !!!
-        dxl_present_position2, dxl_comm_result2, dxl_error = packetHandler.read4ByteTxRx(portHandler, PROTOCOL_VERSION, 2, ADDR_PRESENT_POSITION) # added PROTOCOL_VERSION !!!
+        dxl_present_position1, dxl_comm_result1, dxl_error = packetHandler.read4ByteTxRx(portHandler, 1, ADDR_PRESENT_POSITION)
+        dxl_present_position2, dxl_comm_result2, dxl_error = packetHandler.read4ByteTxRx(portHandler, 2, ADDR_PRESENT_POSITION)
         motor_msg.curr_pos1 = int(dxl_present_position1*0.087891)
-        curr_pos1 = int(dxl_present_position1*0.087891)
-        motor_msg.curr_pos2 = int(dxl_present_position2*0.087891)
-        curr_pos2 = int(dxl_present_position2*0.087891)
+        curr_pos1 = int(dxl_present_position1*0.087891) #in angle
+        motor_msg.curr_pos2 = int(dxl_present_position2*0.087891) #in angle
+        curr_pos2 = int(dxl_present_position2*0.087891)#in angle
         motor_msg.motor_fail = False
         motor_msg.toff = 0
         pub.publish(motor_msg)
@@ -199,36 +207,54 @@ def main():
     
         
     # Set operating mode to extended position control mode #if we want it to be vel control=0, pos control=3, extended pos control=4, pwm=16 change this EXT_POSI...)
-    #write1ByteTxRx(int port_num, int protocol_version, uint8_t id, uint16_t address, uint8_t data)
-    dxl_comm_result1, dxl_error1 = packetHandler.write1ByteTxRx(portHandler, PROTOCOL_VERSION,1, ADDR_OPERATING_MODE, EXT_POSITION_CONTROL_MODE) # added in the PROTOCOL_VERSION!!!
-    dxl_comm_result2, dxl_error2 = packetHandler.write1ByteTxRx(portHandler, PROTOCOL_VERSION,2, ADDR_OPERATING_MODE, EXT_POSITION_CONTROL_MODE) # added in the PROTOCOL_VERSION!!!
-    if dxl_comm_result1 != COMM_SUCCESS or dxl_comm_result2 != COMM_SUCCESS:
-        print("error 1")
+    
+    #motor 1
+    dxl_comm_result1, dxl_error1 = packetHandler.write1ByteTxRx(portHandler, 1, ADDR_OPERATING_MODE, EXT_POSITION_CONTROL_MODE)
+    if dxl_comm_result1 != COMM_SUCCESS:
+        print("\nerror1 in setting mode for motor 1")
         print("%s" % packetHandler.getTxRxResult(dxl_comm_result1))
     elif dxl_error1 != 0:
-        print("error 2")
+        print("\nerror2 in setting mode for motor 1")
         print("%s" % packetHandler.getRxPacketError(dxl_error1))
     else:
-        print("Operating mode changed to extended position control mode.")
+        print("\nOperating mode changed to extended position control mode for motor 1.")
+    
+    #motor 2
+    dxl_comm_result2, dxl_error2 = packetHandler.write1ByteTxRx(portHandler, 2, ADDR_OPERATING_MODE, EXT_POSITION_CONTROL_MODE)
+    if dxl_comm_result2 != COMM_SUCCESS:
+        print("\nerror1 in setting mode for motor 2")
+        print("%s" % packetHandler.getTxRxResult(dxl_comm_result2))
+    elif dxl_error2 != 0:
+        print("\nerror2 in setting mode for motor 2")
+        print("%s" % packetHandler.getRxPacketError(dxl_error2))
+    else:
+        print("\nOperating mode changed to extended position control mode for motor 2.")
     
     # Enable Dynamixel Torque
-    dxl_comm_result1, dxl_error1 = packetHandler.write1ByteTxRx(portHandler, PROTOCOL_VERSION,1, ADDR_TORQUE_ENABLE, TORQUE_ENABLE) #!!! added PROTOCOL_VERSION
-    dxl_comm_result2, dxl_error2 = packetHandler.write1ByteTxRx(portHandler, PROTOCOL_VERSION,2, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)  #!!! added PROTOCOL_VERSION
-    if dxl_comm_result1 != COMM_SUCCESS or dxl_comm_result2 != COMM_SUCCESS:
-        print("error1")
+    
+    #motor 1
+    dxl_comm_result1, dxl_error1 = packetHandler.write1ByteTxRx(portHandler, 1, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
+    if dxl_comm_result1 != COMM_SUCCESS:
+        print("\nerror1 in enabling dynamixel torque for motor 1")
         print("%s" % packetHandler.getTxRxResult(dxl_comm_result1))
-        print("Press any key to terminate...")
-        getch()
-        quit()
-    elif dxl_error1 != 0 or dxl_error2 != 0:
-        print("error2")
+    elif dxl_error1 != 0:
+        print("\nerror2 in enabling dynamixel torque for motor 1")
         print("%s" % packetHandler.getRxPacketError(dxl_error1))
-        print("Press any key to terminate...")
-        getch()
-        quit()
     else:
-        print("DYNAMIXEL has been successfully connected")
+        print("\nDYNAMIXEL motor 1 has been successfully connected")
+    
+    #motor 2
+    dxl_comm_result2, dxl_error2 = packetHandler.write1ByteTxRx(portHandler, 2, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
+    if dxl_comm_result2 != COMM_SUCCESS:
+        print("\nerror1 in enabling dynamixel torque for motor 2")
+        print("%s" % packetHandler.getTxRxResult(dxl_comm_result2))
+    elif dxl_error2 != 0:
+        print("\nerror2 in enabling dynamixel torque for motor 2")
+        print("%s" % packetHandler.getRxPacketError(dxl_error2))
+    else:
+        print("\nDYNAMIXEL motor 2 has been successfully connected")
 
+    #start the node
     print("Ready to get & set Position.")
     read_write_py_node()
 

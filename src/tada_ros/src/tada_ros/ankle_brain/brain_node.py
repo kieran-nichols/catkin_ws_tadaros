@@ -38,7 +38,7 @@ class BrainNode():
         self.motor_command = MotorDataMsg()
         # Subscribers: motors, IMU, Europa; subscribe command with it necessary variables that will be attached to self
         self.sub = rospy.Subscriber('motor_listen', MotorListenMsg, self.listener)
-        self.curr_pos1 = 0; self.curr_pos2 = 0
+        self.current_angle1 = 0; self.current_angle2 = 0
         #rospy.spin() # keeps python from exiting until this node is stopped
         ## Add rospy.Subscriber with self, its necessary global-like variables, and appropiate listeners (aka callback functions)
         #handling the sensor data
@@ -131,8 +131,8 @@ class BrainNode():
         
     # defining the listener functions for the subscibed nodes
     def listener(self,data):
-        self.curr_pos1 = data.curr_pos1
-        self.curr_pos2 = data.curr_pos2
+        self.current_angle1 = data.current_angle1
+        self.current_angle2 = data.current_angle2
         self.toff = data.toff
         self.motor_fail = data.motor_fail
     
@@ -166,7 +166,7 @@ class BrainNode():
         self.prev_stance_theta, self.prev_stance_alpha = 0,0
         self.home_multiple1 = 0; self.home_multiple2 = 0
         # specify home when the motor is turned on to be the motor positions at start
-        self.homed1 = self.curr_pos1; self.homed2 = self.curr_pos2
+        self.homed1 = self.current_angle1; self.homed2 = self.current_angle2
         self.global_M1 = 0; self.global_M2 = 0;
         self.prev_M1 = 0; self.prev_M2 = 0
         self.homed1prev=0;self.homed2prev=0
@@ -541,7 +541,7 @@ class BrainNode():
         while not rospy.is_shutdown(): #and rospy.on_shutdown(hook):
             # repurpose and shorten the self variables to be local variables
             motor_command = self.motor_command
-            curr_pos1 = self.curr_pos1; curr_pos2 = self.curr_pos2
+            current_angle1 = self.current_angle1; current_angle2 = self.current_angle2
             homed1 = self.homed1; homed2 = self.homed2
             ## variables that are called here are updated to be used in this while loop          
             # read input from the terminal; expecting between 1 and 3 inputs
@@ -605,9 +605,9 @@ class BrainNode():
                 # if first command is h then assign current position as homed values
                 ## need to fix homing the current position; it seems that the correct value comes in the future iteration
                 if var[0]=="h":
-                    self.homed1 = curr_pos1
-                    self.homed2 = curr_pos2
-                    print(curr_pos1, curr_pos2)
+                    self.homed1 = current_angle1
+                    self.homed2 = current_angle2
+                    print(current_angle1, current_angle2)
                     print("created new homed positions:", self.homed1, self.homed2,"\n")     
                 
                 # if first command is r then return the motors back to home
@@ -620,9 +620,9 @@ class BrainNode():
                 
                 # if first command is c then print the current motor positions
                 elif var[0]=="c":
-                    print("Current motor positions:", curr_pos1, curr_pos2,"\n")
-                    var1 = curr_pos1 # 180
-                    var2 = curr_pos2 # 567
+                    print("Current motor positions:", current_angle1, current_angle2,"\n")
+                    var1 = current_angle1 # 180
+                    var2 = current_angle2 # 567
                 
                 ## if first command is i then read the IMU's state
                 elif var[0]=="i":
@@ -636,8 +636,8 @@ class BrainNode():
                 elif var[0] == "mode0" or var[0] == "x":
                     print("return to mode 0")
                     self.mode = 0
-                    var1 = self.prev_var1 #curr_pos1 
-                    var2 = self.prev_var2 #curr_pos2 
+                    var1 = self.prev_var1 #current_angle1 
+                    var2 = self.prev_var2 #current_angle2 
                     
                 elif var[0]== "mode1":
                     # Test for sagittal only ankle movement from neutral to dorsiflexed and back to neutral
@@ -692,8 +692,8 @@ class BrainNode():
                                
             # else statement to keep motor position the same; consider also to return to home     
             else:
-                var1 = self.prev_var1 #curr_pos1 
-                var2 = self.prev_var2 #curr_pos2 
+                var1 = self.prev_var1 #current_angle1 
+                var2 = self.prev_var2 #current_angle2 
                 # ~ prev_var1, prev_var2 = var1, var2 
                 print("Kept current position", var1, var2,"\n")
             

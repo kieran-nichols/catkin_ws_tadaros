@@ -112,10 +112,12 @@ def write_goal(which_motor, angle):
         print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
     elif dxl_error != 0:
         print("%s" % packetHandler.getRxPacketError(dxl_error))
+  
     
-def motor(next_angle, which_motor):
+#to move a motor to an angle
+def move_motor(which_motor, next_angle):
     print("\n")
-    print("\n MOTOR: ", which_motor)
+    print("\n START MOVING MOTOR: ", which_motor)
     global current_angles
 
     
@@ -126,26 +128,23 @@ def motor(next_angle, which_motor):
         #get correct angle
         #next_angle = new_angle_calculate(current_angle, next_angle)
     
-        print("data(current count, current angle, next count, next angle): ", int(current_angle/0.087891), current_angle, int(next_angle/0.087891), next_angle)
+        print("data (current count, current angle, next count, next angle): ", int(current_angle/0.087891), current_angle, int(next_angle/0.087891), next_angle)
         
-        #move motor
-        move_motor(which_motor, next_angle)
+        #read
+        print("Before write: ")
+        read_goal(which_motor)
+            
+        #write
+        write_goal(which_motor, next_angle)
+            
+        #read
+        print("After write: ")
+        read_goal(which_motor)
         
-
-def move_motor(which_motor, angle):
-    print("MOVING MOTOR ", which_motor)
-    
-    #read
-    print("Before write: ")
-    read_goal(which_motor)
-        
-    #write
-    write_goal(which_motor, angle)
-        
-    #read
-    print("After write: ")
-    read_goal(which_motor)
-    
+    print("\n END MOVING MOTOR: ", which_motor)
+    print("\n")
+ 
+#to calculate which angle we need to go locally to achive given angle
 def new_angle_calculate(current_angle, future_angle):
     if abs(current_angle-future_angle)<=180:
         return future_angle
@@ -160,7 +159,46 @@ def new_angle_calculate(current_angle, future_angle):
             return 0
         print("Math2 (where rotating, new angle, old pos add-on): ", result_angle, future_angle%360, math.floor((current_angle+3)/360)*360)
         return result_angle
-        
+
+#to set-up a motor
+def motor_set_up(which_motor):
+    print("\n")
+    print("\n SET-UP MOTOR ", which_motor)
+    #reset while not changing id or baud
+    #packetHandler.factoryReset(portHandler, which_motor, 0x02)
+    set_up_operating_mode(which_motor)
+    set_up_torque(which_motor)
+    print("END SET-UP MOTOR ", which_motor)
+    print("\n")
+
+#To set-up operating mode for a motor
+def set_up_operating_mode(which_motor):
+    # Set operating mode to extended position control mode #if we want it to be vel control=0, pos control=3, extended pos control=4, pwm=16 change this EXT_POSI...)
+    print("settin up mode for motor ", which_motor)
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, which_motor, ADDR_OPERATING_MODE, EXT_POSITION_CONTROL_MODE)
+    if dxl_comm_result != COMM_SUCCESS:
+        print("result")
+        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("error")
+        print("%s" % packetHandler.getRxPacketError(dxl_error))
+    else:
+        print("Operating mode has been set for motor ", which_motor)
+
+#To set-up torque for a motor
+def set_up_torque(which_motor):
+    # Enable Dynamixel Torque
+    print("settin up torque for motor ", which_motor)
+    dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, which_motor, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
+    if dxl_comm_result != COMM_SUCCESS:
+        print("result")
+        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("error")
+        print("%s" % packetHandler.getRxPacketError(dxl_error))
+    else:
+        print("Torque has been set for motor ", which_motor)
+
 
 def set_goal_pos_callback(MotorDataMsg):
     #max reading is 377488800? and that is at 180 position
@@ -171,10 +209,9 @@ def set_goal_pos_callback(MotorDataMsg):
     input_motor_angle2 = int(MotorDataMsg.motor2_move)
     #too many message sening, so only send if new dir
     
-    motor(input_motor_angle1, 1)
-    motor(input_motor_angle2, 2)
+    move_motor(1, input_motor_angle1)
+    move_motor(2, input_motor_angle2)
 
-       
     #time.sleep(0.1)
 
 def read_write_py_node():
@@ -222,72 +259,10 @@ def main():
         getch()
         quit()
     
-    #reboot
-    #packetHandler.factoryReset(portHandler, 2, 0x02)
-        
-    # Set operating mode to extended position control mode #if we want it to be vel control=0, pos control=3, extended pos control=4, pwm=16 change this EXT_POSI...)
     
-    #motor 1
-    read_from_motor1 = packetHandler.read1ByteTxRx(portHandler, 1, ADDR_OPERATING_MODE)
-    print("\nread from motor 1 before the set-up of operating mode: ", read_from_motor1)
-    dxl_comm_result1, dxl_error1 = packetHandler.write1ByteTxRx(portHandler, 1, ADDR_OPERATING_MODE, EXT_POSITION_CONTROL_MODE)
-    if dxl_comm_result1 != COMM_SUCCESS:
-        print("\nerror1 in setting mode for motor 1")
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result1))
-    elif dxl_error1 != 0:
-        print("\nerror2 in setting mode for motor 1")
-        print("%s" % packetHandler.getRxPacketError(dxl_error1))
-    else:
-        print("\nOperating mode changed to extended position control mode for motor 1.")
-    read_from_motor1 = packetHandler.read1ByteTxRx(portHandler, 1, ADDR_OPERATING_MODE)
-    print("\nread from motor 1 after the set-up of operating mode: ", read_from_motor1)
-    
-    #motor 2
-    read_from_motor2 = packetHandler.read1ByteTxRx(portHandler, 2, ADDR_OPERATING_MODE)
-    print("\nread from motor 2 before the set-up of operating mode: ", read_from_motor2)
-    dxl_comm_result2, dxl_error2 = packetHandler.write1ByteTxRx(portHandler, 2, ADDR_OPERATING_MODE, EXT_POSITION_CONTROL_MODE)
-    if dxl_comm_result2 != COMM_SUCCESS:
-        print("\nerror1 in setting mode for motor 2")
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result2))
-    elif dxl_error2 != 0:
-        print("\nerror2 in setting mode for motor 2")
-        print("%s" % packetHandler.getRxPacketError(dxl_error2))
-    else:
-        print("\nOperating mode changed to extended position control mode for motor 2.")
-    read_from_motor2 = packetHandler.read1ByteTxRx(portHandler, 2, ADDR_OPERATING_MODE)
-    print("\nread from motor 2 after the set-up of operating mode: ", read_from_motor2)
-    
-    # Enable Dynamixel Torque
-    
-    #motor 1
-    read_from_motor1 = packetHandler.read1ByteTxRx(portHandler, 1, ADDR_TORQUE_ENABLE)
-    print("\nread from motor 1 before the set-up of torque: ", read_from_motor1)
-    dxl_comm_result1, dxl_error1 = packetHandler.write1ByteTxRx(portHandler, 1, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
-    if dxl_comm_result1 != COMM_SUCCESS:
-        print("\nerror1 in enabling dynamixel torque for motor 1")
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result1))
-    elif dxl_error1 != 0:
-        print("\nerror2 in enabling dynamixel torque for motor 1")
-        print("%s" % packetHandler.getRxPacketError(dxl_error1))
-    else:
-        print("\nDYNAMIXEL motor 1 has been successfully connected")
-    read_from_motor1 = packetHandler.read1ByteTxRx(portHandler, 1, ADDR_TORQUE_ENABLE)
-    print("\nread from motor 1 after the set-up of torque: ", read_from_motor1)
-    
-    #motor 2
-    read_from_motor2 = packetHandler.read1ByteTxRx(portHandler, 2, ADDR_TORQUE_ENABLE)
-    print("\nread from motor 2 before the set-up of torque: ", read_from_motor2)
-    dxl_comm_result2, dxl_error2 = packetHandler.write1ByteTxRx(portHandler, 2, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
-    if dxl_comm_result2 != COMM_SUCCESS:
-        print("\nerror1 in enabling dynamixel torque for motor 2")
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result2))
-    elif dxl_error2 != 0:
-        print("\nerror2 in enabling dynamixel torque for motor 2")
-        print("%s" % packetHandler.getRxPacketError(dxl_error2))
-    else:
-        print("\nDYNAMIXEL motor 2 has been successfully connected")
-    read_from_motor2 = packetHandler.read1ByteTxRx(portHandler, 2, ADDR_TORQUE_ENABLE)
-    print("\nread from motor 2 after the set-up of torque: ", read_from_motor2)
+    #Setting up motors
+    motor_set_up(1)
+    motor_set_up(2)
     
     #start the node
     print("Ready to get & set Position.")
