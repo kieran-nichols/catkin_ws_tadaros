@@ -44,9 +44,8 @@ import math
 import numpy as np
 
 from dynamixel_sdk import *
-#from dynamixel_sdk_examples.srv import *
-#from dynamixel_sdk_examples.msg import *
 
+#to init the motor communication
 if os.name == 'nt':
     import msvcrt
     def getch():
@@ -117,31 +116,29 @@ def write_goal(which_motor, angle):
 #to move a motor to an angle
 def move_motor(which_motor, next_angle):
     print("\n")
-    print("\n START MOVING MOTOR: ", which_motor)
-    global current_angles
-
+    print("START MOVING MOTOR: ", which_motor)
     
     #getting current angle
+    global current_angles
     current_angle = current_angles[which_motor-1]
-    if current_angle != next_angle:
+
         
-        #get correct angle
-        #next_angle = new_angle_calculate(current_angle, next_angle)
-    
-        print("data (current count, current angle, next count, next angle): ", int(current_angle/0.087891), current_angle, int(next_angle/0.087891), next_angle)
+    #get correct angle
+    #next_angle = new_angle_calculate(current_angle, next_angle)
+    print("data (current count, current angle, next count, next angle): ", int(current_angle/0.087891), current_angle, int(next_angle/0.087891), next_angle)
         
-        #read
-        print("Before write: ")
-        read_goal(which_motor)
+    #read
+    print("Before write: ")
+    read_goal(which_motor)
             
-        #write
-        write_goal(which_motor, next_angle)
+    #write
+    write_goal(which_motor, next_angle)
             
-        #read
-        print("After write: ")
-        read_goal(which_motor)
+    #read
+    print("After write: ")
+    read_goal(which_motor)
         
-    print("\n END MOVING MOTOR: ", which_motor)
+    print("END MOVING MOTOR: ", which_motor)
     print("\n")
  
 #to calculate which angle we need to go locally to achive given angle
@@ -163,7 +160,7 @@ def new_angle_calculate(current_angle, future_angle):
 #to set-up a motor
 def motor_set_up(which_motor):
     print("\n")
-    print("\n SET-UP MOTOR ", which_motor)
+    print("SET-UP MOTOR ", which_motor)
     #reset while not changing id or baud
     #packetHandler.factoryReset(portHandler, which_motor, 0x02)
     set_up_operating_mode(which_motor)
@@ -205,8 +202,8 @@ def set_goal_pos_callback(MotorDataMsg):
     #ERROR: does not move to 360 or 0 but does go to 1 or 359
     #Increase in degrees CCW and Decrease CW
     # full rotation if over 360 move
-    input_motor_angle1 = int(MotorDataMsg.motor1_move)
-    input_motor_angle2 = int(MotorDataMsg.motor2_move)
+    input_motor_angle1 = int(MotorDataMsg.motor1_angle)
+    input_motor_angle2 = int(MotorDataMsg.motor2_angle)
     #too many message sening, so only send if new dir
     
     move_motor(1, input_motor_angle1)
