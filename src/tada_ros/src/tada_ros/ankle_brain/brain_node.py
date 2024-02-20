@@ -76,6 +76,7 @@ def brain_action():
             
         elif len(input_values)== 3:
             if input_values[0] == "m":
+                print("moving motor")
                 publish_motor(input_values[1], input_values[2])
                     
         else:

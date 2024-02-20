@@ -78,7 +78,7 @@ MAX_POSITION_VALUE          = 1048575     #currently isn't called anywhere      
 DXL_MOVING_STATUS_THRESHOLD = 20             #CHANGE this to adjust accuracy!!!!   # Dynamixel will rotate between this value
 #goal_position               = -4095
 ADDR_OPERATING_MODE         = 11
-HOMING_OFFSET2              =-1024 #need to figure out how to set !!!
+#HOMING_OFFSET2              =-1024 #need to figure out how to set !!!
 POSITION_P_GAIN             =2760  #need to figure out how to set !!!
 
 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
@@ -94,23 +94,63 @@ portHandler = PortHandler(DEVICENAME)
 packetHandler = PacketHandler(PROTOCOL_VERSION)
 current_angles = [0, 0]
 
+#global true/false variable
+#if true means writting, if false means that we are not writting.
+occupying_bus = False
+
+#global varible true/false that tells us whether we are reading position
+reading_position = False
+
 def read_goal(which_motor):
-    time.sleep(0.3)
+    #time.sleep(0.3)
+    global occupying_bus
+    global reading_position
+    
+    #waiting for the bus to finish its previous read
+    while reading_position:
+        continue
+    
+    #taking the bus
+    occupying_bus = True
+    print("Bus taken reading")
+    
+    #reading the bus
     dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, which_motor, ADDR_GOAL_POSITION)
     print("reading motor ", which_motor, " goal angle and counts: ", int(dxl_present_position*0.087891), " ", dxl_present_position)
     if dxl_comm_result != COMM_SUCCESS:
         print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+        #print("comm error")
     elif dxl_error != 0:
         print("%s" % packetHandler.getRxPacketError(dxl_error))
+    
+    #releasing it
+    occupying_bus = False
+    print("Bus released reading")
 
 def write_goal(which_motor, angle):
-    time.sleep(0.3)
+       # time.sleep(0.3)
+    global occupying_bus
+    global reading_position
+    
+    #waiting for the bus to finish its previous read
+    while reading_position:
+        continue
+    
+    #taking the bus
+    occupying_bus = True
+    print("Bus taken writting")
+    
+    #writting
     print("writing motor ", which_motor, " goal angle and counts: ", angle, " ", int(angle/0.087891))
     dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, which_motor, ADDR_GOAL_POSITION, int(angle/0.087891))
     if dxl_comm_result != COMM_SUCCESS:
         print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
     elif dxl_error != 0:
         print("%s" % packetHandler.getRxPacketError(dxl_error))
+    
+    #releasing the bus
+    occupying_bus = False
+    print("Bus released writting")
   
     
 #to move a motor to an angle
@@ -213,7 +253,8 @@ def set_goal_pos_callback(MotorDataMsg):
 
 def read_write_py_node():
     global current_angles
-
+    global occupying_bus
+    global reading_position
 
     #seting up the publisher
     rospy.init_node('motor_pub', anonymous=True)
@@ -222,9 +263,14 @@ def read_write_py_node():
 
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
+        #skipping if the bus is busy
+        if occupying_bus:
+            continue
+        reading_position = True #started the read
         motor_msg = MotorListenMsg()
-        dxl_present_position1, dxl_comm_result1, dxl_error = packetHandler.read4ByteTxRx(portHandler, 1, ADDR_PRESENT_POSITION)
-        dxl_present_position2, dxl_comm_result2, dxl_error = packetHandler.read4ByteTxRx(portHandler, 2, ADDR_PRESENT_POSITION)
+        dxl_present_position1, dxl_comm_result1, dxl_error = packetHandler.read4ByteTxRx(portHandler, 1, ADDR_PRESENT_POSITION) #reading motor 1 position
+        dxl_present_position2, dxl_comm_result2, dxl_error = packetHandler.read4ByteTxRx(portHandler, 2, ADDR_PRESENT_POSITION) #reading motor 2 position
+        reading_position = False #finished the read
         motor_msg.current_angle1 = int(dxl_present_position1*0.087891)
         current_angles[0] = int(dxl_present_position1*0.087891) #in angle
         motor_msg.current_angle2 = int(dxl_present_position2*0.087891) #in angle
@@ -233,7 +279,7 @@ def read_write_py_node():
         motor_msg.toff = 0
         pub.publish(motor_msg)
         rate.sleep()
-    rospy.spin()
+#    rospy.spin()
 
 def main():
     # Open port
