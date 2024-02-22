@@ -101,10 +101,18 @@ occupying_bus = False
 #global varible true/false that tells us whether we are reading position
 reading_position = False
 
+#ratio of counts to angle
+motor_count_to_angles = 0.087891
+
+def unsigned_to_signed_int(number):
+    return int.from_bytes((number).to_bytes(4, byteorder='big', signed=False), byteorder = 'big', signed = True)
+    
+    
 def read_goal(which_motor):
     #time.sleep(0.3)
     global occupying_bus
     global reading_position
+    global motor_count_to_angles
     
     #waiting for the bus to finish its previous read
     while reading_position:
@@ -116,7 +124,8 @@ def read_goal(which_motor):
     
     #reading the bus
     dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, which_motor, ADDR_GOAL_POSITION)
-    print("reading motor ", which_motor, " goal angle and counts: ", int(dxl_present_position*0.087891), " ", dxl_present_position)
+    dxl_present_position = unsigned_to_signed_int(dxl_present_position)
+    print("reading motor ", which_motor, " goal angle and counts: ", int(dxl_present_position*motor_count_to_angles), " ", dxl_present_position)
     if dxl_comm_result != COMM_SUCCESS:
         print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
         #print("comm error")
@@ -131,6 +140,7 @@ def write_goal(which_motor, angle):
        # time.sleep(0.3)
     global occupying_bus
     global reading_position
+    global motor_count_to_angles
     
     #waiting for the bus to finish its previous read
     while reading_position:
@@ -141,8 +151,8 @@ def write_goal(which_motor, angle):
     print("Bus taken writting")
     
     #writting
-    print("writing motor ", which_motor, " goal angle and counts: ", angle, " ", int(angle/0.087891))
-    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, which_motor, ADDR_GOAL_POSITION, int(angle/0.087891))
+    print("writing motor ", which_motor, " goal angle and counts: ", angle, " ", int(angle/motor_count_to_angles))
+    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, which_motor, ADDR_GOAL_POSITION, int(angle/motor_count_to_angles))
     if dxl_comm_result != COMM_SUCCESS:
         print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
     elif dxl_error != 0:
@@ -153,19 +163,48 @@ def write_goal(which_motor, angle):
     print("Bus released writting")
   
     
+#to calculate which angle we need to go locally to achive given angle
+def new_angle_calculate(current_angle, future_angle):
+    present=current_angle%360 #current local position in degrees (aka between 0 to 360 degrees)
+    goal=future_angle%360 #this converts it into 0 to 360 so we don't have to deal with negative numbers. e.g. it would convert -90 deg to 270 deg which are equivalent for our purposes
+    print("current: ",current_angle,"present: ",present)
+#    if (abs(goal-present)<180): 
+#        change=goal-present
+#        print("Less than 180 degrees, move default direction")
+#    
+    if (abs(goal-present)>180): # if we would move more than 180 deg we will change the motor direction
+        if (goal-present)>0: 
+            print("move CW")
+            temp=goal-360 #half of the rotation
+            change=temp-present #the other half of the rotation
+        elif (goal-present)<0:
+            print("move CCW")
+            temp=360-present  #half of the rotation
+            change=temp+goal  #other half of the rotation
+    else:
+        change=goal-present
+        print(change,'=',goal, '-', present)
+        print("This is a catch, move default direction")
+        
+    result_angle=change+current_angle #this adds the change to the previous location to get the position we want it to move to
+    print("new spot!!: ",result_angle)
+    return result_angle
+
 #to move a motor to an angle
 def move_motor(which_motor, next_angle):
     print("\n")
     print("START MOVING MOTOR: ", which_motor)
+    global motor_count_to_angles
     
     #getting current angle
     global current_angles
     current_angle = current_angles[which_motor-1]
 
-        
-    #get correct angle
-    #next_angle = new_angle_calculate(current_angle, next_angle)
-    print("data (current count, current angle, next count, next angle): ", int(current_angle/0.087891), current_angle, int(next_angle/0.087891), next_angle)
+    #takes the shortest path to get to the right location
+    if which_motor==2: #BECCA get rid of this after we put both motors in place!!!! it errors out if you try to do this with an unconnected motor
+        next_angle = new_angle_calculate(current_angle, next_angle)
+
+    print("data (current count, current angle, next count, next angle): ", int(current_angle/motor_count_to_angles), current_angle, int(next_angle/motor_count_to_angles), next_angle)
         
     #read
     print("Before write: ")
@@ -181,21 +220,6 @@ def move_motor(which_motor, next_angle):
     print("END MOVING MOTOR: ", which_motor)
     print("\n")
  
-#to calculate which angle we need to go locally to achive given angle
-def new_angle_calculate(current_angle, future_angle):
-    if abs(current_angle-future_angle)<=180:
-        return future_angle
-    else:
-        print("Algo Triggered ", abs(current_angle-future_angle), current_angle, future_angle )
-        current_sign2 = np.sign(current_angle-future_angle) #if pos we add to 360*x, if negetive we then subtract
-        #+3 for noise and error
-        #Equation to where to move
-        result_angle = future_angle%180*current_sign2+math.floor((current_angle+3)/360)*360
-        if result_angle<0:
-            print("Error! The angle is going into 0 and will wrap around and mess up the motor location! Enter a new angle!")
-            return 0
-        print("Math2 (where rotating, new angle, old pos add-on): ", result_angle, future_angle%360, math.floor((current_angle+3)/360)*360)
-        return result_angle
 
 #to set-up a motor
 def motor_set_up(which_motor):
@@ -207,6 +231,8 @@ def motor_set_up(which_motor):
     set_up_torque(which_motor)
     print("END SET-UP MOTOR ", which_motor)
     print("\n")
+    #make sure motor always starts at position 0
+    write_goal(which_motor, 0)
 
 #To set-up operating mode for a motor
 def set_up_operating_mode(which_motor):
@@ -255,6 +281,7 @@ def read_write_py_node():
     global current_angles
     global occupying_bus
     global reading_position
+    global motor_count_to_angles
 
     #seting up the publisher
     rospy.init_node('motor_pub', anonymous=True)
@@ -271,16 +298,21 @@ def read_write_py_node():
         dxl_present_position1, dxl_comm_result1, dxl_error = packetHandler.read4ByteTxRx(portHandler, 1, ADDR_PRESENT_POSITION) #reading motor 1 position
         dxl_present_position2, dxl_comm_result2, dxl_error = packetHandler.read4ByteTxRx(portHandler, 2, ADDR_PRESENT_POSITION) #reading motor 2 position
         reading_position = False #finished the read
-        motor_msg.current_angle1 = int(dxl_present_position1*0.087891)
-        current_angles[0] = int(dxl_present_position1*0.087891) #in angle
-        motor_msg.current_angle2 = int(dxl_present_position2*0.087891) #in angle
-        current_angles[1] = int(dxl_present_position2*0.087891)#in angle
+        #convertig to signed int
+        dxl_present_position1 = unsigned_to_signed_int(dxl_present_position1)
+        dxl_present_position2 = unsigned_to_signed_int(dxl_present_position2)
+        #getting angle and publishing
+        motor_msg.current_angle1 = int(dxl_present_position1*motor_count_to_angles)
+        current_angles[0] = int(dxl_present_position1*motor_count_to_angles) #in angle
+        motor_msg.current_angle2 = int(dxl_present_position2*motor_count_to_angles) #in angle
+        current_angles[1] = int(dxl_present_position2*motor_count_to_angles)#in angle
         motor_msg.motor_fail = False
         motor_msg.toff = 0
         pub.publish(motor_msg)
         rate.sleep()
 #    rospy.spin()
-
+       
+#main function
 def main():
     # Open port
     try:
