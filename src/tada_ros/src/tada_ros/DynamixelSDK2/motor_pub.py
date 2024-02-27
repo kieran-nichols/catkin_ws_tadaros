@@ -104,6 +104,7 @@ reading_position = False
 #ratio of counts to angle
 motor_count_to_angles = 0.087891
 
+
 def unsigned_to_signed_int(number):
     return int.from_bytes((number).to_bytes(4, byteorder='big', signed=False), byteorder = 'big', signed = True)
     
@@ -120,7 +121,7 @@ def read_goal(which_motor):
     
     #taking the bus
     occupying_bus = True
-    print("Bus taken reading")
+    #print("Bus taken reading")
     
     #reading the bus
     dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, which_motor, ADDR_GOAL_POSITION)
@@ -134,7 +135,7 @@ def read_goal(which_motor):
     
     #releasing it
     occupying_bus = False
-    print("Bus released reading")
+    #print("Bus released reading")
 
 def write_goal(which_motor, angle):
        # time.sleep(0.3)
@@ -148,9 +149,9 @@ def write_goal(which_motor, angle):
     
     #taking the bus
     occupying_bus = True
-    print("Bus taken writting")
+    #print("Bus taken writting")
     
-    #writting
+    #writing
     print("writing motor ", which_motor, " goal angle and counts: ", angle, " ", int(angle/motor_count_to_angles))
     dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, which_motor, ADDR_GOAL_POSITION, int(angle/motor_count_to_angles))
     if dxl_comm_result != COMM_SUCCESS:
@@ -160,34 +161,25 @@ def write_goal(which_motor, angle):
     
     #releasing the bus
     occupying_bus = False
-    print("Bus released writting")
+    #print("Bus released writting")
   
     
 #to calculate which angle we need to go locally to achive given angle
 def new_angle_calculate(current_angle, future_angle):
     present=current_angle%360 #current local position in degrees (aka between 0 to 360 degrees)
     goal=future_angle%360 #this converts it into 0 to 360 so we don't have to deal with negative numbers. e.g. it would convert -90 deg to 270 deg which are equivalent for our purposes
-    print("current: ",current_angle,"present: ",present)
-#    if (abs(goal-present)<180): 
-#        change=goal-present
-#        print("Less than 180 degrees, move default direction")
-#    
+
     if (abs(goal-present)>180): # if we would move more than 180 deg we will change the motor direction
-        if (goal-present)>0: 
-            print("move CW")
+        if (goal-present)>0:#moves CW 
             temp=goal-360 #half of the rotation
             change=temp-present #the other half of the rotation
-        elif (goal-present)<0:
-            print("move CCW")
+        elif (goal-present)<0:  #moves CCW
             temp=360-present  #half of the rotation
             change=temp+goal  #other half of the rotation
-    else:
+    else: #This is a catch, move default direction")
         change=goal-present
-        print(change,'=',goal, '-', present)
-        print("This is a catch, move default direction")
         
     result_angle=change+current_angle #this adds the change to the previous location to get the position we want it to move to
-    print("new spot!!: ",result_angle)
     return result_angle
 
 #to move a motor to an angle
@@ -201,8 +193,8 @@ def move_motor(which_motor, next_angle):
     current_angle = current_angles[which_motor-1]
 
     #takes the shortest path to get to the right location
-    if which_motor==2: #BECCA get rid of this after we put both motors in place!!!! it errors out if you try to do this with an unconnected motor
-        next_angle = new_angle_calculate(current_angle, next_angle)
+    #if which_motor==2: #BECCA get rid of this after we put both motors in place!!!! it errors out if you try to do this with an unconnected motor
+    next_angle = new_angle_calculate(current_angle, next_angle)
 
     print("data (current count, current angle, next count, next angle): ", int(current_angle/motor_count_to_angles), current_angle, int(next_angle/motor_count_to_angles), next_angle)
         
@@ -287,6 +279,10 @@ def read_write_py_node():
     rospy.init_node('motor_pub', anonymous=True)
     pub = rospy.Publisher('motor_listen', MotorListenMsg, queue_size=100)
     sub = rospy.Subscriber('motor_command', MotorDataMsg, set_goal_pos_callback)
+#    print("MotorDataMsg: ", MotorDataMsg)
+#    print("motor_command: ", motor_command)
+#    print("motor_command.motor1_angle: ", motor_command.motor1_angle)
+#    print("motor_command[1]: ", motor_command[1])
 
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():

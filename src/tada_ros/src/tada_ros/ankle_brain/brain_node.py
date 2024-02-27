@@ -22,16 +22,13 @@ rospy.init_node('brain', anonymous=True)
         
 #Subscribbing to some topics
 print("init brain")
-#rospy.Subscriber('europa_topic', EuropaMsg, handle_europa_input)
-#rospy.Subscriber('sensing_topic', IMUDataMsg, handle_sensor_input)
-#rospy.Subscriber('motor_listen', MotorListenMsg, listener)
-        
-#Publishing a topic
-motor_pub = rospy.Publisher('motor_command', MotorDataMsg, queue_size=10)       
 
 print("Type 'help' for description of full instructions")
 
 #global variables
+#imu
+steps = 0
+
 #previous values
 prev_M1 = 0
 prev_M2 = 0
@@ -42,11 +39,11 @@ EV = 0
 
 #ratio of counts to angle
 motor_count_to_angles = 0.087891
-
+    
 #getting foot angles
 def theta_alpha_to_motor_angles(theta_deg, alpha_deg):
     #variables
-    cnts_per_rev = 567
+    cnts_per_rev = 4096#567
     global motor_count_to_angles
     global prev_M1
     global prev_M2
@@ -59,11 +56,11 @@ def theta_alpha_to_motor_angles(theta_deg, alpha_deg):
     
     #homed1 = self.homed1; homed2 = self.homed2
     #home_multiple1 = self.home_multiple1; home_multiple2 = self.home_multiple2 
-    theta = theta_deg*math.pi/180
-    beta = 5*math.pi/180
+    theta = theta_deg*math.pi/180  #converts to radians
+    beta = 5*math.pi/180  #I think this is because wedges have a slope of 5 deg
     q3 = 2*np.real((np.arccos(np.sin(theta/2)/np.sin(beta)))) # arccos in python always returns real values
 
-    alpha = alpha_deg*math.pi/180
+    alpha = alpha_deg*math.pi/180  #converts the degrees to radians
     # counterlockwise is positive 
     M1 = 180/math.pi*(alpha - np.arctan2(np.tan(q3/2),np.cos(beta))) 
     M2 = 180/math.pi*(-(alpha + np.arctan2(np.tan(q3/2), np.cos(beta))))
@@ -71,6 +68,8 @@ def theta_alpha_to_motor_angles(theta_deg, alpha_deg):
     #this is the code to find the rotation 
     #M1_prev is current position and can be any number
     #M1_new is what we want
+    
+    
     M1_new=M1; M2_new=M2
             
     temp1 = M1_new-prev_M1
@@ -83,8 +82,11 @@ def theta_alpha_to_motor_angles(theta_deg, alpha_deg):
     if rot2>180:
         rot2=rot2-360
     
-    #updating old
-    prev_M1=M1; prev_M2=M2           
+  #  updating old
+    prev_M1=M1; prev_M2=M2      
+
+
+     
     # Wrapping function that ensures that the angle is between 180 and -180;
     ## need to finish verify
     # ~ M1 = (M1 + 180)%360 - 180
@@ -143,8 +145,70 @@ def publish_motor(motor1_angle, motor2_angle):
     motor_pub.EV = EV
     motor_pub.publish(motor_command)
 
+#to update global variable steps
+def update_from_imu(IMUDataMsg):
+    global steps
+    steps = IMUDataMsg.steps
+
+#to make all possible combinations
+def making_combinations(PF_angles, EV_angles):
+    all_combinations = []
+    for PF in PF_angles:
+        for EV in EV_angles:
+            all_combinations.append([PF, EV])
+    return all_combinations
+
+#waiting for certain amount of steps with ability to pause (?)
+#TODO: add a way to pause
+def waiting_for_steps(how_many_steps):
+    global steps
+    compare_step = steps
+    while steps-compare_step < how_many_steps:
+        continue
+    return
+
+#part of tada exp1, just the reoccuring portion
+def tada_exp1_mini(theta, alpha):
+    step_count_walking = 6
+    step_count_relaxing = 3
+    
+    #getting motor command
+    motor1_angle, motor2_angle = theta_alpha_to_motor_angles(theta, alpha)
+    publish_motor(motor1_angle, motor2_angle)
+    #publish_motor(theta, alpha) #for testing, uncomment he line above, and comment this line
+    
+    #waiting for the amount of compare_step to happened
+    waiting_for_steps(step_count_walking)
+    
+    #relaxing then
+    publish_motor(0, 0)
+    waiting_for_steps(step_count_relaxing)
+    
+    #done with this one experiment
+    return
+    
+#tada exp1 with changing PF and EV, with relaxing steps in between
+def tada_exp1():
+    global steps
+
+    theta_angles = [-90, -45, 0, 45, 90]
+    alpha_angles = [-10, -5, 0, 5, 10]
+    all_combinations = making_combinations(theta_angles, alpha_angles)
+    
+    print("Angles [theta, alpha]: ", all_combinations)
+    
+    #taking random PF and EV
+    while len(all_combinations) > 0:
+        random_element = random.choice(all_combinations) #choosing a random angle
+        tada_exp1_mini(random_element[0], random_element[1]) #doing an experiment with that angle
+        all_combinations.remove(random_element) #deleting that angle
+    
+    print("End of experiment 1")
+    return
+     
+
 #the main loop that determines the action
-def brain_action():
+def brain_action():  
     while not rospy.is_shutdown():
         input_values = input_thread()
             
@@ -153,9 +217,10 @@ def brain_action():
                 os.system("rosnode kill -a")
                 os.system("killall -9 rosmaster")
                 print("ROS has been killed")
-                
-            elif var[0]=="help":                
-                    print("\nTo command motor movement: 'm angle angle' ")
+            elif input_values[0]=="exp1":
+                tada_exp1()
+            elif input_values[0]=="help":                
+                print("\nTo command motor movement: 'm angle angle' ")
                 
         elif len(input_values)== 2:
             continue
@@ -164,16 +229,19 @@ def brain_action():
             if input_values[0] == "m":
                 print("moving motor")
                 publish_motor(input_values[1], input_values[2])
-            if input_values[0] == "theta":
+            elif input_values[0] == "theta":
                 print("theta and alpha to motor conversion")
                 motor1_angle, motor2_angle = theta_alpha_to_motor_angles(input_values[1], input_values[2])
-                #publish_motor(motor1_angle, motor2_angle)
-            
-                    
+                #publish_motor(motor1_angle, motor2_angle)             
         else:
             print("Couldn't determine input")
 
+#putting hre so that all subscriber functions have been defined
+#Publishing a topic
+motor_pub = rospy.Publisher('motor_command', MotorDataMsg, queue_size=10)
 
+#Getting subscribers
+rospy.Subscriber('sensing_topic', IMUDataMsg, update_from_imu)
         
        
 if __name__ == '__main__':
