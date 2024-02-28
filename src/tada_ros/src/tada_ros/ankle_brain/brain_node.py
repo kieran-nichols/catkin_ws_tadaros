@@ -59,9 +59,8 @@ def theta_alpha_to_motor_angles(theta_deg, alpha_deg):
     theta = theta_deg*math.pi/180  #converts to radians
     beta = 5*math.pi/180  #I think this is because wedges have a slope of 5 deg
     q3 = 2*np.real((np.arccos(np.sin(theta/2)/np.sin(beta)))) # arccos in python always returns real values
-
     alpha = alpha_deg*math.pi/180  #converts the degrees to radians
-    # counterlockwise is positive 
+    # counterlockwise is positive
     M1 = 180/math.pi*(alpha - np.arctan2(np.tan(q3/2),np.cos(beta))) 
     M2 = 180/math.pi*(-(alpha + np.arctan2(np.tan(q3/2), np.cos(beta))))
             
@@ -69,23 +68,8 @@ def theta_alpha_to_motor_angles(theta_deg, alpha_deg):
     #M1_prev is current position and can be any number
     #M1_new is what we want
     
-    
-    M1_new=M1; M2_new=M2
-            
-    temp1 = M1_new-prev_M1
-    rot1 = temp1%360
-    if rot1>180:
-        rot1=rot1-360
-                
-    temp2 = M2_new-prev_M2
-    rot2 = temp2%360
-    if rot2>180:
-        rot2=rot2-360
-    
-  #  updating old
-    prev_M1=M1; prev_M2=M2      
-
-
+    rot1=M1
+    rot2=M2
      
     # Wrapping function that ensures that the angle is between 180 and -180;
     ## need to finish verify
@@ -111,7 +95,8 @@ def theta_alpha_to_motor_angles(theta_deg, alpha_deg):
     EV = float(180/np.pi*np.arctan2(R05[1,2],R05[2,2]))
             
     # Convert rotation in deg to rotation we need to move it in counts
-    motor1_angle = int(rot1*cnts_per_rev/360*motor_count_to_angles)
+    motor1_angle = int(rot1*cnts_per_rev/360*motor_count_to_angles) # cnts per rev* motor count to angles=1????
+    #motor1_angle = int(rot1/360)
     motor2_angle = int(rot2*cnts_per_rev/360*motor_count_to_angles)
     
     print("PF:", PF, " EV:", EV, " Motor1 Angle:", motor1_angle, " Motor2 Angle:", motor2_angle)
@@ -168,21 +153,27 @@ def waiting_for_steps(how_many_steps):
     return
 
 #part of tada exp1, just the reoccuring portion
-def tada_exp1_mini(theta, alpha):
+#how_wait defines whether we wait by step count or seconds
+# how_wait = 1 means timer, how_wait = 2 means steps
+def tada_exp_mini(theta, alpha, how_wait):
     step_count_walking = 6
-    step_count_relaxing = 3
+    #step_count_relaxing = 3
+    time_sec = 3
     
     #getting motor command
     motor1_angle, motor2_angle = theta_alpha_to_motor_angles(theta, alpha)
     publish_motor(motor1_angle, motor2_angle)
     #publish_motor(theta, alpha) #for testing, uncomment he line above, and comment this line
     
-    #waiting for the amount of compare_step to happened
-    waiting_for_steps(step_count_walking)
+    if how_wait == 1:
+        rospy.sleep(time_sec)
+    elif how_wait == 2:
+        #waiting for the amount of compare_step to happened
+        waiting_for_steps(step_count_walking)
     
     #relaxing then
-    publish_motor(0, 0)
-    waiting_for_steps(step_count_relaxing)
+    #publish_motor(0, 0)
+    #waiting_for_steps(step_count_relaxing)
     
     #done with this one experiment
     return
@@ -191,21 +182,37 @@ def tada_exp1_mini(theta, alpha):
 def tada_exp1():
     global steps
 
-    theta_angles = [-90, -45, 0, 45, 90]
-    alpha_angles = [-10, -5, 0, 5, 10]
+    alpha_angles = [-90, -45, 0, 45, 90]
+    theta_angles = [-10, -5, 0, 5, 10]
     all_combinations = making_combinations(theta_angles, alpha_angles)
-    
+    #all_combinations = [[theta, alpha], [theta, alpha],.....]
     print("Angles [theta, alpha]: ", all_combinations)
     
     #taking random PF and EV
     while len(all_combinations) > 0:
         random_element = random.choice(all_combinations) #choosing a random angle
-        tada_exp1_mini(random_element[0], random_element[1]) #doing an experiment with that angle
+        tada_exp_mini(random_element[0], random_element[1], 2) #doing an experiment with that angle
         all_combinations.remove(random_element) #deleting that angle
     
     print("End of experiment 1")
     return
-     
+
+#tada exp for mocap
+def tada_exp_mocap():
+    alpha_angles = [-90, -45, 45, 90]
+    theta_angles = [-10, -5, 5, 10]
+    all_combinations = making_combinations(theta_angles, alpha_angles)
+    #all_combinations = [[theta, alpha], [theta, alpha],.....]
+    print("Angles [theta, alpha]: ", all_combinations)
+    
+    #taking random PF and EV
+    while len(all_combinations) > 0:
+        random_element = random.choice(all_combinations) #choosing a random angle
+        tada_exp_mini(random_element[0], random_element[1], 1) #doing an experiment with that angle
+        all_combinations.remove(random_element) #deleting that angle
+    
+    print("End of mocap")
+    return
 
 #the main loop that determines the action
 def brain_action():  
@@ -218,7 +225,11 @@ def brain_action():
                 os.system("killall -9 rosmaster")
                 print("ROS has been killed")
             elif input_values[0]=="exp1":
+                print("Experiment 1")
                 tada_exp1()
+            elif input_values[0]=="mocap":
+                print("MOCAP Experiment")
+                tada_exp_mocap()
             elif input_values[0]=="help":                
                 print("\nTo command motor movement: 'm angle angle' ")
                 
@@ -232,7 +243,7 @@ def brain_action():
             elif input_values[0] == "theta":
                 print("theta and alpha to motor conversion")
                 motor1_angle, motor2_angle = theta_alpha_to_motor_angles(input_values[1], input_values[2])
-                #publish_motor(motor1_angle, motor2_angle)             
+                publish_motor(motor1_angle, motor2_angle)             
         else:
             print("Couldn't determine input")
 
