@@ -156,7 +156,7 @@ def waiting_for_steps(how_many_steps):
 #how_wait defines whether we wait by step count or seconds
 # how_wait = 1 means timer, how_wait = 2 means steps
 def tada_exp_mini(theta, alpha, how_wait):
-    step_count_walking = 6
+    step_count_walking = 20
     #step_count_relaxing = 3
     time_sec = 3
     
@@ -177,9 +177,9 @@ def tada_exp_mini(theta, alpha, how_wait):
     
     #done with this one experiment
     return
-    
-#tada exp1 with changing PF and EV, with relaxing steps in between
-def tada_exp1():
+
+#tada exp2 with changing PF and EV, with relaxing steps in between
+def tada_exp2():
     global steps
 
     alpha_angles = [-90, -45, 0, 45, 90]
@@ -196,6 +196,74 @@ def tada_exp1():
     
     print("End of experiment 1")
     return
+
+#tada exp1 for becca
+def tada_exp1():
+       
+    global steps
+ 
+    study=1
+    '''
+    if
+    study= 0 for test
+    study= 1 for hallway,
+    study= 2 for figure eight9s
+    study= 3 for three deg incline
+    study= 4 for six deg incline
+    study= 5 for three deg decline
+    study= 6 for three deg right slope
+    study= 7 for three deg left slope
+    '''
+ 
+ 
+    if study==0:
+        alpha_angles = [-90, -45, 0, 45, 90]
+        theta_angles = [-10, -5, 0, 5, 10]
+        all_combinations = making_combinations(theta_angles, alpha_angles)
+   
+    #all_combinations = [[theta, alpha], [theta, alpha],.....]
+    if study==1: #hallway trials
+        alpha_angles = [-90, 0, 90, 180]
+        mid_alpha_angles=[-135,-45, 45, 135]
+ 
+        all_combinations0 = making_combinations([9], alpha_angles)
+        all_combinations1 = making_combinations([6], alpha_angles)
+        all_combinations2 = making_combinations([3], alpha_angles)
+        all_combinations3 = making_combinations([3], mid_alpha_angles)
+        all_combinations4 = making_combinations([7], mid_alpha_angles)
+ 
+        all_combinations=all_combinations0+all_combinations1+all_combinations2+all_combinations3+all_combinations4
+        all_combinations.append([0, 0])
+ 
+    if study==2: #figure 8s
+        all_combinations = [[0,0],[3, 90],[6, 90],[9, 90],[3, -90],[6, -90],[9, -90]]
+ 
+    if study==3: #3 deg incline
+        all_combinations = [[0,0],[2,180],[3,180],[5,180],[7,180],[9,180]]
+ 
+    if study==4:#6 deg incline
+        all_combinations = [[0,0],[2,180],[4,180],[6,180],[8,180],[10,180]]
+ 
+    if study==5:#3 degree decline
+        all_combinations = [[0,0],[2,0],[3,0],[5,0],[7,0],[9,0]]
+ 
+    if study==6: #3 deg right slope
+        all_combinations = [[0,0],[2,90],[3,90],[5,90],[7,90],[9,90]]
+ 
+    if study==7: #3 deg left slope
+        all_combinations = [[0,0],[2,-90],[3,-90],[5,-90],[7,-90],[9,-90]]
+       
+    #print("Angles [theta, alpha]: ", all_combinations)
+   
+    #taking random PF and EV
+    while len(all_combinations) > 0:
+        random_element = random.choice(all_combinations) #choosing a random angle
+        tada_exp_mini(random_element[0], random_element[1], 2) #doing an experiment with that angle
+        all_combinations.remove(random_element) #deleting that angle
+   
+    print("End of experiment 1")
+    return
+
 
 #tada exp for mocap
 def tada_exp_mocap():
@@ -226,12 +294,19 @@ def brain_action():
                 print("ROS has been killed")
             elif input_values[0]=="exp1":
                 print("Experiment 1")
+            elif input_values[0]=="exp2":
+                print("Experiment 2")
                 tada_exp1()
             elif input_values[0]=="mocap":
                 print("MOCAP Experiment")
                 tada_exp_mocap()
             elif input_values[0]=="help":                
                 print("\nTo command motor movement: 'm angle angle' ")
+                print("To command motor movement through theta and alpha: 'theta theta_value alpha_value' ")
+                print("To command kill: 'k' ")
+                print("To start experiment 1: 'exp1' ")
+                print("To start experiment 1: 'exp2' ")
+                print("To start MOCAP Experiment: 'mocap' ")
                 
         elif len(input_values)== 2:
             continue
@@ -246,6 +321,12 @@ def brain_action():
                 publish_motor(motor1_angle, motor2_angle)             
         else:
             print("Couldn't determine input")
+            print("\nTo command motor movement: 'm angle angle' ")
+            print("To command motor movement through theta and alpha: 'theta theta_value alpha_value' ")
+            print("To command kill: 'k' ")
+            print("To start experiment 1: 'exp1' ")
+            print("To start experiment 1: 'exp2' ")
+            print("To start MOCAP Experiment: 'mocap' ")
 
 #putting hre so that all subscriber functions have been defined
 #Publishing a topic

@@ -78,9 +78,8 @@ MAX_POSITION_VALUE          = 1048575     #currently isn't called anywhere      
 DXL_MOVING_STATUS_THRESHOLD = 20             #CHANGE this to adjust accuracy!!!!   # Dynamixel will rotate between this value
 #goal_position               = -4095
 ADDR_OPERATING_MODE         = 11
-#HOMING_OFFSET2              =-1024 #need to figure out how to set !!!
 POSITION_P_GAIN             =2760  #need to figure out how to set !!!
-
+ADDR_POSITION_P_GAIN        =84
 # ex) Windows: "COM1"   Linux: "/dev/ttyUSB0" Mac: "/dev/tty.usbserial-*"
 
 TORQUE_ENABLE               = 1                 # Value for enabling the torque
@@ -93,21 +92,64 @@ DXL_MOVING_STATUS_THRESHOLD = 1                # Dynamixel moving status thresho
 portHandler = PortHandler(DEVICENAME)
 packetHandler = PacketHandler(PROTOCOL_VERSION)
 current_angles = [0, 0]
+moving_angles = [0, 0]
 
 #global true/false variable
-#if true means writting, if false means that we are not writting.
+#if true means writting/reading, if false means that we are not writting/reading.
 occupying_bus = False
-
-#global varible true/false that tells us whether we are reading position
-reading_position = False
 
 #ratio of counts to angle
 motor_count_to_angles = 0.087891
 
+#sleep values
+sleep_reboot = 0.1
+sleep_waiting_for_move = 1
+
+#how much angle deviation do we allow
+angle_error_threshold = 3
+
+
+#to handle jamming reset
+def handle_jamming_reboot(which_motor, angle):
+    global reading_position
+    global motor_count_to_angles
+    
+    print("Rebooting motor ", which_motor, " due to error")
+    
+    #reboot
+    packetHandler.reboot(portHandler, which_motor)
+    sleep(sleep_reboot)
+    
+    #setting up post reboot
+    set_up_operating_mode(which_motor)
+    set_up_torque(which_motor)
+    set_up_position_p_gain(which_motor)
+    
+    #sending the command again
+    write_goal(which_motor, angle)
+    
+#to check whether the movement was complete
+def check_movement(which_motor, fix):
+    global motor_count_to_angles
+    global angle_error_threshold
+    global current_angles
+    global moving_angles
+    global occupying_bus
+    
+    #getting values
+    sleep(sleep_waiting_for_move) #delay for the expected time to move
+    current_angle = current_angles[which_motor-1] #getting current angle again
+    moving_angle = moving_angles[which_motor-1] #getting where we wanted to move
+    
+    #comparing values
+    print("\nANGLE DIF: ", current_angle-moving_angle, " FOR MOTOR ", which_motor)
+    if abs(current_angle-moving_angle) > angle_error_threshold:
+        print("NOT MOVED ERROR MOTOR", which_motor)
+        if fix:
+            handle_jamming_reboot(which_motor, moving_angle)
 
 def unsigned_to_signed_int(number):
     return int.from_bytes((number).to_bytes(4, byteorder='big', signed=False), byteorder = 'big', signed = True)
-    
     
 def read_goal(which_motor):
     global occupying_bus
@@ -115,7 +157,7 @@ def read_goal(which_motor):
     global motor_count_to_angles
     
     #waiting for the bus to finish its previous read
-    while reading_position:
+    while occupying_bus:
         continue
     
     #taking the bus
@@ -135,11 +177,10 @@ def read_goal(which_motor):
 
 def write_goal(which_motor, angle):
     global occupying_bus
-    global reading_position
     global motor_count_to_angles
     
     #waiting for the bus to finish its previous read
-    while reading_position:
+    while occupying_bus:
         continue
     
     #taking the bus
@@ -151,6 +192,7 @@ def write_goal(which_motor, angle):
         print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
     elif dxl_error != 0:
         print("%s" % packetHandler.getRxPacketError(dxl_error))
+        handle_jamming_reboot(which_motor, angle)
     
     #releasing the bus
     occupying_bus = False
@@ -174,29 +216,64 @@ def new_angle_calculate(current_angle, future_angle):
     result_angle=change+current_angle #this adds the change to the previous location to get the position we want it to move to
     return result_angle
 
+#to read a motor's position
+def read_angle_motor(which_motor):
+    global current_angles
+    global motor_count_to_angles
+    global occupying_bus
+    
+    #read when available
+    while occupying_bus:
+        continue
+    
+    occupying_bus = True #started the read and taking the bus
+    dxl_present_position, dxl_comm_result, dxl_error = packetHandler.read4ByteTxRx(portHandler, which_motor, ADDR_PRESENT_POSITION) #reading motor position
+    dxl_present_position = unsigned_to_signed_int(dxl_present_position) #convertig to signed int
+    current_angles[which_motor-1] = int(dxl_present_position*motor_count_to_angles) #in angle
+    occupying_bus = False #ended the read and releasing the bus
+    
+    return current_angles[which_motor-1]
+
 #to move a motor to an angle
 def move_motor(which_motor, next_angle):
-    global motor_count_to_angles
-    
-    #getting current angle
     global current_angles
+    global moving_angles
+    
     current_angle = current_angles[which_motor-1]
 
     #takes the shortest path to get to the right location
-    next_angle = new_angle_calculate(current_angle, next_angle)
-
+    local_next_angle = new_angle_calculate(current_angle, next_angle)
+    moving_angles[which_motor-1] = local_next_angle
+    
     #write
-    write_goal(which_motor, next_angle)
- 
+    write_goal(which_motor, local_next_angle)
+    
+def set_up_position_p_gain(which_motor):
+    print("settin up position p gain for motor ", which_motor)
+    dxl_comm_result, dxl_error = packetHandler.write4ByteTxRx(portHandler, which_motor, ADDR_POSITION_P_GAIN, POSITION_P_GAIN)
+    if dxl_comm_result != COMM_SUCCESS:
+        print("result")
+        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+    elif dxl_error != 0:
+        print("error")
+        print("%s" % packetHandler.getRxPacketError(dxl_error))
+    else:
+        print("position p gain has been set for motor ", which_motor)
+
 
 #to set-up a motor
 def motor_set_up(which_motor):
     print("\n")
+    print("REBOOT MOTOR ", which_motor)
+    packetHandler.reboot(portHandler, which_motor)
+    sleep(sleep_reboot)
     print("SET-UP MOTOR ", which_motor)
     #reset while not changing id or baud
     #packetHandler.factoryReset(portHandler, which_motor, 0x02)
     set_up_operating_mode(which_motor)
     set_up_torque(which_motor)
+    set_up_position_p_gain(which_motor)
+    
     print("END SET-UP MOTOR ", which_motor)
     print("\n")
     #make sure motor always starts at position 0
@@ -223,7 +300,8 @@ def set_up_torque(which_motor):
     dxl_comm_result, dxl_error = packetHandler.write1ByteTxRx(portHandler, which_motor, ADDR_TORQUE_ENABLE, TORQUE_ENABLE)
     if dxl_comm_result != COMM_SUCCESS:
         print("result")
-        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))
+        print("%s" % packetHandler.getTxRxResult(dxl_comm_result))       
+        
     elif dxl_error != 0:
         print("error")
         print("%s" % packetHandler.getRxPacketError(dxl_error))
@@ -235,15 +313,20 @@ def set_goal_pos_callback(MotorDataMsg):
     input_motor_angle1 = int(MotorDataMsg.motor1_angle)
     input_motor_angle2 = int(MotorDataMsg.motor2_angle)
     
+    #moving the motor
     move_motor(1, input_motor_angle1)
     move_motor(2, input_motor_angle2)
 
+    #checking whether the motor movement was correct, we have to do it after so that we don't slow down the motor movement
+    #check if moved correctly
+    check_movement(1, False)
+    check_movement(2, False)
+    
 
 def read_write_py_node():
-    global current_angles
     global occupying_bus
-    global reading_position
-    global motor_count_to_angles
+    global moving_angles
+    global current_angles
 
     #seting up the publisher
     rospy.init_node('motor_pub', anonymous=True)
@@ -252,23 +335,17 @@ def read_write_py_node():
 
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
+        motor_msg = MotorListenMsg() # creating message instance
         #skipping if the bus is busy
         if occupying_bus:
             continue
-        reading_position = True #started the read
-        motor_msg = MotorListenMsg()
-        dxl_present_position1, dxl_comm_result1, dxl_error = packetHandler.read4ByteTxRx(portHandler, 1, ADDR_PRESENT_POSITION) #reading motor 1 position
-        dxl_present_position2, dxl_comm_result2, dxl_error = packetHandler.read4ByteTxRx(portHandler, 2, ADDR_PRESENT_POSITION) #reading motor 2 position
-        reading_position = False #finished the read
-        #convertig to signed int
-        dxl_present_position1 = unsigned_to_signed_int(dxl_present_position1)
-        dxl_present_position2 = unsigned_to_signed_int(dxl_present_position2)
         #getting angle and publishing
-        motor_msg.current_angle1 = int(dxl_present_position1*motor_count_to_angles)
-        current_angles[0] = int(dxl_present_position1*motor_count_to_angles) #in angle
-        motor_msg.current_angle2 = int(dxl_present_position2*motor_count_to_angles) #in angle
-        current_angles[1] = int(dxl_present_position2*motor_count_to_angles)#in angle
-        motor_msg.motor_fail = False
+        motor_msg.current_angle1 = read_angle_motor(1)
+        motor_msg.current_angle2 = read_angle_motor(2)
+        motor1_moved = abs(current_angles[0]-moving_angles[0]) > angle_error_threshold
+        motor2_moved = abs(current_angles[0]-moving_angles[0]) > angle_error_threshold
+        motor_msg.motor1_fail = motor1_moved
+        motor_msg.motor2_fail = motor2_moved
         motor_msg.toff = 0
         pub.publish(motor_msg)
         rate.sleep()
