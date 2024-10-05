@@ -9,8 +9,6 @@ from time import sleep
 from std_msgs.msg import String
 from tada_ros.sensors import IMU_controller
 from IMU_controller import *
-
-
 import smbus # SMBus module of I2C
 import time
 import os, sys
@@ -20,13 +18,11 @@ from enum import Enum
 from tada_ros.msg import IMUDataMsg, ReconDataMsg
 from tada_ros.global_info import constants
 from tada_ros.sensors import IMU_controller
-
 import numpy as np
 import subprocess
 import csv
 DEBUG_FLAG = 0
 linear_correction = 1
-
 import subprocess
 import csv
 
@@ -42,6 +38,7 @@ ACCEL_ZOUT_H = 0x3F
 GYRO_XOUT_H  = 0x43
 GYRO_YOUT_H  = 0x45
 GYRO_ZOUT_H  = 0x47
+
 class SensorNode():
     bus = smbus.SMBus(1)  # or bus = smbus.SMBus(0) for older version boards
     Device_Address = 0x68   # MPU6050 device address
@@ -61,10 +58,8 @@ class SensorNode():
     accel_thres = 0.5
     state=0
     swing_time=0
-
-
     pub_killed_confirm = None
-            # killing the program is its own topic so that there's minimal delay
+    # killing the program is its own topic so that there's minimal delay
 
     def __init__(self):
         
@@ -78,14 +73,6 @@ class SensorNode():
         imu = IMU_controller.IMUController()
         while not rospy.is_shutdown():
             imu_data = imu.get_data()
-            #self.imu_msg.accel_x =
-            #self.imu_msg.accel_y = 
-            #self.imu_msg.accel_z = 
-            #self.imu_msg.gyro_x =
-            #self.imu_msg.gyro_y =
-            #self.imu_msg.gyro_z =
-            #self.imu_msg.state =
-            #self.imu_msg.swing_time =
             msg_imu = imu_data.to_ROS_message()
             pub_sensing.publish(msg_imu)
             rate.sleep()
@@ -112,16 +99,12 @@ class SensorNode():
     def MPU_Init():
         #write to sample rate register
         bus.write_byte_data(Device_Address, SMPLRT_DIV, 7)
-
         #Write to power management register
         bus.write_byte_data(Device_Address, PWR_MGMT_1, 1)
-
         #Write to Configuration register
         bus.write_byte_data(Device_Address, CONFIG, 0)
-
         #Write to Gyro configuration register
         bus.write_byte_data(Device_Address, GYRO_CONFIG, 24)
-
         #Write to interrupt enable register
         bus.write_byte_data(Device_Address, INT_ENABLE, 1)
          
@@ -129,6 +112,7 @@ class SensorNode():
     def kill_sensors():
         # TODO: sensor-specific code
         print("Killing Sensor Node")
+        
 if __name__ == '__main__':
     SensorNode()
 #def Publishing_Sensor(void):

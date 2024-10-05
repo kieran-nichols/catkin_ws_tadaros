@@ -8,6 +8,9 @@
 * Python 3.7
 * ROS Noetic
 
+## Related Repos
+https://github.com/kieran-nichols/catkin_ws_remote/
+
 ## Hardware
 * Raspberry Pi
 * Power source: 12 V Batteries with voltage regulators to give power to various devices

@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 
-# Much of this is from Interfacing Raspberry Pi with MPU6050
-# http://www.electronicwings.com
-
 import smbus # SMBus module of I2C
 import numpy
 import time
@@ -17,7 +14,6 @@ from tada_ros.global_info import constants
 
 DEBUG_FLAG = 0
 linear_correction = 1
-
 # todo: what of this should be in constants file?
 #some MPU6050 Registers and their Address
 PWR_MGMT_1   = 0x6B
@@ -31,7 +27,6 @@ ACCEL_ZOUT_H = 0x3F
 GYRO_XOUT_H  = 0x43
 GYRO_YOUT_H  = 0x45
 GYRO_ZOUT_H  = 0x47
-
 DEVICE_ADDR = 0x68   # MPU6050 device address
 
 class Triple():
@@ -89,6 +84,7 @@ class IMUController():
     ## initialization of IMU
     def __init__(self):
         # initialize the MPU6050 Module IMU
+        # Much of this is from Interfacing Raspberry Pi with MPU6050; http://www.electronicwings.com
         self.bus.write_byte_data(DEVICE_ADDR, SMPLRT_DIV, 7)
         self.bus.write_byte_data(DEVICE_ADDR, PWR_MGMT_1, 1)
         self.bus.write_byte_data(DEVICE_ADDR, CONFIG, 0)
